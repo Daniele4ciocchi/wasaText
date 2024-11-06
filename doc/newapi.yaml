@@ -1,64 +1,81 @@
 openapi: 3.0.0
-servers:
-  - url:"http://localhost:3000"
 info:
   title: wasaText
-  description: text message application
   version: 1.0.0
-
-components:
-  schemas:
-    User:
-
-
-parameters:
-responses:
+  description: API per il progetto wasaText
 
 paths:
-  /users/:
-  #
-  #  get:
-  #    operationId: listUsers
-  #    summary: get the list of avaiable users
-  #    description: |
-  #      ritorna una lista degli utenti disponibili 
-  #    parameters:
-  #      - name: 
-  
+  /user: 
+    # GET method to get the list of all users
+    get:
+      operationId: getListOfUser
+      summary: ritorna la lista di tutti gli utenti 
+      description: |
+        ritorna la lista degli utenti presenti nel sistema 
+      responses:
+        '200':
+          description: lista degli utenti 
+          content: 
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
+
+    # POST method to add user to the list 
     post:
-      operationId: addUser
-      summary: create a new user
+      operationId: createUser
+      summary: crea un nuovo utente 
       description: |
-        Create a new user with the properties in the request body
-        the server will create a new unique ID, the client can find it in the response 
+        crea un nuovo utente e restituisce il suo id 
       requestBody:
-          content:
-            application/json:
-              schema: {$ref: "#components/schemas/User"}
-
-      responses: 
-        "201": 
-          description: User created succesfully
-          content:
-            application/json:
-              schema: {$ref: "components/schemas/User"}
-
-  /users/{user}:
-    parameters:
-      - $ref: "#/components/parameters/UserID"
-    put:
-      operationId: updateUser
-      summary: update the properties with the user specified in the body of the request 
-      description: |
-        replace all users properties with the user specified in the body of the request
-      requestBody:
+        required: true 
         content:
-          application/json:
-            schema: { $ref: "#/components/schemas/User" }
-          responses:
-            "200":
-              description: user updated succesfully
-              conent: 
-                application/json:
-                  schema: { $ref: "#components/scehams/User" }
-            "404": { user not found }
+          application/json: 
+            schema:
+              type: object
+              properties:
+                username: 
+                  type: string
+                  example: marta
+              required:
+              - username
+      responses:
+        '201':
+          description: utente creato con successo
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        # codici di errore da implementare (non me li ricordo)
+
+  /user/{userID}:
+    get: 
+      operationId: getParticularUser
+      description: get a single user by the id 
+      summary: getuser 
+
+
+
+
+
+
+components:
+  schemas: 
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        username:
+          type: string
+          example: "marta"
+  parameters:
+    userid:
+      name: userId
+      in: path 
+      required: true
+      schema: 
+        type: integer
+      description: l'identificazione univoca dell'utente 

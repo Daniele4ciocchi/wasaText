@@ -1,0 +1,64 @@
+openapi: 3.0.0
+servers:
+  - url:"http://localhost:3000"
+info:
+  title: wasaText
+  description: text message application
+  version: 1.0.0
+
+components:
+  schemas:
+    User:
+
+
+parameters:
+responses:
+
+paths:
+  /users/:
+  #
+  #  get:
+  #    operationId: listUsers
+  #    summary: get the list of avaiable users
+  #    description: |
+  #      ritorna una lista degli utenti disponibili 
+  #    parameters:
+  #      - name: 
+  
+    post:
+      operationId: addUser
+      summary: create a new user
+      description: |
+        Create a new user with the properties in the request body
+        the server will create a new unique ID, the client can find it in the response 
+      requestBody:
+          content:
+            application/json:
+              schema: {$ref: "#components/schemas/User"}
+
+      responses: 
+        "201": 
+          description: User created succesfully
+          content:
+            application/json:
+              schema: {$ref: "components/schemas/User"}
+
+  /users/{user}:
+    parameters:
+      - $ref: "#/components/parameters/UserID"
+    put:
+      operationId: updateUser
+      summary: update the properties with the user specified in the body of the request 
+      description: |
+        replace all users properties with the user specified in the body of the request
+      requestBody:
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/User" }
+          responses:
+            "200":
+              description: user updated succesfully
+              conent: 
+                application/json:
+                  schema: { $ref: "#components/scehams/User" }
+            "404": { user not found }

@@ -5,9 +5,11 @@ info:
   description: API per il progetto wasaText
 
 paths:
+  #path per identificare la lista di utenti 
   /user: 
-    # GET method to get the list of all users
+    #GET per ottenere la lista di tutti gli utenti
     get:
+      tags: ['utente'] 
       operationId: getListOfUser
       summary: ritorna la lista di tutti gli utenti 
       description: |
@@ -22,8 +24,9 @@ paths:
                 items:
                   $ref: '#/components/schemas/User'
 
-    # POST method to add user to the list 
+    #POST metodo per inserire un nuovo utente
     post:
+      tags: ['utente']
       operationId: createUser
       summary: crea un nuovo utente 
       description: |
@@ -49,11 +52,74 @@ paths:
                 $ref: '#/components/schemas/User'
         # codici di errore da implementare (non me li ricordo)
 
+  #path per identificare il sihngolo utente
   /user/{userID}:
+    parameters:
+      - $ref: '#/components/parameters/userID'
+
+    #GET ottiene un utente in particolare desiderato 
     get: 
+      tags: ['utente']
       operationId: getParticularUser
       description: get a single user by the id 
-      summary: getuser 
+      summary: get user by Id
+      responses:
+        '200':
+          description: a single user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '404': { $ref: '#/components/responses/ErrorResponse'}
+
+    #PUT aggiorna un utente esistente
+    put:
+      tags: ['utente']
+      operationId: updateUser
+      summary: aggiorna un utente
+      description: aggiorna un utente trmite il suo id
+      requestBody:
+        required: true
+        content: 
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                  example: "nuovo username"
+      responses:
+        '200':
+          description: utente aggiornato con successo 
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '404': { $ref: '#/components/responses/ErrorResponse'}
+
+    # DELETE elimina un utente 
+    delete:
+      tags: ['utente']
+      operationId: deleteUser
+      summary: elimina un utente con il suo id
+      responses:
+        '204':
+          description: utente eliminato con successo
+        '404': { $ref: '#/components/responses/ErrorResponse'}
+
+  #path per identificare la lista di conversazioni di un determinato utente 
+  /conversation/:
+    parameters: 
+      - $ref: '#/components/parameters/userID'
+    #GET
+    get:
+      operationId: getConversation
+      summary: get all conversation
+      description: ottiene tutte le conversazioni di un determinato utente 
+
+  /users/{userID}/conversation/{conversationID}:
+  /users/{userID}/conversation/{conversationID}/messages/:
+  /users/{userID}/conversation/{conversationID}/messages/{messageID}:
 
 
 
@@ -61,6 +127,7 @@ paths:
 
 
 components:
+  #schemi per definire oggetti 
   schemas: 
     User:
       type: object
@@ -71,11 +138,53 @@ components:
         username:
           type: string
           example: "marta"
+
+  #parametri utilizzati come richieste dell'utente
   parameters:
-    userid:
-      name: userId
+    userID:
+      name: userID
       in: path 
       required: true
       schema: 
         type: integer
       description: l'identificazione univoca dell'utente 
+
+    conversationID:
+      name: conversationID
+      in: path
+      required: true
+      schema:
+        type: integer
+      description: l'identificazione univoca della conversazione
+    
+    messageID:
+      name: messageID
+      in: path
+      required: true
+      schema:
+        type: integer
+      description: l'identificazione univoca del messaggio
+    
+    user:
+      name: user
+      in: query
+      required: true
+      schema:
+        type: integer
+      description: 
+
+  #risposte di errore predefinite
+  responses:
+    ErrorResponse:
+      description: risposta di errore
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              code:
+                type: integer
+                example: 404
+              message:
+                type: string
+                example: "element not found"

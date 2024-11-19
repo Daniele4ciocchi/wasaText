@@ -109,17 +109,116 @@ paths:
 
   #path per identificare la lista di conversazioni di un determinato utente 
   /conversation/:
-    parameters: 
-      - $ref: '#/components/parameters/userID'
-    #GET
-    get:
-      operationId: getConversation
-      summary: get all conversation
-      description: ottiene tutte le conversazioni di un determinato utente 
+    #POST
+    post:
+      tags: ['conversazione']
+      summary: Crea una nuova conversazione
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Conversation'
+      responses:
+        '201':
+          description: Conversazione creata
+        '400':
+          description: Dati non validi
 
-  /users/{userID}/conversation/{conversationID}:
-  /users/{userID}/conversation/{conversationID}/messages/:
-  /users/{userID}/conversation/{conversationID}/messages/{messageID}:
+
+  /conversation/{conversationID}:
+    parameters:
+      - $ref: '#/components/parameters/conversationID'
+
+    #GET ottiene un utente in particolare desiderato 
+    get: 
+      tags: ['conversazione']
+      operationId: getParticularConversation
+      description: get a conversation by the id 
+      summary: get conversation by Id
+      responses:
+        '200':
+          description: a single conversation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Conversation'
+        '404': { $ref: '#/components/responses/ErrorResponse'}
+
+    #PUT aggiorna un utente esistente
+    put:
+      tags: ['conversazione']
+      operationId: updateConversation
+      summary: update a conversation
+      description: update a conversation by the id
+      requestBody:
+        required: true
+        content: 
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                  example: "nuovo nome conversazione"
+      responses:
+        '200':
+          description: conversazione aggiornata con successo 
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Conversation'
+        '404': { $ref: '#/components/responses/ErrorResponse'}
+
+    # DELETE elimina un utente 
+    delete:
+      tags: ['conversazione']
+      operationId: deleteConversation
+      summary: elimina una conversazione con il suo id
+      responses:
+        '204':
+          description: conversazione eliminata con successo
+        '404': { $ref: '#/components/responses/ErrorResponse'}
+
+    
+  /conversation/{conversationID}/messages/:
+    parameters:
+      - $ref: '#/components/parameters/conversationID'
+    post:
+      tags: ['message']
+      summary: Invia un messaggio in una conversazione
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Message'
+      responses:
+        '201':
+          description: Messaggio inviato
+        '400':
+          description: Dati non validi
+    get:
+      tags: ['message']
+      summary: Recupera i messaggi di una conversazione
+      parameters:
+        - name: conversationId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Lista dei messaggi
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Message'
+        '404':
+          description: Conversazione non trovata
+  #/conversation/{conversationID}/messages/{messageID}:
 
 
 
@@ -138,6 +237,24 @@ components:
         username:
           type: string
           example: "marta"
+    Conversation:
+      type: object
+      properties:
+        participants:
+          type: array
+          items:
+            type: string
+      required:
+        - participants
+    Message:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        sender:
+          type: 
+
 
   #parametri utilizzati come richieste dell'utente
   parameters:
@@ -165,14 +282,7 @@ components:
         type: integer
       description: l'identificazione univoca del messaggio
     
-    user:
-      name: user
-      in: query
-      required: true
-      schema:
-        type: integer
-      description: 
-
+    
   #risposte di errore predefinite
   responses:
     ErrorResponse:

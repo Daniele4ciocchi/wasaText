@@ -295,14 +295,7 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                content:
-                  type: string
-                  minLength: 1
-                  maxLength: 500
-              required:
-                - content
+              $ref: '#/components/schemas/Message'
       responses:
         '200':
           description: Messaggio inviato correttamente

@@ -109,6 +109,11 @@ paths:
 
   #path per identificare la lista di conversazioni di un determinato utente 
   /conversation/:
+    #GET per ottenere la lista di tutte le conversazioni
+    get:
+      tags: ['conversazione'] 
+      operationId: getMyConversations
+      
     #POST
     post:
       tags: ['conversazione']
@@ -237,6 +242,19 @@ components:
         username:
           type: string
           example: "marta"
+    Group:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        name:
+          type: string
+          example: "gruppo di lavoro"
+        members:
+          type: array
+          items:
+            type: User
     Conversation:
       type: object
       properties:
@@ -249,11 +267,19 @@ components:
     Message:
       type: object
       properties:
-        id:
+        sender:
+          type: string
+          example: "marta"
+        content:
+          type: string
+          example: "Ciao a tutti!"
+        timestamp:
+          type: string
+          format: date-time
+          example: "2023-10-01T12:00:00Z"
+        conversationId:
           type: integer
           example: 1
-        sender:
-          type: 
 
 
   #parametri utilizzati come richieste dell'utente
@@ -265,6 +291,14 @@ components:
       schema: 
         type: integer
       description: l'identificazione univoca dell'utente 
+
+    groupID:
+      name: groupID
+      in: path
+      required: true
+      schema:
+        type: integer
+      description: l'identificazione univoca del gruppo
 
     conversationID:
       name: conversationID
@@ -281,6 +315,8 @@ components:
       schema:
         type: integer
       description: l'identificazione univoca del messaggio
+
+
     
     
   #risposte di errore predefinite

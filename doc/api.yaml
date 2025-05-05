@@ -1,273 +1,871 @@
 openapi: 3.0.0
-servers:
-  - url: "http://localhost:3000"
 info:
-  title: Fantastic Coffee (decaffeinated)
-  description: Fantastic Coffee (decaffeinated), the skeleton project for Web and Software architecture course
+  title: wasaText
   version: 1.0.0
+  description: API per il progetto wasaText
+
+  # This YAML file defines a set of API operations for a messaging application.
+  # Below is a brief description of each operation:
+  #
+  # doLogin:
+  # x - Simplified login operation for user authentication. 
+  #
+  # setMyUserName:
+  # x - Allows the user to set or update their username.
+  #
+  # getMyConversations:
+  # x - Retrieves a list of all conversations associated with the user.
+  #
+  # getConversation:
+  # x - Fetches the details of a specific conversation by its identifier.
+  #
+  # sendMessage:
+  # x - Sends a message to a specific conversation or user.
+  #
+  # forwardMessage:
+  # x - Forwards an existing message to another conversation or user.
+  #
+  # commentMessage:
+  # x - Adds a comment to a specific message.
+  #
+  # uncommentMessage:
+  # x - Removes a previously added comment from a message.
+  #
+  # deleteMessage:
+  # x - Deletes a specific message from a conversation.
+  #
+  # addToGroup:
+  # x - Adds a user to a group conversation.
+  #
+  # leaveGroup:
+  # x - Allows the user to leave a group conversation.
+  #
+  # setGroupName:
+  #   - Updates the name of a group conversation.
+  #
+  # setMyPhoto:
+  # x - Sets or updates the user's profile photo.
+  #
+  # setGroupPhoto:
+  #   - Sets or updates the photo of a group conversation.
+
+
 paths:
-  /status:
-    parameters:
-      - $ref: "#/components/parameters/XAppBuild"
-      - $ref: "#/components/parameters/XAppVersion"
-      - $ref: "#/components/parameters/XAppLanguage"
-      - $ref: "#/components/parameters/XAppPlatform"
-    get:
-      tags: ["General"]
-      operationId: getStatusMessage
-      summary: Get status message for the user about issues / updates
-      description: |-
-        The response contains a status message meant for the user. It might
-        contains information about current technical issues, update messages
-        or general information.
-      responses:
-        "200":
-          description: Status message available
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/StatusInfo"
-        "400": { $ref: "#/components/responses/BadRequest" }
-        "500": { $ref: "#/components/responses/InternalServerError" }
-
-  /:
-    get:
-      tags: ["Group 1"]
-      operationId: index
-      summary: Get an index
-      description: |-
-        This is an example of an index API description
-      responses:
-        "200":
-          description: Successful
-        "400": { $ref: "#/components/responses/BadRequest" }
-        "500": { $ref: "#/components/responses/InternalServerError" }
-  /context:
-    parameters:
-      - $ref: "#/components/parameters/XAppBuild"
-      - $ref: "#/components/parameters/XAppVersion"
-      - $ref: "#/components/parameters/XAppLanguage"
-      - $ref: "#/components/parameters/XAppPlatform"
+  /session:
     post:
-      tags: ["Group 1"]
-      operationId: getContext
-      summary: Another API example
-      description: |-
-        Example description 2
-      responses:
-        "200":
-          description: Request ok
-          headers:
-            X-Access-Token:
-              description: Access token for authenticated requests
-              schema: { type: string }
-        "500": { $ref: "#/components/responses/InternalServerError" }
-  /authenticated:
-    parameters:
-      - $ref: "#/components/parameters/XAppBuild"
-      - $ref: "#/components/parameters/XAppVersion"
-      - $ref: "#/components/parameters/XAppLanguage"
-      - $ref: "#/components/parameters/XAppPlatform"
-    get:
-      tags: ["Group 2"]
-      operationId: getAuthenticatedExample
-      summary: Get an endpoint with authentication
-      description: |-
-        Get an endpoint with auth
-      security:
-        - LegacyAuth: []
-        - AppToken: []
-      responses:
-        "200":
-          description: Logout successful
-        "500": { $ref: "#/components/responses/InternalServerError" }
-
-  /pictures/{cat}:
-    parameters:
-      - $ref: "#/components/parameters/XAppBuild"
-      - $ref: "#/components/parameters/XAppVersion"
-      - $ref: "#/components/parameters/XAppLanguage"
-      - $ref: "#/components/parameters/XAppPlatform"
-      - $ref: "#/components/parameters/cat"
-    get:
-      tags: ["Cat pictures"]
-      operationId: getCatFromPicture
-      summary: Example of a parameter in URL
-      description: |-
-        Example of a parameter in URL
-      security:
-        - LegacyAuth: []
-      responses:
-        "200":
-          description: Student picture found
-          content:
-            image/png:
-              schema:
-                type: string
-                format: binary
-              example: Picture binary file
-        "404":
-          description: Student picture not found
-        "500": { $ref: "#/components/responses/InternalServerError" }
-
-
-  /autofeeder/{cat}:
-    parameters:
-      - $ref: "#/components/parameters/XAppBuild"
-      - $ref: "#/components/parameters/XAppVersion"
-      - $ref: "#/components/parameters/XAppLanguage"
-      - $ref: "#/components/parameters/XAppPlatform"
-      - $ref: "#/components/parameters/cat"
-    put:
-      tags: ["Autofeeder"]
-      operationId: createCatAutofeeder
-      summary: Example of PUT operation
-      security:
-        - LegacyAuth: []
-      responses:
-        "200":
-          description: Auto feed enabled
-        "400": { $ref: "#/components/responses/BadRequest" }
-        "500": { $ref: "#/components/responses/InternalServerError" }
-    delete:
-      tags: ["Autofeeder"]
-      operationId: deleteCatAutofeeder
-      summary: Example of DELETE operation
-      security:
-        - LegacyAuth: []
-      responses:
-        "200":
-          description: Auto feed disabled
-        "400": { $ref: "#/components/responses/BadRequest" }
-        "500": { $ref: "#/components/responses/InternalServerError" }
-
-  /session/login:
-    parameters:
-      - $ref: "#/components/parameters/XAppBuild"
-      - $ref: "#/components/parameters/XAppVersion"
-      - $ref: "#/components/parameters/XAppLanguage"
-      - $ref: "#/components/parameters/XAppPlatform"
-    post:
-      tags: ["Session management"]
-      operationId: login
-      summary: Log-in into system
-      description: |-
-        Perform a log-in action using username and password credentials.
-        Returns a token which can be used in authenticated requests.
+      summary: Login o registrazione utente
+      description: >
+        Se l'utente con il nome specificato non esiste, viene creato.
+        In entrambi i casi, restituisce l'identificatore dell'utente.
       requestBody:
+        required: true
         content:
-          application/x-www-form-urlencoded:
+          application/json:
             schema:
               type: object
               properties:
-                userid:
+                name:
                   type: string
-                  pattern: '^[a-zA-Z0-9]+$'
                   minLength: 3
-                  maxLength: 255
-                password:
-                  type: string
-                  pattern: '^.*?$'
-                  minLength: 8
-                  maxLength: 255
+                  maxLength: 16
+              required:
+                - name
       responses:
-        "200":
-          description: Login successful
-          headers:
-            X-Access-Token:
-              description: Access token for authenticated requests
-              schema: { type: string }
-        "400": { $ref: "#/components/responses/BadRequest" }
-        "403":
-          description: Login failed
-          headers:
-            X-Message:
-              description: Error message
-              schema: { type: string }
-        "500": { $ref: "#/components/responses/InternalServerError" }
+        '201':
+          description: Login effettuato correttamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    format: uuid
+        '400':
+          description: Nome utente non valido
+        '500':
+          description: Errore interno del server
+  #path per identificare la lista di utenti 
+  /user: 
+    get:
+      tags:
+        - utente
+      operationId: getListOfUsers
+      summary: Ottieni la lista di utenti
+      description: >
+        Ottiene la lista di utenti registrati.
+        Restituisce un elenco di utenti con i loro ID e nomi.
+      responses:
+        '200':
+          description: Elenco degli utenti
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
+        '500':
+          description: Errore interno del server
+    post:
+      tags:
+        - utente
+      operationId: setMyUserName
+      summary: Imposta il nome utente
+      description: >
+        Imposta il nome utente per l'utente corrente.
+        Se il nome utente è già in uso, restituisce un errore.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                  minLength: 3
+                  maxLength: 16
+              required:
+                - username
+      responses:
+        '200':
+          description: Nome utente impostato correttamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    format: uuid
+        '400':
+          description: Nome utente non valido
+        '409':
+          description: Nome utente già in uso
+        '500':
+          description: Errore interno del server
+
+  /me/photo:
+    post: 
+      tags:
+        - utente
+      operationId: setMyPhoto
+      summary: Imposta la foto del profilo
+      description: >
+        Imposta la foto del profilo per l'utente corrente.
+        Restituisce l'ID della foto impostata.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                photo:
+                  type: string
+                  format: binary
+              required:
+                - photo
+      responses:
+        '200':
+          description: Foto del profilo impostata correttamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  photoID:
+                    type: integer
+                    example: 1
+        '400':
+          description: Foto non valida
+        '500':
+          description: Errore interno del server
+  /user/{userID}:
+    parameters:
+        - $ref: '#/components/parameters/userID'
+
+    get:
+      tags:
+        - utente
+      operationId: getUser
+      summary: Ottieni informazioni sull'utente
+      description: >
+        Ottiene le informazioni sull'utente specificato dall'ID.
+        Restituisce l'ID e il nome dell'utente.
+      responses:
+        '200':
+          description: Informazioni sull'utente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '404':
+          description: Utente non trovato
+        '500':
+          description: Errore interno del server
+
+
+  /user/{userID}/conversation:
+    parameters:
+        - $ref: '#/components/parameters/userID'
+    get:
+      tags:
+        - utente
+      operationId: getMyConversations
+      summary: Ottieni le conversazioni dell'utente
+      description: >
+        Ottiene tutte le conversazioni associate all'utente specificato.
+        Restituisce un elenco di conversazioni.
+      responses:
+        '200':
+          description: Elenco delle conversazioni
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Conversation'
+        '404':
+          description: Utente non trovato
+        '500':
+          description: Errore interno del server
+      
+    
+    
+  /conversation/{conversationID}:
+    parameters:
+        - $ref: '#/components/parameters/conversationID'
+    get:
+      tags:
+        - conversazione
+      operationId: getConversations
+      summary: Ottieni una conversazione specifica
+      description: >
+        Ottiene i dettagli di una conversazione specifica.
+        Restituisce l'ID della conversazione e i messaggi associati.
+      responses:
+        '200':
+          description: Dettagli della conversazione
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Conversation'
+        '404':
+          description: Conversazione non trovata
+        '500':
+          description: Errore interno del server
+
+  /conversation/{conversationID}/message:
+    parameters:
+        - $ref: '#/components/parameters/conversationID'
+
+    get:
+      tags:
+        - conversazione
+      operationId: getMessages
+      summary: Ottieni i messaggi di una conversazione
+      description: >
+        Ottiene tutti i messaggi di una conversazione specifica.
+        Restituisce un elenco di messaggi.
+      responses:
+        '200':
+          description: Elenco dei messaggi
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Message'
+        '404':
+          description: Conversazione non trovata
+        '500':
+          description: Errore interno del server
+
+    post:
+      tags:
+        - conversazione
+      operationId: sendMessage
+      summary: Invia un messaggio
+      description: >
+        Invia un messaggio a una conversazione specifica.
+        Restituisce l'ID del messaggio inviato.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                content:
+                  type: string
+                  minLength: 1
+                  maxLength: 500
+              required:
+                - content
+      responses:
+        '200':
+          description: Messaggio inviato correttamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  messageID:
+                    type: integer
+                    example: 1
+        '400':
+          description: Messaggio non valido
+        '404':
+          description: Conversazione non trovata
+        '500':
+          description: Errore interno del server
+
+  /conversation/{conversationID}/message/{messageID}:
+    parameters:
+        - $ref: '#/components/parameters/conversationID'
+        - $ref: '#/components/parameters/messageID'
+
+    post:
+      tags:
+        - conversazione
+      operationId: forwardMessage
+      summary: Inoltra un messaggio
+      description: >
+        Inoltra un messaggio a una conversazione specifica.
+        Restituisce l'ID del messaggio inoltrato.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                conversationID:
+                  type: integer
+                  example: 1
+              required:
+                - conversationID
+      responses:
+        '200':
+          description: Messaggio inoltrato correttamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  messageID:
+                    type: integer
+                    example: 1
+        '400':
+          description: Messaggio non valido
+        '404':
+          description: Conversazione non trovata
+        '500':
+          description: Errore interno del server
+
+  /messages/{messageID}:
+    parameters:
+      - $ref: '#/components/parameters/messageID'
+      
+    get:
+      tags:
+        - messaggio
+      operationId: getMessage
+      summary: Ottieni un messaggio specifico
+      description: >
+        Ottiene i dettagli di un messaggio specifico.
+        Restituisce l'ID del messaggio e il contenuto.
+      responses:
+        '200':
+          description: Dettagli del messaggio
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+        '404':
+          description: Messaggio non trovato
+        '500':
+          description: Errore interno del server
+    delete:
+      tags:
+        - messaggio
+      operationId: deleteMessage
+      summary: Elimina un messaggio
+      description: >
+        Elimina un messaggio specifico.
+        Restituisce l'ID del messaggio eliminato.
+      responses:
+        '200':
+          description: Messaggio eliminato correttamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  messageID:
+                    type: integer
+                    example: 1
+        '404':
+          description: Messaggio non trovato
+        '500':
+          description: Errore interno del server
+
+
+  /messages/{messageID}/comment:
+    parameters:
+      - $ref: '#/components/parameters/messageID'
+        
+    post:
+      tags:
+        - messaggio
+      operationId: commentMessage
+      summary: Aggiungi un commento a un messaggio
+      description: >
+        Aggiunge un commento a un messaggio specifico.
+        Restituisce l'ID del commento aggiunto.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                content:
+                  type: string
+                  minLength: 1
+                  maxLength: 500
+              required:
+                - content
+      responses:
+        '200':
+          description: Commento aggiunto correttamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  commentID:
+                    type: integer
+                    example: 1
+        '400':
+          description: Commento non valido
+        '404':
+          description: Messaggio non trovato
+        '500':
+          description: Errore interno del server
+
+  /messages/{messageID}/comment/{commentID}:
+    parameters:
+      - $ref: '#/components/parameters/messageID'
+      - $ref: '#/components/parameters/commentID'
+    delete: 
+      tags:
+        - messaggio
+      operationId: uncommentMessage
+      summary: Rimuovi un commento da un messaggio
+      description: >
+        Rimuove un commento da un messaggio specifico.
+        Restituisce l'ID del commento rimosso.
+      responses:
+        '200':
+          description: Commento rimosso correttamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  commentID:
+                    type: integer
+                    example: 1
+        '404':
+          description: Messaggio o commento non trovato
+        '500':
+          description: Errore interno del server
+  /group:
+
+    post:
+      tags:
+        - gruppo
+      operationId: createGroup
+      summary: Crea un nuovo gruppo
+      description: >
+        Crea un nuovo gruppo di lavoro.
+        Restituisce l'ID del gruppo creato.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  minLength: 1
+                  maxLength: 50
+              required:
+                - name
+      responses:
+        '200':
+          description: Gruppo creato correttamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  groupID:
+                    type: integer
+                    example: 1
+        '400':
+          description: Nome del gruppo non valido
+        '500':
+          description: Errore interno del server
+
+  /group/{groupID}:
+    parameters:
+        - $ref: '#/components/parameters/groupID'
+
+    get:
+      tags:
+        - gruppo
+      operationId: getGroup
+      summary: Ottieni informazioni su un gruppo
+      description: >
+        Ottiene le informazioni su un gruppo specifico.
+        Restituisce l'ID e il nome del gruppo.
+      responses:
+        '200':
+          description: Informazioni sul gruppo
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Group'
+        '404':
+          description: Gruppo non trovato
+        '500':
+          description: Errore interno del server
+
+  /group/{groupID}/photo:
+    parameters:
+        - $ref: '#/components/parameters/groupID'
+
+    post:
+      tags:
+        - gruppo
+      operationId: setGroupPhoto
+      summary: Imposta la foto del gruppo
+      description: >
+        Imposta la foto del gruppo specificato.
+        Restituisce l'ID della foto impostata.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                photo:
+                  type: string
+                  format: binary
+              required:
+                - photo
+      responses:
+        '200':
+          description: Foto del gruppo impostata correttamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  photoID:
+                    type: integer
+                    example: 1
+        '400':
+          description: Foto non valida
+        '404':
+          description: Gruppo non trovato
+        '500':
+          description: Errore interno del server
+  /group/{groupID}/name:
+    parameters:
+        - $ref: '#/components/parameters/groupID'
+
+    get:
+      tags:
+        - gruppo
+      operationId: getGroupName
+      summary: Ottieni il nome di un gruppo
+      description: >
+        Ottiene il nome di un gruppo specifico.
+        Restituisce l'ID e il nome del gruppo.
+      responses:
+        '200':
+          description: Nome del gruppo
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  name:
+                    type: string
+                    example: "gruppo di lavoro"
+        '404':
+          description: Gruppo non trovato
+        '500':
+          description: Errore interno del server
+    post:
+      tags:
+        - gruppo
+      operationId: setGroupName
+      summary: Imposta il nome del gruppo
+      description: >
+        Imposta il nome del gruppo specificato.
+        Restituisce l'ID del gruppo aggiornato.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  minLength: 1
+                  maxLength: 50
+              required:
+                - name
+      responses:
+        '200':
+          description: Nome del gruppo impostato correttamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  groupID:
+                    type: integer
+                    example: 1
+        '400':
+          description: Nome del gruppo non valido
+        '404':
+          description: Gruppo non trovato
+        '500':
+          description: Errore interno del server
+  /group/{groupID}/members:
+    parameters:
+        - $ref: '#/components/parameters/groupID'
+
+    get:
+      tags:
+        - gruppo
+      operationId: getGroupMembers
+      summary: Ottieni i membri di un gruppo
+      description: >
+        Ottiene tutti i membri di un gruppo specifico.
+        Restituisce un elenco di membri del gruppo.
+      responses:
+        '200':
+          description: Elenco dei membri del gruppo
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
+        '404':
+          description: Gruppo non trovato
+        '500':
+          description: Errore interno del server
+    post:
+      tags:
+        - gruppo
+      operationId: addToGroup
+      summary: Aggiungi un membro a un gruppo
+      description: >
+        Aggiunge un membro a un gruppo specifico.
+        Restituisce l'ID del membro aggiunto.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                userID:
+                  type: integer
+                  example: 1
+              required:
+                - userID
+      responses:
+        '200':
+          description: Membro aggiunto correttamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  memberID:
+                    type: integer
+                    example: 1
+        '400':
+          description: ID utente non valido
+        '404':
+          description: Gruppo non trovato
+        '500':
+          description: Errore interno del server
+
+  /group/{groupID}/members/{userID}:
+    parameters:
+        - $ref: '#/components/parameters/groupID'
+        - $ref: '#/components/parameters/userID'
+
+    delete:
+      tags:
+        - gruppo
+      operationId: leaveGroup
+      summary: Lascia un gruppo
+      description: >
+        Permette a un membro di lasciare un gruppo specifico.
+        Restituisce l'ID del membro rimosso.
+      responses:
+        '200':
+          description: Membro rimosso correttamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  memberID:
+                    type: integer
+                    example: 1
+        '404':
+          description: Gruppo o utente non trovato
+        '500':
+          description: Errore interno del server
 
 
 components:
-  schemas:
-    StatusInfo:
-      title: Status Info
+  #schemi per definire oggetti 
+  schemas: 
+    User:
       type: object
       properties:
-        status:
+        id:
+          type: integer
+          example: 1
+        username:
           type: string
-          enum:
-            - info
-            - warning
-            - critical
-            - ""
-        title: { type: string }
-        message: { type: string }
-        url: { type: string }
+          example: "marta"
+    Group:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        name:
+          type: string
+          example: "gruppo di lavoro"
+        members:
+          type: array
+          items:
+            $ref: '#/components/schemas/User'
+    Conversation:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        Group:
+          $ref: '#/components/schemas/Group' 
+        messages:
+          type: array
+          items:
+            $ref: '#/components/schemas/Message'
+    Message:
+      type: object
+      properties:
+        sender:
+          type: string
+          example: "marta"
+        content:
+          type: string
+          example: "Ciao a tutti!"
+        timestamp:
+          type: string
+          format: date-time
+          example: "2023-10-01T12:00:00Z"
+        conversationId:
+          type: integer
+          example: 1
 
-  responses:
-    Unauthorized:
-      description: The access token is missing or it's expired
-    BadRequest:
-      description: The request was not compliant with the documentation (eg. missing fields, etc)
-    InternalServerError:
-      description: The server encountered an internal error. Further info in server logs
 
-  securitySchemes:
-    LegacyAuth:
-      type: apiKey
-      in: header
-      name: X-App-Token
-      description: |-
-        App session token value. This value is sent by the server in the login
-        and session refresh APIs.
 
+  #parametri utilizzati come richieste dell'utente
   parameters:
-    XAppVersion:
-      schema:
-        type: string
-        pattern: '^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$'
-        minLength: 1
-        maxLength: 10
-      name: X-App-Version
-      in: header
+    username:
+      name: username
+      in: path 
       required: true
-      description: App human readable version ("semantic version" format)
-      allowEmptyValue: false
-    XAppBuild:
-      schema: { type: integer }
-      name: X-App-Build
-      in: header
-      required: true
-      description: App build number
-      allowEmptyValue: false
-    XAppLanguage:
-      schema:
+      schema: 
         type: string
-        pattern: '^[a-z]{2}([-_][A-Z]{2})?$'
-        minLength: 2
-        maxLength: 5
-      name: X-App-Language
-      in: header
-      required: true
-      description: App language in ISO 639-1 format
-      allowEmptyValue: false
-    XAppPlatform:
-      schema:
-        type: string
-        enum: [ios, android]
-      name: X-App-Platform
-      in: header
-      required: true
-      description: App operating system / platform
-      allowEmptyValue: false
-    cat:
-      schema:
-        type: string
-        pattern: '^[a-zA-Z]+$'
         minLength: 3
-        maxLength: 10
-      name: cat
+        maxLength: 16
+      description: il nome dell'utente
+
+    userID:
+      name: userID
+      in: path 
+      required: true
+      schema: 
+        type: integer
+      description: l'identificazione univoca dell'utente 
+
+    groupID:
+      name: groupID
       in: path
       required: true
-      description: Cat
-      allowEmptyValue: false
+      schema:
+        type: integer
+      description: l'identificazione univoca del gruppo
+
+    conversationID:
+      name: conversationID
+      in: path
+      required: true
+      schema:
+        type: integer
+      description: l'identificazione univoca della conversazione
+    
+    messageID:
+      name: messageID
+      in: path
+      required: true
+      schema:
+        type: integer
+      description: l'identificazione univoca del messaggio
+
+    commentID:
+      name: commentID
+      in: path
+      required: true
+      schema:
+        type: integer
+      description: l'identificazione univoca del commento
+
+    
+    
+  #risposte di errore predefinite
+  responses:
+    ErrorResponse:
+      description: risposta di errore
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              code:
+                type: integer
+                example: 404
+              message:
+                type: string
+                example: "element not found"

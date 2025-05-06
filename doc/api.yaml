@@ -106,7 +106,7 @@ paths:
                   $ref: '#/components/schemas/User'
         '500':
           description: Errore interno del server
-    post:
+    put:
       tags:
         - utente
       operationId: setMyUserName

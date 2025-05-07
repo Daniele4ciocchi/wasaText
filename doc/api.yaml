@@ -1,8 +1,11 @@
-openapi: 2.0.0
+openapi: 3.0.0
 info:
   title: wasaText
   version: 1.0.0
   description: API per il progetto wasaText
+servers:
+  - url: http://127.0.0.1:3000
+    description: Server di sviluppo in locale
 
   # This YAML file defines a set of API operations for a messaging application.
   # Below is a brief description of each operation:
@@ -53,12 +56,15 @@ info:
 paths:
   /session:
     post:
-      summary: Login o registrazione utente
-      description: >
-        Se l'utente con il nome specificato non esiste, viene creato.
-        In entrambi i casi, restituisce l'identificatore dell'utente.
+      tags: ["login"]
+      summary: Logs in the user
+      description: |-
+        If the user does not exist, it will be created,
+        and an identifier is returned.
+        If the user exists, the user identifier is returned.
+      operationId: doLogin
       requestBody:
-        required: true
+        description: User details
         content:
           application/json:
             schema:
@@ -66,26 +72,24 @@ paths:
               properties:
                 name:
                   type: string
+                  example: Maria
+                  pattern: 'ˆ.*?$'
                   minLength: 3
                   maxLength: 16
-              required:
-                - name
+        required: true
       responses:
         '201':
-          description: Login effettuato correttamente
+          description: User log-in action successful
           content:
             application/json:
               schema:
                 type: object
                 properties:
-                  id:
+                  identifier:
                     type: string
-                    format: uuid
-        '400':
-          description: Nome utente non valido
-        '500':
-          description: Errore interno del server
-  #path per identificare la lista di utenti 
+                    example: "abcdef012345"
+
+
   /user: 
     get:
       tags:
@@ -106,6 +110,7 @@ paths:
                   $ref: '#/components/schemas/User'
         '500':
           description: Errore interno del server
+  /me/username:
     put:
       tags:
         - utente
@@ -739,6 +744,13 @@ paths:
 
 components:
   #schemi per definire oggetti 
+  securitySchemes:
+    bearerAuth: # arbitrary name for the security scheme
+      type: http
+      scheme: bearer
+      bearerFormat: JWT # optional, arbitrary value for documentation purposes
+
+
   schemas: 
     User:
       type: object
@@ -862,3 +874,7 @@ components:
               message:
                 type: string
                 example: "element not found"
+
+security:
+
+  - bearerAuth: [] # use the same name as above

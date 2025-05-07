@@ -6,6 +6,29 @@ func (db *appdbimpl) AddUser(name string, username string) error {
 	return err
 }
 
+func (db *appdbimpl) GetAllUsers() ([]string, error) {
+	rows, err := db.c.Query("SELECT name, username FROM users")
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var users []string
+	for rows.Next() {
+		var user string
+		if err := rows.Scan(&user); err != nil {
+			return nil, err
+		}
+		users = append(users, user)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return users, nil
+}
+
 func (db *appdbimpl) GetAllUsernames() ([]string, error) {
 	rows, err := db.c.Query("SELECT username FROM users")
 	if err != nil {
@@ -38,7 +61,7 @@ func (db *appdbimpl) GetNameByUsername(username string) (string, error) {
 	return name, nil
 }
 
-func (db *appdbimpl) SetMyUsername(username string) error {
-	_, err := db.c.Exec("UPDATE users SET username = ?", username)
+func (db *appdbimpl) SetMyUsername(name string, username string) error {
+	_, err := db.c.Exec("UPDATE users SET username = ? WHERE name = ?", username, name)
 	return err
 }

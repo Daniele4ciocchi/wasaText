@@ -50,24 +50,24 @@ func (rt *_router) addUser(w http.ResponseWriter, r *http.Request, _ httprouter.
 }
 
 func (rt *_router) SetMyUsername(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
-
-	getUserIDFromAuth(r)
-
 	w.Header().Set("Content-Type", "application/json")
 
-	var user struct {
-		Username string `json:"username"`
+	name, err := getUserIDFromAuth(r)
+	if err != nil {
+		http.Error(w, "Token mancante", http.StatusUnauthorized)
+		return
 	}
 
-	if err := json.NewDecoder(r.Body).Decode(&user); err != nil {
+	if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
 		http.Error(w, "Errore nella decodifica JSON", http.StatusBadRequest)
 		return
 	}
 
-	if err := rt.db.SetMyUsername(user.Username); err != nil {
+	if err := rt.db.SetMyUsername(name, payload.Username); err != nil {
 		http.Error(w, "Errore nell'aggiornamento del nome utente", http.StatusInternalServerError)
 		return
 	}
-
-	w.WriteHeader(http.StatusOK)
+	// Restituisci una risposta con name e username aggiornati
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]string{"name": payload.Username})
 }

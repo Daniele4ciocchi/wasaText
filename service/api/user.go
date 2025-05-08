@@ -32,7 +32,7 @@ func (rt *_router) getUsers(w http.ResponseWriter, r *http.Request, _ httprouter
 func (rt *_router) getUser(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	w.Header().Set("Content-Type", "application/json")
 
-	name := ps.ByName("name")
+	name := ps.ByName("userID")
 	id, name, username, err := rt.db.GetUser(name)
 	if err != nil {
 		http.Error(w, "Errore nel recupero dell'utente", http.StatusInternalServerError)

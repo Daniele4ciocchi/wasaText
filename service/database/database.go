@@ -38,15 +38,17 @@ import (
 
 // AppDatabase is the high level interface for the DB
 type AppDatabase interface {
-	GetName() (string, error)
-	SetName(name string) error
+	//GetName() (string, error)
+	//SetName(name string) error
 
 	//user
 	AddUser(name string, username string) error
-	GetAllUsers() ([]string, error)
-	GetAllUsernames() ([]string, error)
-	GetNameByUsername(username string) (string, error)
-	SetMyUsername(name string, username string) error
+	GetUser(name string) (int, string, string, error)
+
+	//utils
+	SetToken(id int, name string) error
+	GetToken(name string) (string, error)
+	CheckToken(token string) (int, error)
 
 	Ping() error
 }
@@ -66,10 +68,11 @@ func New(db *sql.DB) (AppDatabase, error) {
 	var tableName string
 	err := db.QueryRow(`SELECT name FROM sqlite_master WHERE type='table' AND name='users';`).Scan(&tableName)
 	if errors.Is(err, sql.ErrNoRows) {
+
 		sqlStmt := `CREATE TABLE users (
 					    id INTEGER PRIMARY KEY AUTOINCREMENT,
-					    name TEXT NOT NULL,
-					    username TEXT UNIQUE
+					    name TEXT NOT NULL UNIQUE,
+					    username TEXT NOT NULL UNIQUE
 					);
 
 					CREATE TABLE messages (
@@ -106,6 +109,18 @@ func New(db *sql.DB) (AppDatabase, error) {
 					    FOREIGN KEY (user_id) REFERENCES users(id)
 					);
 
+					CREATE TABLE tokens (
+					    id INTEGER PRIMARY KEY AUTOINCREMENT,
+						token TEXT NOT NULL,
+						user_id INTEGER NOT NULL,
+					}
+					
+						DROP TABLE IF EXISTS comments;
+    					DROP TABLE IF EXISTS messages;
+    					DROP TABLE IF EXISTS user_conversations;
+    					DROP TABLE IF EXISTS conversations;
+    					DROP TABLE IF EXISTS users;
+						DROP TABLE IF EXISTS tokens;
 					`
 		_, err = db.Exec(sqlStmt)
 		if err != nil {

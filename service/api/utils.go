@@ -6,10 +6,15 @@ import (
 	"strings"
 )
 
+type Token struct {
+	Token string `json:"Authorization"`
+}
+
 type User struct {
 	ID       int    `json:"id"`
 	Name     string `json:"name"`
 	Username string `json:"username"`
+	Token    string `json:"token"`
 }
 
 type Group struct {
@@ -29,16 +34,26 @@ type Message struct {
 	Content string `json:"content"`
 }
 
-func getUserIDFromAuth(r *http.Request) (string, error) {
-	auth := r.Header.Get("Authorization")
-	if auth == "" {
-		return "", fmt.Errorf("token mancante")
+// controlla se il token è valido e se si trova all'interno del db
+// se non è valido restituisce un errore
+// se è valido restituisce l'id dell'utente
+func checkAuth(rt *_router, r *http.Request) (int, error) {
+	var token Token
+	authHeader := r.Header.Get("Authorization")
+	if authHeader == "" {
+		return -1, fmt.Errorf("missing Authorization header")
+	}
+	if !strings.HasPrefix(authHeader, "Bearer ") {
+		return -1, fmt.Errorf("invalid Authorization header format")
+	}
+	token.Token = strings.TrimPrefix(authHeader, "Bearer ")
+	if token.Token == "" {
+		return -1, fmt.Errorf("empty token")
 	}
 
-	const prefix = "Bearer "
-	if !strings.HasPrefix(auth, prefix) {
-		return "", fmt.Errorf("formato token non valido")
+	id, err := rt.db.CheckToken(token.Token)
+	if err != nil {
+		return -1, fmt.Errorf("invalid token: %w", err)
 	}
-
-	return strings.TrimPrefix(auth, prefix), nil
+	return id, nil
 }

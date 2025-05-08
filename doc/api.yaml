@@ -88,6 +88,26 @@ paths:
                   identifier:
                     type: string
                     example: "abcdef012345"
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Invalid username"
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Internal server error"
 
 
   /user: 
@@ -149,7 +169,31 @@ paths:
           description: Nome utente già in uso
         '500':
           description: Errore interno del server
-
+    get:
+      tags:
+        - utente
+      operationId: getMyUserName
+      summary: Ottieni il nome utente
+      security:
+        - bearerAuth: []
+      description: >
+        Ottiene il nome utente per l'utente corrente.
+        Restituisce l'ID e il nome dell'utente.
+      responses:
+        '200':
+          description: Nome utente ottenuto correttamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  username:
+                    type: string
+                    example: "marta"
+        '404':
+          description: Utente non trovato
+        '500':
+          description: Errore interno del server
   /me/photo:
     post: 
       tags:
@@ -211,9 +255,7 @@ paths:
           description: Errore interno del server
 
 
-  /user/{userID}/conversation:
-    parameters:
-        - $ref: '#/components/parameters/userID'
+  /conversation:
     get:
       tags:
         - utente
@@ -222,6 +264,7 @@ paths:
       description: >
         Ottiene tutte le conversazioni associate all'utente specificato.
         Restituisce un elenco di conversazioni.
+      
       responses:
         '200':
           description: Elenco delle conversazioni

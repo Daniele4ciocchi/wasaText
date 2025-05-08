@@ -457,6 +457,8 @@ paths:
     parameters:
       - $ref: '#/components/parameters/messageID'
         
+    get:
+    
     post:
       tags:
         - messaggio
@@ -865,7 +867,7 @@ components:
       in: path 
       required: true
       schema: 
-        type: integer
+        type: string
       description: l'identificazione univoca dell'utente 
 
     groupID:
@@ -873,7 +875,7 @@ components:
       in: path
       required: true
       schema:
-        type: integer
+        type: string
       description: l'identificazione univoca del gruppo
 
     conversationID:
@@ -881,7 +883,7 @@ components:
       in: path
       required: true
       schema:
-        type: integer
+        type: string
       description: l'identificazione univoca della conversazione
     
     messageID:

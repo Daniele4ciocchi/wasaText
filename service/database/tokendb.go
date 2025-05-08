@@ -5,13 +5,14 @@ import "strconv"
 func (db *appdbimpl) SetToken(id int, name string) error {
 
 	token := name + strconv.Itoa(id)
-	_, err := db.c.Exec("INSERT INTO tokens (token, user_id) VALUES (?, ?)", token, id)
+	_, err := db.c.Exec("INSERT OR REPLACE INTO tokens (token, user_id) VALUES (?, ?)", token, id)
+
 	return err
 }
 
-func (db *appdbimpl) GetToken(name string) (string, error) {
+func (db *appdbimpl) GetToken(id int) (string, error) {
 	var token string
-	err := db.c.QueryRow("SELECT tokens.token FROM tokens JOIN users ON tokens.users_id = users.id WHERE users.name = ?", name).Scan(&token)
+	err := db.c.QueryRow("SELECT tokens.token FROM tokens WHERE user_id = ?", id).Scan(&token)
 	return token, err
 }
 

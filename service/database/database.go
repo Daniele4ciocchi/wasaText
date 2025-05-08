@@ -44,10 +44,12 @@ type AppDatabase interface {
 	//user
 	AddUser(name string, username string) error
 	GetUser(name string) (int, string, string, error)
+	GetUsers() ([]string, error)
+	GetConversations(id int) ([]int, error)
 
 	//utils
 	SetToken(id int, name string) error
-	GetToken(name string) (string, error)
+	GetToken(id int) (string, error)
 	CheckToken(token string) (int, error)
 
 	Ping() error
@@ -59,6 +61,7 @@ type appdbimpl struct {
 
 // New returns a new instance of AppDatabase based on the SQLite connection `db`.
 // `db` is required - an error will be returned if `db` is `nil`.
+
 func New(db *sql.DB) (AppDatabase, error) {
 	if db == nil {
 		return nil, errors.New("database is required when building a AppDatabase")
@@ -69,7 +72,8 @@ func New(db *sql.DB) (AppDatabase, error) {
 	err := db.QueryRow(`SELECT name FROM sqlite_master WHERE type='table' AND name='users';`).Scan(&tableName)
 	if errors.Is(err, sql.ErrNoRows) {
 
-		sqlStmt := `CREATE TABLE users (
+		sqlStmt := `
+					CREATE TABLE users (
 					    id INTEGER PRIMARY KEY AUTOINCREMENT,
 					    name TEXT NOT NULL UNIQUE,
 					    username TEXT NOT NULL UNIQUE
@@ -89,7 +93,7 @@ func New(db *sql.DB) (AppDatabase, error) {
 					    id INTEGER PRIMARY KEY AUTOINCREMENT,
 					    is_group BOOLEAN NOT NULL,
 					    name TEXT NOT NULL
-					);    
+					);
 
 					CREATE TABLE user_conversations (
 					    id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -113,14 +117,11 @@ func New(db *sql.DB) (AppDatabase, error) {
 					    id INTEGER PRIMARY KEY AUTOINCREMENT,
 						token TEXT NOT NULL,
 						user_id INTEGER NOT NULL,
-					}
-					
-						DROP TABLE IF EXISTS comments;
-    					DROP TABLE IF EXISTS messages;
-    					DROP TABLE IF EXISTS user_conversations;
-    					DROP TABLE IF EXISTS conversations;
-    					DROP TABLE IF EXISTS users;
-						DROP TABLE IF EXISTS tokens;
+						FOREIGN KEY (user_id) REFERENCES users(id)
+					);
+
+					INSERT INTO users (name, username) VALUES ('admin', 'admin');
+
 					`
 		_, err = db.Exec(sqlStmt)
 		if err != nil {
@@ -132,7 +133,6 @@ func New(db *sql.DB) (AppDatabase, error) {
 		c: db,
 	}, nil
 }
-
 func (db *appdbimpl) Ping() error {
 	return db.c.Ping()
 }

@@ -14,9 +14,9 @@ func (rt *_router) Handler() http.Handler {
 	rt.router.POST("/session", rt.doLogin) // doLogin
 
 	//users
-	//rt.router.GET("/user", rt.getUsers) // getListOfUsers
-	//rt.router.GET("/user/:id", rt.getUser) // getUser
-	//rt.router.GET("/conversation/", rt.getMyConversations) // getMyConversations
+	rt.router.GET("/user", rt.getUsers)                    // getListOfUsers
+	rt.router.GET("/user/:userID", rt.getUser)             // getUser
+	rt.router.GET("/conversation/", rt.getMyConversations) // getMyConversations
 
 	//conversations
 	//rt.router.GET("/conversation/:C_id", rt.getConversation) // getConversation

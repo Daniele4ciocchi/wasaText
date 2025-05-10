@@ -3,6 +3,8 @@ package database
 import (
 	"database/sql"
 	"strconv"
+
+	"github.com/Daniele4ciocchi/wasaText/service/utils"
 )
 
 func (db *appdbimpl) SetToken(id int, name string) error {
@@ -23,6 +25,23 @@ func (db *appdbimpl) GetToken(id int) (string, error) {
 		return "", err
 	}
 	return token, nil
+}
+
+func (db *appdbimpl) GetUserFromToken(token string) (utils.User, error) {
+	var id int
+	var user utils.User
+	err := db.c.QueryRow("SELECT user_id FROM tokens WHERE token = ?", token).Scan(&id)
+	if err != nil {
+		return utils.User{}, err
+	}
+	user.ID = id
+	err = db.c.QueryRow("SELECT name, username FROM users WHERE id = ?", id).Scan(&user.Name, &user.Username)
+	if err != nil {
+		return utils.User{}, err
+	}
+
+	return user, err
+
 }
 
 func (db *appdbimpl) CheckToken(token string) (int, error) {

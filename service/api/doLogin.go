@@ -13,10 +13,7 @@ import (
 // il nuovo utente e viene ritornato l'ID
 func (rt *_router) doLogin(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 
-	type Name struct {
-		Name string `json:"name"`
-	}
-	var name Name
+	var name utils.Name
 	var user utils.User
 	var err error
 

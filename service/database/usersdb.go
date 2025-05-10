@@ -44,10 +44,8 @@ func (db *appdbimpl) GetUser(name string) (utils.User, error) {
 	var exists bool
 	err := db.c.QueryRow("SELECT EXISTS(SELECT id, username FROM users WHERE name = ?)", name).Scan(&exists)
 	if err != nil {
-		if err == sql.ErrNoRows {
-			return utils.User{}, nil
-		}
-		return utils.User{}, err
+		print("errore")
+		return user, err
 	}
 	if !exists {
 		return user, sql.ErrNoRows
@@ -55,14 +53,7 @@ func (db *appdbimpl) GetUser(name string) (utils.User, error) {
 	user.Name = name
 	err = db.c.QueryRow("SELECT id, username FROM users WHERE name = ?", name).Scan(&user.ID, &user.Username)
 	if err != nil {
-		if err == sql.ErrNoRows {
-			return utils.User{}, nil
-		}
 		return utils.User{}, err
-	}
-	//controllo se l'utente è presente nel db
-	if user.ID == 0 {
-		return utils.User{}, nil
 	}
 
 	return user, nil

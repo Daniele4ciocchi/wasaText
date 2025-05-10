@@ -50,12 +50,19 @@ type AppDatabase interface {
 
 	//conversation
 	AddConversation(name string, isGroup bool) (int, error)
-	GetConversation(id int) (int, error)
-	GetConversations(id int) ([]int, error)
+	AddUserConversation(userID int, convID int) error
+	GetConversation(id int) (utils.Conversation, error)
+	GetConversations(id int) ([]utils.Conversation, error)
+
+	//message
+	AddMessage(senderID int, convID int, content string) (int, error)
+	GetMessage(id int) (utils.Message, error)
+	GetMessages(convID int) ([]utils.Message, error)
 
 	//utils
 	SetToken(id int, name string) error
 	GetToken(id int) (string, error)
+	GetUserFromToken(token string) (utils.User, error)
 	CheckToken(token string) (int, error)
 
 	Ping() error

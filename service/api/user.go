@@ -80,25 +80,3 @@ func (rt *_router) getUser(w http.ResponseWriter, r *http.Request, ps httprouter
 		return
 	}
 }
-
-func (rt *_router) getMyConversations(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
-	w.Header().Set("Content-Type", "application/json")
-
-	id, err := checkAuth(rt, r)
-	if err != nil {
-		http.Error(w, "Token non valido", http.StatusUnauthorized)
-		return
-	}
-
-	conversations, err := rt.db.GetConversations(id)
-	if err != nil {
-		http.Error(w, "Errore nel recupero delle conversazioni", http.StatusInternalServerError)
-		return
-	}
-	if err := json.NewEncoder(w).Encode(conversations); err != nil {
-		http.Error(w, "Errore nella codifica JSON", http.StatusInternalServerError)
-		return
-	}
-	w.WriteHeader(http.StatusOK)
-
-}

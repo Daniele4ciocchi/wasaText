@@ -4,6 +4,10 @@ type Token struct {
 	Token string `json:"Authorization"`
 }
 
+type Name struct {
+	Name string `json:"name"`
+}
+
 type User struct {
 	ID       int    `json:"id"`
 	Name     string `json:"name"`
@@ -16,13 +20,15 @@ type Group struct {
 }
 
 type Conversation struct {
-	ID   int    `json:"id"`
-	Name string `json:"name"`
+	ID      int    `json:"id"`
+	Name    string `json:"name"`
+	IsGroup bool   `json:"is_group"`
 }
 
 type Message struct {
-	ID      int    `json:"id"`
-	From    string `json:"from"`
-	To      string `json:"to"`
-	Content string `json:"content"`
+	ID             int    `json:"id"`
+	SenderID       int    `json:"sender_id"`
+	ConversationID int    `json:"conversation_id"`
+	Content        string `json:"content"`
+	Timestamp      string `json:"timestamp"`
 }

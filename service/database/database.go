@@ -34,6 +34,8 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+
+	"github.com/Daniele4ciocchi/wasaText/service/utils"
 )
 
 // AppDatabase is the high level interface for the DB
@@ -43,8 +45,12 @@ type AppDatabase interface {
 
 	//user
 	AddUser(name string, username string) error
-	GetUser(name string) (int, string, string, error)
-	GetUsers() ([]string, error)
+	GetUser(name string) (utils.User, error)
+	GetUsers() ([]utils.User, error)
+
+	//conversation
+	AddConversation(name string, isGroup bool) (int, error)
+	GetConversation(id int) (int, error)
 	GetConversations(id int) ([]int, error)
 
 	//utils

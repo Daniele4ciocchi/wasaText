@@ -1,6 +1,9 @@
 package database
 
-import "strconv"
+import (
+	"database/sql"
+	"strconv"
+)
 
 func (db *appdbimpl) SetToken(id int, name string) error {
 
@@ -13,7 +16,13 @@ func (db *appdbimpl) SetToken(id int, name string) error {
 func (db *appdbimpl) GetToken(id int) (string, error) {
 	var token string
 	err := db.c.QueryRow("SELECT tokens.token FROM tokens WHERE user_id = ?", id).Scan(&token)
-	return token, err
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return "", nil
+		}
+		return "", err
+	}
+	return token, nil
 }
 
 func (db *appdbimpl) CheckToken(token string) (int, error) {

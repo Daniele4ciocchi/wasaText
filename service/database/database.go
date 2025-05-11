@@ -53,6 +53,8 @@ type AppDatabase interface {
 	AddUserConversation(userID int, convID int) error
 	GetConversation(id int) (utils.Conversation, error)
 	GetConversations(id int) ([]utils.Conversation, error)
+	GetConversationByName(sender string, reciver string) (utils.Conversation, error)
+	CheckExistingConversation(id1 int, id2 int) (int, error)
 
 	//message
 	AddMessage(senderID int, convID int, content string) (int, error)

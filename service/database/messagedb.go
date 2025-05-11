@@ -2,7 +2,7 @@ package database
 
 import "github.com/Daniele4ciocchi/wasaText/service/utils"
 
-func (db *appdbimpl) addMessage(senderID int, convID int, content string) (int, error) {
+func (db *appdbimpl) AddMessage(senderID int, convID int, content string) (int, error) {
 	var messageID int
 	err := db.c.QueryRow("INSERT INTO messages (sender_id, conversation_id, content) VALUES (?, ?, ?) RETURNING id", senderID, convID, content).Scan(&messageID)
 	if err != nil {
@@ -11,7 +11,7 @@ func (db *appdbimpl) addMessage(senderID int, convID int, content string) (int, 
 	return messageID, nil
 }
 
-func (db *appdbimpl) getMessage(id int) (utils.Message, error) {
+func (db *appdbimpl) GetMessage(id int) (utils.Message, error) {
 	var message utils.Message
 	err := db.c.QueryRow("SELECT id, sender_id, conversation_id, content, timestamp FROM messages WHERE id = ?", id).Scan(&message.ID, &message.SenderID, &message.ConversationID, &message.Content, &message.Timestamp)
 	if err != nil {
@@ -20,7 +20,7 @@ func (db *appdbimpl) getMessage(id int) (utils.Message, error) {
 	return message, nil
 }
 
-func (db *appdbimpl) getMessages(convID int) ([]utils.Message, error) {
+func (db *appdbimpl) GetMessages(convID int) ([]utils.Message, error) {
 	rows, err := db.c.Query("SELECT id, sender_id, conversation_id, content, timestamp FROM messages WHERE conversation_id = ?", convID)
 	if err != nil {
 		return nil, err

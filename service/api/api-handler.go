@@ -19,12 +19,10 @@ func (rt *_router) Handler() http.Handler {
 	rt.router.GET("/conversation", rt.getMyConversations) // getMyConversations
 
 	//conversation
-	rt.router.POST("/conversation", rt.addConversation) // addConversation ?
-
-	//conversations
-	//rt.router.GET("/conversation/:C_id", rt.getConversation) // getConversation
-	//rt.router.GET("/conversation/:c_id/message", rt.getMessages) // getMessages
-	//rt.router.POST("/conversation/:c_id/message", rt.sendMessage) // sendMessage
+	rt.router.POST("/conversation", rt.addConversation)                     // addConversation ?
+	rt.router.GET("/conversation/:conversationID", rt.getConversation)      // getConversation
+	rt.router.GET("/conversation/:conversationID/message", rt.getMessages)  // getMessages
+	rt.router.POST("/conversation/:conversationID/message", rt.sendMessage) // sendMessage
 
 	//rt.router.POST("/conversation/:c_id/message/:m_id", rt.forwardMessage) // forwardMessage ?
 

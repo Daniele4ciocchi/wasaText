@@ -1,9 +1,30 @@
 <script setup>
 import { RouterLink, RouterView } from 'vue-router'
+import { ref, onMounted } from 'vue'
+import axios from 'axios'
+
+// Stato reattivo per le conversazioni
+const conversations = ref([])
+const error = ref(null)
+
+onMounted(async () => {
+	try {
+		const token = localStorage.getItem('token')
+		const res = await axios.get('http://localhost:3000/conversation', {
+			headers: { Authorization: `Bearer ${token}` }
+	})
+		conversations.value = res.data
+	} catch (err) {
+		error.value = 'Errore nel caricamento delle conversazioni'
+		console.error(err)
+	}
+})
 </script>
+
 <script>
 export default {}
 </script>
+
 
 <template>
 
@@ -38,7 +59,7 @@ export default {}
 								<svg class="feather">
 									<use href="/feather-sprite-v4.29.0.svg#book" />
 								</svg>
-								contatti
+								nuova conversazione
 							</RouterLink>
 						</li>
 
@@ -46,18 +67,19 @@ export default {}
 
 					<h6
 						class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted text-uppercase">
-						<span>Secondary menu</span>
+						<span>Conversazioni</span>
 					</h6>
 					<ul class="nav flex-column">
-						<li class="nav-item">
-							<RouterLink :to="'/some/' + 'variable_here' + '/path'" class="nav-link">
+						<li class="nav-item" v-for="conv in conversations" :key="conv.id">
+							<RouterLink :to="`/conversation/${conv.conversation_id}`" class="nav-link">
 								<svg class="feather">
-									<use href="/feather-sprite-v4.29.0.svg#file-text" />
+									<use href="/feather-sprite-v4.29.0.svg#message-square" />
 								</svg>
-								Item 1
+								{{ conv.name }}
 							</RouterLink>
 						</li>
 					</ul>
+
 				</div>
 			</nav>
 

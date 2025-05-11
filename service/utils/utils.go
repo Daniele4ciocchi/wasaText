@@ -9,24 +9,24 @@ type Name struct {
 }
 
 type User struct {
-	ID       int    `json:"id"`
+	ID       int    `json:"user_id"`
 	Name     string `json:"name"`
 	Username string `json:"username"`
 }
 
 type Group struct {
-	ID   int    `json:"id"`
+	ID   int    `json:"group_id"`
 	Name string `json:"name"`
 }
 
 type Conversation struct {
-	ID      int    `json:"id"`
+	ID      int    `json:"conversation_id"`
 	Name    string `json:"name"`
 	IsGroup bool   `json:"is_group"`
 }
 
 type Message struct {
-	ID             int    `json:"id"`
+	ID             int    `json:"message_id"`
 	SenderID       int    `json:"sender_id"`
 	ConversationID int    `json:"conversation_id"`
 	Content        string `json:"content"`

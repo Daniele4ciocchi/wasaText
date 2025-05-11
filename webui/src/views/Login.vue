@@ -16,7 +16,7 @@
 			<div>
 				<p>Sei loggato come <strong>{{ name }}</strong></p>
 			</div>
-			<button class="btn btn-outline-danger btn-lg">Logout</button>
+			<button class="btn btn-outline-danger btn-lg ">Logout</button>
 		</form>
 		
 

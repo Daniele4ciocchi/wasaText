@@ -1,17 +1,35 @@
 package database
 
 import (
+	"fmt"
+
 	"github.com/Daniele4ciocchi/wasaText/service/utils"
 )
 
 // AddConversation adds a new conversation to the database.
 func (db *appdbimpl) AddConversation(name string, isGroup bool) (int, error) {
+
 	var convID int
 	err := db.c.QueryRow("INSERT INTO conversations (name, is_group) VALUES (?, ?) RETURNING id", name, isGroup).Scan(&convID)
 	if err != nil {
 		return 0, err
 	}
 	return convID, nil
+}
+
+// controlla tramite due nomi se la conversazione esiste già e ritorna l'id della conversazione
+func (db *appdbimpl) CheckExistingConversation(id1 int, id2 int) (int, error) {
+	var convID int
+	err := db.c.QueryRow(`SELECT uc1.conversation_id
+							FROM user_conversations uc1 JOIN user_conversations uc2 ON uc1.conversation_id = uc2.conversation_id
+							WHERE uc1.user_id = ? AND uc2.user_id = ?
+							LIMIT 1`, id1, id2).Scan(&convID)
+	if err != nil {
+		//print error
+		fmt.Printf("err: %v\n", err)
+	}
+	return convID, nil
+
 }
 
 // AddUserConversation adds a user to a conversation.
@@ -57,4 +75,13 @@ func (db *appdbimpl) GetConversations(id int) ([]utils.Conversation, error) {
 		return nil, err
 	}
 	return convs, nil
+}
+
+func (db *appdbimpl) GetConversationByName(sender string, reciver string) (utils.Conversation, error) {
+	var conv utils.Conversation
+	err := db.c.QueryRow("SELECT id, name, is_group FROM conversations WHERE (name = ? OR name = ?) AND is_group = false", sender+reciver, reciver+sender).Scan(&conv.ID, &conv.Name, &conv.IsGroup)
+	if err != nil {
+		return utils.Conversation{}, err
+	}
+	return conv, nil
 }

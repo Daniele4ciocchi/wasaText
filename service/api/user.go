@@ -66,10 +66,17 @@ func (rt *_router) getUsers(w http.ResponseWriter, r *http.Request, _ httprouter
 func (rt *_router) getUser(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	w.Header().Set("Content-Type", "application/json")
 
+	//auth control
+	_, err := checkAuth(rt, r)
+	if err != nil {
+		http.Error(w, "Token non valido", http.StatusUnauthorized)
+		return
+	}
+
 	var user utils.User
 
 	name := ps.ByName("userID")
-	user, err := rt.db.GetUser(name)
+	user, err = rt.db.GetUser(name)
 	if err != nil {
 		http.Error(w, "Errore nel recupero dell'utente", http.StatusInternalServerError)
 		return

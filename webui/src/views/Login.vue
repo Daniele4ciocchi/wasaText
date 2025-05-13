@@ -1,3 +1,6 @@
+<script setup>
+	const apiUrl = import.meta.env.VITE_API_URL;
+</script>
 <template>
 	<div class="home">
 		<h1>Login</h1>
@@ -54,7 +57,7 @@ export default {
 			this.error = '';
 
 			try {
-				const response = await this.$axios.post('http://localhost:3000/session', {
+				const response = await this.$axios.post(`http://100.87.168.104:3000/session`, {
 					name: this.name
 				});
 

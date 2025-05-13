@@ -56,8 +56,19 @@ type AppDatabase interface {
 	GetConversationByName(sender string, reciver string) (utils.Conversation, error)
 	CheckExistingConversation(id1 int, id2 int) (int, error)
 
+	//group
+	AddGroup(name string) (utils.Group, error)
+	GetGroupById(id int) (utils.Group, error)
+	GetGroupByName(name string) (utils.Group, error)
+	GetGroups(id int) ([]utils.Group, error)
+	CheckExistingGroup(name string) (utils.Group, error)
+	AddUserToGroup(userID int, groupID int) error
+	RemoveUserFromGroup(userID int, groupID int) error
+	GetGroupMembers(id int) ([]utils.User, error)
+	LeaveGroup(userID int, groupID int) error
+
 	//message
-	AddMessage(senderID int, convID int, content string) (int, error)
+	AddMessage(senderID int, convID int, content string, repliedMessageID int) (int, error)
 	GetMessage(id int) (utils.Message, error)
 	GetMessages(convID int) ([]utils.Message, error)
 
@@ -98,10 +109,12 @@ func New(db *sql.DB) (AppDatabase, error) {
 					    id INTEGER PRIMARY KEY AUTOINCREMENT,
 					    conversation_id INTEGER NOT NULL,
 					    sender_id INTEGER NOT NULL,
+						replied_message_id INTEGER,
 					    content TEXT NOT NULL,
 					    timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
 					    FOREIGN KEY (conversation_id) REFERENCES conversations(id),
 					    FOREIGN KEY (sender_id) REFERENCES users(id)
+						FOREIGN KEY (replied_message_id) REFERENCES messages(id)
 					);
 
 					CREATE TABLE conversations (
@@ -117,7 +130,7 @@ func New(db *sql.DB) (AppDatabase, error) {
 					    FOREIGN KEY (user_id) REFERENCES users(id),
 					    FOREIGN KEY (conversation_id) REFERENCES conversations(id)
 					);
-
+					
 					CREATE TABLE comments (
 					    id INTEGER PRIMARY KEY AUTOINCREMENT,
 					    message_id INTEGER NOT NULL,

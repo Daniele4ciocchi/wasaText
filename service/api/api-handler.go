@@ -37,11 +37,10 @@ func (rt *_router) Handler() http.Handler {
 	//rt.router.GET("/comment/:c_id", rt.getComment) // getComment  DA FARE URGENTE
 
 	//groups
-	//rt.router.GET("/group/:g_id", rt.getGroup) // getGroup
-	//rt.router.POST("/group", rt.createGroup) // createGroup
-	//rt.router.GET("/group/:g_id/name", rt.getGroupName) // getGroupName
+	rt.router.GET("/group/:groupID", rt.getGroup)      // getGroup
+	rt.router.POST("/group", rt.createGroup)           // createGroup
+	rt.router.DELETE("/group/:groupID", rt.leaveGroup) // deleteGroup
 	//rt.router.POST("/group/:g_id/name", rt.setGroupName) // setGroupName
-	//rt.router.GET("/group/:g_id/members", rt.getGroupMembers) // getGroupMembers
 	//rt.router.GET("/group/:g_id/photo", rt.getGroupPhoto) // getGroupPhoto DA FARE URGENTE
 	//rt.router.POST("/group/:g_id/photo", rt.setGroupPhoto) // setGroupPhoto
 	//rt.router.POST("/group/:g_id/members", rt

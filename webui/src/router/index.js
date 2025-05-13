@@ -1,7 +1,10 @@
 import {createRouter, createWebHashHistory} from 'vue-router'
 import Login from '../views/Login.vue'
 import Users from '../views/Users.vue'
+import CreateGroup from '../views/CreateGroup.vue'
 import Conversation from '../views/Conversation.vue'
+
+const defaultAddress = 'http://100.87.168.104:3000'
 
 const router = createRouter({
 	history: createWebHashHistory(import.meta.env.BASE_URL),
@@ -10,7 +13,9 @@ const router = createRouter({
 		//{path: '/link1', component: HomeView},
 		//{path: '/link2', component: HomeView},
 		{path: '/users', component: Users},
+		{path: '/group', component: CreateGroup},
 		{path: '/conversation/:conversationID', component: Conversation},
+
 	]
 })
 

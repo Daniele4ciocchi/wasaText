@@ -2,6 +2,7 @@ package api
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"strconv"
 	"strings"
@@ -70,7 +71,7 @@ func (rt *_router) sendMessage(w http.ResponseWriter, r *http.Request, ps httpro
 	//
 	message.SenderID = sender.ID
 
-	messageID, err := rt.db.AddMessage(message.SenderID, message.ConversationID, message.Content)
+	messageID, err := rt.db.AddMessage(message.SenderID, message.ConversationID, message.Content, message.RepliedMessageID)
 	if err != nil {
 		http.Error(w, "Errore durante l'invio del messaggio", http.StatusInternalServerError)
 		return
@@ -124,6 +125,8 @@ func (rt *_router) getMessages(w http.ResponseWriter, r *http.Request, ps httpro
 	messages, err = rt.db.GetMessages(conv.ID)
 	if err != nil {
 		http.Error(w, "Errore durante il recupero dei messaggi", http.StatusInternalServerError)
+		//printo l'errore
+		fmt.Printf("err: %v\n", err)
 		return
 	}
 

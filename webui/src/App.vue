@@ -1,24 +1,57 @@
 <script setup>
-import { RouterLink, RouterView } from 'vue-router'
-import { ref, onMounted } from 'vue'
+import { RouterLink, RouterView, useRoute } from 'vue-router'
+import { ref, onMounted, onUnmounted, watch } from 'vue'
 import axios from 'axios'
 
 // Stato reattivo per le conversazioni
+const route = useRoute()
 const conversations = ref([])
+const messages = ref([])
 const error = ref(null)
+const token = localStorage.getItem('token')
+const username = localStorage.getItem('name')
+let intervalID
 
-onMounted(async () => {
+
+const getConversations = async () => {
 	try {
-		const token = localStorage.getItem('token')
-		const res = await axios.get('http://localhost:3000/conversation', {
+		const res = await axios.get('http://100.87.168.104:3000/conversation', {
 			headers: { Authorization: `Bearer ${token}` }
-	})
+		})
 		conversations.value = res.data
 	} catch (err) {
 		error.value = 'Errore nel caricamento delle conversazioni'
 		console.error(err)
 	}
+}
+const fetchMessages = async () => {
+  const convId = route.params.conversationID
+  try {
+    const res = await axios.get(`http://100.87.168.104:3000/conversation/${convid}`, {
+      headers: { Authorization: `Bearer ${token}` }
+    })
+    messages.value = res.data.messages
+  } catch (err) {
+    console.error('Errore nel caricamento dei messaggi:', err)
+  }
+}
+onMounted(async () => {
+
+	intervalID = setInterval(getConversations, 3000)
+	fetchMessages()
 })
+
+onUnmounted(() => {
+	clearInterval(intervalID)
+})
+watch(
+  () => route.params.conversation_id,
+  () => {
+    fetchMessages()
+  },
+  { immediate: true }
+)
+
 </script>
 
 <script>
@@ -51,7 +84,7 @@ export default {}
 								<svg class="feather" id="Login">
 									<use href="/feather-sprite-v4.29.0.svg#user" />
 								</svg>
-								Login
+								{{ username || "Login"}}
 							</RouterLink>
 						</li>
 						<li class="nav-item">
@@ -62,6 +95,14 @@ export default {}
 								nuova conversazione
 							</RouterLink>
 						</li>
+						<li class="nav-item">
+							<RouterLink to="/group" class="nav-link">
+								<svg class="feather">
+									<use href="/feather-sprite-v4.29.0.svg#users" />
+								</svg>
+								nuovo gruppo
+							</RouterLink>
+						</li>
 
 					</ul>
 
@@ -70,10 +111,10 @@ export default {}
 						<span>Conversazioni</span>
 					</h6>
 					<ul class="nav flex-column">
-						<li class="nav-item" v-for="conv in conversations" :key="conv.id">
-							<RouterLink :to="`/conversation/${conv.conversation_id}`" class="nav-link">
+						<li class="nav-item" v-for="conv in conversations" :key="conv.conversation_id">
+							<RouterLink :to="'/conversation/' + conv.conversation_id" :key="route.params.conversation_id" class="nav-link">
 								<svg class="feather">
-									<use href="/feather-sprite-v4.29.0.svg#message-square" />
+									<use href="/feather-sprite-v4.29.0.svg#book" />
 								</svg>
 								{{ conv.name }}
 							</RouterLink>
@@ -90,4 +131,11 @@ export default {}
 	</div>
 </template>
 
-<style></style>
+<style>
+.nav-item {
+	background-color: #d1e7dd;
+	border-radius: 13px;
+	border: #888 1px solid;
+	margin: 5px 10px;
+}
+</style>

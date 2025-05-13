@@ -11,7 +11,7 @@ servers:
   # Below is a brief description of each operation:
   #
   # doLogin:
-  # x - Simplified login operation for user authentication. 
+  # x - Simplified login operation for user authentication.
   #
   # setMyUserName:
   # x - Allows the user to set or update their username.
@@ -52,7 +52,6 @@ servers:
   # setGroupPhoto:
   #   - Sets or updates the photo of a group conversation.
 
-
 paths:
   /session:
     post:
@@ -73,12 +72,12 @@ paths:
                 name:
                   type: string
                   example: Maria
-                  pattern: 'ˆ.*?$'
+                  pattern: "ˆ.*?$"
                   minLength: 3
                   maxLength: 16
         required: true
       responses:
-        '201':
+        "201":
           description: User log-in action successful
           content:
             application/json:
@@ -88,7 +87,7 @@ paths:
                   identifier:
                     type: string
                     example: "abcdef012345"
-        '400':
+        "400":
           description: Invalid request
           content:
             application/json:
@@ -98,7 +97,7 @@ paths:
                   error:
                     type: string
                     example: "Invalid username"
-        '500':
+        "500":
           description: Internal server error
           content:
             application/json:
@@ -109,8 +108,7 @@ paths:
                     type: string
                     example: "Internal server error"
 
-
-  /user: 
+  /user:
     get:
       tags:
         - utente
@@ -120,15 +118,15 @@ paths:
         Ottiene la lista di utenti registrati.
         Restituisce un elenco di utenti con i loro ID e nomi.
       responses:
-        '200':
+        "200":
           description: Elenco degli utenti
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/User'
-        '500':
+                  $ref: "#/components/schemas/User"
+        "500":
           description: Errore interno del server
   /me/username:
     put:
@@ -153,7 +151,7 @@ paths:
               required:
                 - username
       responses:
-        '200':
+        "200":
           description: Nome utente impostato correttamente
           content:
             application/json:
@@ -163,11 +161,11 @@ paths:
                   id:
                     type: string
                     format: uuid
-        '400':
+        "400":
           description: Nome utente non valido
-        '409':
+        "409":
           description: Nome utente già in uso
-        '500':
+        "500":
           description: Errore interno del server
     get:
       tags:
@@ -180,7 +178,7 @@ paths:
         Ottiene il nome utente per l'utente corrente.
         Restituisce l'ID e il nome dell'utente.
       responses:
-        '200':
+        "200":
           description: Nome utente ottenuto correttamente
           content:
             application/json:
@@ -190,12 +188,12 @@ paths:
                   username:
                     type: string
                     example: "marta"
-        '404':
+        "404":
           description: Utente non trovato
-        '500':
+        "500":
           description: Errore interno del server
   /me/photo:
-    post: 
+    post:
       tags:
         - utente
       operationId: setMyPhoto
@@ -216,7 +214,7 @@ paths:
               required:
                 - photo
       responses:
-        '200':
+        "200":
           description: Foto del profilo impostata correttamente
           content:
             application/json:
@@ -226,13 +224,13 @@ paths:
                   photoID:
                     type: integer
                     example: 1
-        '400':
+        "400":
           description: Foto non valida
-        '500':
+        "500":
           description: Errore interno del server
   /user/{userID}:
     parameters:
-        - $ref: '#/components/parameters/userID'
+      - $ref: "#/components/parameters/userID"
 
     get:
       tags:
@@ -243,17 +241,16 @@ paths:
         Ottiene le informazioni sull'utente specificato dall'ID.
         Restituisce l'ID e il nome dell'utente.
       responses:
-        '200':
+        "200":
           description: Informazioni sull'utente
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/User'
-        '404':
+                $ref: "#/components/schemas/User"
+        "404":
           description: Utente non trovato
-        '500':
+        "500":
           description: Errore interno del server
-
 
   /conversation:
     get:
@@ -264,26 +261,24 @@ paths:
       description: >
         Ottiene tutte le conversazioni associate all'utente specificato.
         Restituisce un elenco di conversazioni.
-      
+
       responses:
-        '200':
+        "200":
           description: Elenco delle conversazioni
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Conversation'
-        '404':
+                  $ref: "#/components/schemas/Conversation"
+        "404":
           description: Utente non trovato
-        '500':
+        "500":
           description: Errore interno del server
-      
-    
-    
+
   /conversation/{conversationID}:
     parameters:
-        - $ref: '#/components/parameters/conversationID'
+      - $ref: "#/components/parameters/conversationID"
     get:
       tags:
         - conversazione
@@ -293,20 +288,20 @@ paths:
         Ottiene i dettagli di una conversazione specifica.
         Restituisce l'ID della conversazione e i messaggi associati.
       responses:
-        '200':
+        "200":
           description: Dettagli della conversazione
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Conversation'
-        '404':
+                $ref: "#/components/schemas/Conversation"
+        "404":
           description: Conversazione non trovata
-        '500':
+        "500":
           description: Errore interno del server
 
   /conversation/{conversationID}/message:
     parameters:
-        - $ref: '#/components/parameters/conversationID'
+      - $ref: "#/components/parameters/conversationID"
 
     get:
       tags:
@@ -317,17 +312,17 @@ paths:
         Ottiene tutti i messaggi di una conversazione specifica.
         Restituisce un elenco di messaggi.
       responses:
-        '200':
+        "200":
           description: Elenco dei messaggi
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Message'
-        '404':
+                  $ref: "#/components/schemas/Message"
+        "404":
           description: Conversazione non trovata
-        '500':
+        "500":
           description: Errore interno del server
 
     post:
@@ -343,9 +338,9 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Message'
+              $ref: "#/components/schemas/Message"
       responses:
-        '200':
+        "200":
           description: Messaggio inviato correttamente
           content:
             application/json:
@@ -355,17 +350,17 @@ paths:
                   messageID:
                     type: integer
                     example: 1
-        '400':
+        "400":
           description: Messaggio non valido
-        '404':
+        "404":
           description: Conversazione non trovata
-        '500':
+        "500":
           description: Errore interno del server
 
   /conversation/{conversationID}/message/{messageID}:
     parameters:
-        - $ref: '#/components/parameters/conversationID'
-        - $ref: '#/components/parameters/messageID'
+      - $ref: "#/components/parameters/conversationID"
+      - $ref: "#/components/parameters/messageID"
 
     post:
       tags:
@@ -388,7 +383,7 @@ paths:
               required:
                 - conversationID
       responses:
-        '200':
+        "200":
           description: Messaggio inoltrato correttamente
           content:
             application/json:
@@ -398,17 +393,17 @@ paths:
                   messageID:
                     type: integer
                     example: 1
-        '400':
+        "400":
           description: Messaggio non valido
-        '404':
+        "404":
           description: Conversazione non trovata
-        '500':
+        "500":
           description: Errore interno del server
 
   /messages/{messageID}:
     parameters:
-      - $ref: '#/components/parameters/messageID'
-      
+      - $ref: "#/components/parameters/messageID"
+
     get:
       tags:
         - messaggio
@@ -418,15 +413,15 @@ paths:
         Ottiene i dettagli di un messaggio specifico.
         Restituisce l'ID del messaggio e il contenuto.
       responses:
-        '200':
+        "200":
           description: Dettagli del messaggio
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Message'
-        '404':
+                $ref: "#/components/schemas/Message"
+        "404":
           description: Messaggio non trovato
-        '500':
+        "500":
           description: Errore interno del server
     delete:
       tags:
@@ -437,7 +432,7 @@ paths:
         Elimina un messaggio specifico.
         Restituisce l'ID del messaggio eliminato.
       responses:
-        '200':
+        "200":
           description: Messaggio eliminato correttamente
           content:
             application/json:
@@ -447,18 +442,15 @@ paths:
                   messageID:
                     type: integer
                     example: 1
-        '404':
+        "404":
           description: Messaggio non trovato
-        '500':
+        "500":
           description: Errore interno del server
-
 
   /messages/{messageID}/comment:
     parameters:
-      - $ref: '#/components/parameters/messageID'
-        
-    get:
-    
+      - $ref: "#/components/parameters/messageID"
+
     post:
       tags:
         - messaggio
@@ -481,7 +473,7 @@ paths:
               required:
                 - content
       responses:
-        '200':
+        "200":
           description: Commento aggiunto correttamente
           content:
             application/json:
@@ -491,18 +483,18 @@ paths:
                   commentID:
                     type: integer
                     example: 1
-        '400':
+        "400":
           description: Commento non valido
-        '404':
+        "404":
           description: Messaggio non trovato
-        '500':
+        "500":
           description: Errore interno del server
 
   /messages/{messageID}/comment/{commentID}:
     parameters:
-      - $ref: '#/components/parameters/messageID'
-      - $ref: '#/components/parameters/commentID'
-    delete: 
+      - $ref: "#/components/parameters/messageID"
+      - $ref: "#/components/parameters/commentID"
+    delete:
       tags:
         - messaggio
       operationId: uncommentMessage
@@ -511,7 +503,7 @@ paths:
         Rimuove un commento da un messaggio specifico.
         Restituisce l'ID del commento rimosso.
       responses:
-        '200':
+        "200":
           description: Commento rimosso correttamente
           content:
             application/json:
@@ -521,12 +513,11 @@ paths:
                   commentID:
                     type: integer
                     example: 1
-        '404':
+        "404":
           description: Messaggio o commento non trovato
-        '500':
+        "500":
           description: Errore interno del server
   /group:
-
     post:
       tags:
         - gruppo
@@ -549,7 +540,7 @@ paths:
               required:
                 - name
       responses:
-        '200':
+        "200":
           description: Gruppo creato correttamente
           content:
             application/json:
@@ -559,14 +550,14 @@ paths:
                   groupID:
                     type: integer
                     example: 1
-        '400':
+        "400":
           description: Nome del gruppo non valido
-        '500':
+        "500":
           description: Errore interno del server
 
   /group/{groupID}:
     parameters:
-        - $ref: '#/components/parameters/groupID'
+      - $ref: "#/components/parameters/groupID"
 
     get:
       tags:
@@ -577,20 +568,20 @@ paths:
         Ottiene le informazioni su un gruppo specifico.
         Restituisce l'ID e il nome del gruppo.
       responses:
-        '200':
+        "200":
           description: Informazioni sul gruppo
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Group'
-        '404':
+                $ref: "#/components/schemas/Group"
+        "404":
           description: Gruppo non trovato
-        '500':
+        "500":
           description: Errore interno del server
 
   /group/{groupID}/photo:
     parameters:
-        - $ref: '#/components/parameters/groupID'
+      - $ref: "#/components/parameters/groupID"
 
     post:
       tags:
@@ -613,7 +604,7 @@ paths:
               required:
                 - photo
       responses:
-        '200':
+        "200":
           description: Foto del gruppo impostata correttamente
           content:
             application/json:
@@ -623,15 +614,15 @@ paths:
                   photoID:
                     type: integer
                     example: 1
-        '400':
+        "400":
           description: Foto non valida
-        '404':
+        "404":
           description: Gruppo non trovato
-        '500':
+        "500":
           description: Errore interno del server
   /group/{groupID}/name:
     parameters:
-        - $ref: '#/components/parameters/groupID'
+      - $ref: "#/components/parameters/groupID"
 
     get:
       tags:
@@ -642,7 +633,7 @@ paths:
         Ottiene il nome di un gruppo specifico.
         Restituisce l'ID e il nome del gruppo.
       responses:
-        '200':
+        "200":
           description: Nome del gruppo
           content:
             application/json:
@@ -652,9 +643,9 @@ paths:
                   name:
                     type: string
                     example: "gruppo di lavoro"
-        '404':
+        "404":
           description: Gruppo non trovato
-        '500':
+        "500":
           description: Errore interno del server
     post:
       tags:
@@ -678,7 +669,7 @@ paths:
               required:
                 - name
       responses:
-        '200':
+        "200":
           description: Nome del gruppo impostato correttamente
           content:
             application/json:
@@ -688,15 +679,15 @@ paths:
                   groupID:
                     type: integer
                     example: 1
-        '400':
+        "400":
           description: Nome del gruppo non valido
-        '404':
+        "404":
           description: Gruppo non trovato
-        '500':
+        "500":
           description: Errore interno del server
   /group/{groupID}/members:
     parameters:
-        - $ref: '#/components/parameters/groupID'
+      - $ref: "#/components/parameters/groupID"
 
     get:
       tags:
@@ -707,17 +698,17 @@ paths:
         Ottiene tutti i membri di un gruppo specifico.
         Restituisce un elenco di membri del gruppo.
       responses:
-        '200':
+        "200":
           description: Elenco dei membri del gruppo
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/User'
-        '404':
+                  $ref: "#/components/schemas/User"
+        "404":
           description: Gruppo non trovato
-        '500':
+        "500":
           description: Errore interno del server
     post:
       tags:
@@ -740,7 +731,7 @@ paths:
               required:
                 - userID
       responses:
-        '200':
+        "200":
           description: Membro aggiunto correttamente
           content:
             application/json:
@@ -750,17 +741,17 @@ paths:
                   memberID:
                     type: integer
                     example: 1
-        '400':
+        "400":
           description: ID utente non valido
-        '404':
+        "404":
           description: Gruppo non trovato
-        '500':
+        "500":
           description: Errore interno del server
 
   /group/{groupID}/members/{userID}:
     parameters:
-        - $ref: '#/components/parameters/groupID'
-        - $ref: '#/components/parameters/userID'
+      - $ref: "#/components/parameters/groupID"
+      - $ref: "#/components/parameters/userID"
 
     delete:
       tags:
@@ -771,7 +762,7 @@ paths:
         Permette a un membro di lasciare un gruppo specifico.
         Restituisce l'ID del membro rimosso.
       responses:
-        '200':
+        "200":
           description: Membro rimosso correttamente
           content:
             application/json:
@@ -781,22 +772,20 @@ paths:
                   memberID:
                     type: integer
                     example: 1
-        '404':
+        "404":
           description: Gruppo o utente non trovato
-        '500':
+        "500":
           description: Errore interno del server
 
-
 components:
-  #schemi per definire oggetti 
+  #schemi per definire oggetti
   securitySchemes:
     bearerAuth: # arbitrary name for the security scheme
       type: http
       scheme: bearer
       bearerFormat: JWT # optional, arbitrary value for documentation purposes
 
-
-  schemas: 
+  schemas:
     User:
       type: object
       properties:
@@ -818,7 +807,7 @@ components:
         members:
           type: array
           items:
-            $ref: '#/components/schemas/User'
+            $ref: "#/components/schemas/User"
     Conversation:
       type: object
       properties:
@@ -826,11 +815,11 @@ components:
           type: integer
           example: 1
         Group:
-          $ref: '#/components/schemas/Group' 
+          $ref: "#/components/schemas/Group"
         messages:
           type: array
           items:
-            $ref: '#/components/schemas/Message'
+            $ref: "#/components/schemas/Message"
     Message:
       type: object
       properties:
@@ -848,15 +837,13 @@ components:
           type: integer
           example: 1
 
-
-
   #parametri utilizzati come richieste dell'utente
   parameters:
     username:
       name: username
-      in: path 
+      in: path
       required: true
-      schema: 
+      schema:
         type: string
         minLength: 3
         maxLength: 16
@@ -864,11 +851,11 @@ components:
 
     userID:
       name: userID
-      in: path 
+      in: path
       required: true
-      schema: 
+      schema:
         type: string
-      description: l'identificazione univoca dell'utente 
+      description: l'identificazione univoca dell'utente
 
     groupID:
       name: groupID
@@ -885,7 +872,7 @@ components:
       schema:
         type: string
       description: l'identificazione univoca della conversazione
-    
+
     messageID:
       name: messageID
       in: path
@@ -902,8 +889,6 @@ components:
         type: integer
       description: l'identificazione univoca del commento
 
-    
-    
   #risposte di errore predefinite
   responses:
     ErrorResponse:
@@ -921,5 +906,4 @@ components:
                 example: "element not found"
 
 security:
-
   - bearerAuth: [] # use the same name as above

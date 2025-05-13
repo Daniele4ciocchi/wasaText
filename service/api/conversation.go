@@ -1,6 +1,7 @@
 package api
 
 import (
+	"database/sql"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -59,8 +60,10 @@ func (rt *_router) addConversation(w http.ResponseWriter, r *http.Request, _ htt
 	// controllo se la conversazione esiste già
 	convID, err = rt.db.CheckExistingConversation(user1.ID, user2.ID)
 	if err != nil {
-		http.Error(w, "Errore durante la ricerca di conversazioni esistenti", http.StatusInternalServerError)
-		return
+		if err != sql.ErrNoRows {
+			http.Error(w, "Errore durante il recupero della conversazione", http.StatusInternalServerError)
+			return
+		}
 	}
 	if convID != 0 {
 		conv, err = rt.db.GetConversation(convID)

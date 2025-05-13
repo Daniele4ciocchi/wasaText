@@ -8,7 +8,7 @@
     <div v-if="users.length">
       <div v-for="user in users" :key="user.id" class="mb-2">
         <button
-          class="btn btn-outline-primary w-100 text-start"
+          class="user"
           @click="startConversation(user.name)"
         >
           {{ user.name }}
@@ -30,13 +30,14 @@ export default {
       loading: false,
       error: null,
       token: localStorage.getItem("token"),
+      name: localStorage.getItem("name"),
     };
   },
   methods: {
     async fetchUsers() {
       this.loading = true;
       try {
-        const response = await this.$axios.get("http://localhost:3000/user", {
+        const response = await this.$axios.get("http://100.87.168.104:3000/user", {
           headers: {
             Authorization: `Bearer ${this.token}`,
           },
@@ -47,12 +48,17 @@ export default {
       } finally {
         this.loading = false;
       }
+      for (const user of this.users) {
+        if (user.name === this.name) {
+          this.users.splice(this.users.indexOf(user), 1);
+        }
+      }
     },
 
     async startConversation(userName) {
       try {
         const response = await this.$axios.post(
-          "http://localhost:3000/conversation",
+          "http://100.87.168.104:3000/conversation",
           { name: userName },
           {
             headers: {
@@ -79,3 +85,20 @@ export default {
   },
 };
 </script>
+
+<style>
+.user {
+    text-align: center;
+    width: 60%;
+    display: flex;
+    margin-bottom: 10px;
+    border: 1px solid #888;
+    border-radius: 10px;
+    padding: 10px;
+    background-color: #d1e7dd;
+}
+.user:hover {
+    background-color: #c3e6cb;
+    cursor: pointer;
+}
+</style>

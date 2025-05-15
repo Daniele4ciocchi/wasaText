@@ -71,6 +71,7 @@ type AppDatabase interface {
 	AddMessage(senderID int, convID int, content string, repliedMessageID int) (int, error)
 	GetMessage(id int) (utils.Message, error)
 	GetMessages(convID int) ([]utils.Message, error)
+	GetLastMessage(convID int) (utils.Message, error)
 
 	//utils
 	SetToken(id int, name string) error

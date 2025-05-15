@@ -1,6 +1,7 @@
 package api
 
 import (
+	"database/sql"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -135,4 +136,42 @@ func (rt *_router) getMessages(w http.ResponseWriter, r *http.Request, ps httpro
 		return
 	}
 	w.WriteHeader(http.StatusOK)
+}
+
+func (rt *_router) getLastMessage(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	w.Header().Set("Content-Type", "application/json")
+
+	_, err := checkAuth(rt, r)
+	if err != nil {
+		http.Error(w, "Token non valido", http.StatusUnauthorized)
+		return
+	}
+
+	token := r.Header.Get("Authorization")
+	token = strings.TrimPrefix(token, "Bearer ")
+	if err != nil {
+		http.Error(w, "Utente non trovato", http.StatusNotFound)
+		return
+	}
+
+	convID, err := strconv.Atoi(ps.ByName("conversationID"))
+	if err != nil {
+		http.Error(w, "ID conversazione non valido", http.StatusBadRequest)
+		return
+	}
+
+	var message utils.Message
+	message, err = rt.db.GetLastMessage(convID)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			message = utils.Message{}
+		}
+	}
+
+	if err := json.NewEncoder(w).Encode(message); err != nil {
+		http.Error(w, "Errore durante l'encoding dell'ultimo messaggio", http.StatusInternalServerError)
+		return
+	}
+	w.WriteHeader(http.StatusOK)
+
 }

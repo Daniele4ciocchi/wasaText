@@ -41,7 +41,11 @@
         <div class="input-area">
 
             <input v-model="newMessage" type="text" placeholder="Scrivi un messaggio..." @keyup.enter="sendMessage" />
-            <button @click="sendMessage">Invia</button>
+            <button id ="send-button"@click="sendMessage">
+                <svg class="feather">
+                    <use href="/feather-sprite-v4.29.0.svg#send" />
+                </svg>
+            </button>
         </div>
 
         <div class="user-list" v-if="conversation.is_group">
@@ -57,7 +61,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted, watch } from 'vue'
+import { ref, onMounted, onUnmounted, watch, nextTick } from 'vue'
 import { useRoute } from 'vue-router'
 import axios from 'axios'
 
@@ -73,7 +77,8 @@ const messages = ref([])
 const newMessage = ref('')
 const replyID = ref(null)
 const replyContent = ref('')
-const lastMessageId = ref(null)
+const lastMessageId = ref(0)
+let messagesContainer = document.getElementById('messagesContainer')
 let intervalID
 
 
@@ -91,8 +96,16 @@ const getConversation = async () => {
 }
 
 const scrollToBottom = async () => {
-    messagesContainer.value.scrollTop = messagesContainer.value.scrollHeight
+    await nextTick()
+    if (messagesContainer.value) {
+        requestAnimationFrame(() => {
+            messagesContainer.scrollTop = messagesContainer.scrollHeight
+            messagesContainer.scrollIntoView({ behavior: 'smooth' })
+        })
+    }
+
 }
+
 
 const fetchMessages = async () => {
     try {
@@ -103,10 +116,13 @@ const fetchMessages = async () => {
     } catch (err) {
         console.error('Errore nel caricamento dei messaggi:', err)
     }
-    if (messages.findLast.id !== lastMessageId) {
+
+    if (messages.value.at(-1).message_id != lastMessageId.value.message_id) {
+        lastMessageId.value.message_id = messages.value.at(-1).message_id
         scrollToBottom()
+        alert('Nuovo messaggio ricevuto')
     }
-    //lastMessageId = messages.findLast.id
+    scrollToBottom()
 
 }
 const fetchUsers = async () => {
@@ -175,6 +191,7 @@ const leaveGroup = async () => {
 onMounted(() => {
     getConversation()
     fetchMessages()
+    scrollToBottom()
     intervalID = setInterval(fetchMessages, 5000)
 })
 
@@ -209,22 +226,27 @@ watch(() => route.params.conversationID, (newId) => {
 }
 
 .leave {
-    background-color: #d4332d;
+    background-color: #fa716c;
     color: black;
     border-radius: 10px;
     cursor: pointer;
     border: #888 1px solid;
     padding: 5px 10px;
 }
+
 .leave:hover {
     background-color: #b02a2a;
+}
+
+#send-button {
+    border-radius: 50px;
 }
 
 .messages {
     border: 1px solid #888;
     padding: 10px;
     height: 400px;
-    overflow-y: scroll;
+    overflow-y: auto;
     margin-bottom: 10px;
     background-color: #f4f6f8;
     display: flex;
@@ -258,6 +280,7 @@ watch(() => route.params.conversationID, (newId) => {
 .replied-message {
     background-color: #e2e3e5;
     border-radius: 10px;
+    border: #888 1px solid;
     padding: 5px;
     margin: 5px 0;
 }

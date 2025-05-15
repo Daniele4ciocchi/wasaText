@@ -1,5 +1,6 @@
 <script setup>
-	const apiUrl = import.meta.env.VITE_API_URL;
+
+const apiUrl = import.meta.env.VITE_API_URL;
 </script>
 <template>
 	<div class="home">
@@ -9,7 +10,7 @@
 		<form v-if="!isLoggedIn" @submit.prevent="login">
 			<div>
 				<label for="username">Nome:</label>
-				<input class="form-control"type="text" v-model="name" id="username" required />
+				<input class="form-control" type="text" v-model="name" id="username" required />
 			</div>
 			<button class="btn btn-outline-success btn-lg" type="submit">Accedi</button>
 		</form>
@@ -21,7 +22,21 @@
 			</div>
 			<button class="btn btn-outline-danger btn-lg ">Logout</button>
 		</form>
-		
+
+		<form v-if="isLoggedIn">
+
+			<div class="username">
+				<div>
+					<label for="username">username:</label>
+					<input class="form-control" type="text" v-model="name" id="username" required />
+					
+				</div>
+				<button class="btn btn-secondary btn-lg username-button" @click="">
+					cambia il tuo username
+				</button>
+			</div>
+		</form>
+
 
 		<!-- Messaggi -->
 		<div v-if="message" class="message">{{ message }}</div>
@@ -33,6 +48,7 @@
 export default {
 	data() {
 		return {
+
 			token: '',
 			name: '',
 			message: '',
@@ -83,7 +99,11 @@ export default {
 			this.name = '';
 			this.message = 'Logout effettuato con successo.';
 			this.error = '';
-		}
+		},
+		
+		
+				
+
 	}
 };
 </script>
@@ -109,6 +129,14 @@ button {
 
 .error {
 	color: red;
+	margin-top: 10px;
+}
+
+.username {
+	margin-top: 10px;
+}
+
+.username-button {
 	margin-top: 10px;
 }
 </style>

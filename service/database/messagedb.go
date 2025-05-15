@@ -64,3 +64,13 @@ func (db *appdbimpl) GetMessages(convID int) ([]utils.Message, error) {
 	}
 	return messages, nil
 }
+
+func (db *appdbimpl) GetLastMessage(convID int) (utils.Message, error) {
+	var message utils.Message
+	err := db.c.QueryRow("SELECT id, sender_id, conversation_id, content, timestamp FROM messages WHERE conversation_id = ? ORDER BY timestamp DESC LIMIT 1", convID).Scan(&message.ID, &message.SenderID, &message.ConversationID, &message.Content, &message.Timestamp)
+	if err != nil {
+		return utils.Message{}, err
+	}
+
+	return message, nil
+}

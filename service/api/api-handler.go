@@ -23,6 +23,7 @@ func (rt *_router) Handler() http.Handler {
 	rt.router.GET("/conversation/:conversationID", rt.getConversation)      // getConversation
 	rt.router.GET("/conversation/:conversationID/message", rt.getMessages)  // getMessages
 	rt.router.POST("/conversation/:conversationID/message", rt.sendMessage) // sendMessage
+	rt.router.GET("/conversation/:conversationID/lastmessage", rt.getLastMessage)
 
 	//rt.router.POST("/conversation/:c_id/message/:m_id", rt.forwardMessage) // forwardMessage ?
 
@@ -40,6 +41,7 @@ func (rt *_router) Handler() http.Handler {
 	rt.router.GET("/group/:groupID", rt.getGroup)      // getGroup
 	rt.router.POST("/group", rt.createGroup)           // createGroup
 	rt.router.DELETE("/group/:groupID", rt.leaveGroup) // deleteGroup
+
 	//rt.router.POST("/group/:g_id/name", rt.setGroupName) // setGroupName
 	//rt.router.GET("/group/:g_id/photo", rt.getGroupPhoto) // getGroupPhoto DA FARE URGENTE
 	//rt.router.POST("/group/:g_id/photo", rt.setGroupPhoto) // setGroupPhoto

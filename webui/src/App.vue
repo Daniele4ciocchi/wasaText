@@ -5,51 +5,14 @@ import axios from 'axios'
 
 // Stato reattivo per le conversazioni
 const route = useRoute()
-const conversations = ref([])
-const messages = ref([])
-const error = ref(null)
+
 const token = localStorage.getItem('token')
 const username = localStorage.getItem('name')
-let intervalID
 
 
-const getConversations = async () => {
-	try {
-		const res = await axios.get('http://100.87.168.104:3000/conversation', {
-			headers: { Authorization: `Bearer ${token}` }
-		})
-		conversations.value = res.data
-	} catch (err) {
-		error.value = 'Errore nel caricamento delle conversazioni'
-		console.error(err)
-	}
-}
-const fetchMessages = async () => {
-  const convId = route.params.conversationID
-  try {
-    const res = await axios.get(`http://100.87.168.104:3000/conversation/${convid}`, {
-      headers: { Authorization: `Bearer ${token}` }
-    })
-    messages.value = res.data.messages
-  } catch (err) {
-    console.error('Errore nel caricamento dei messaggi:', err)
-  }
-}
-onMounted(async () => {
-
-	intervalID = setInterval(getConversations, 3000)
-	fetchMessages()
-})
-
-onUnmounted(() => {
-	clearInterval(intervalID)
-})
 watch(
-  () => route.params.conversation_id,
-  () => {
-    fetchMessages()
-  },
-  { immediate: true }
+	() => route.params.conversation_id,
+
 )
 
 </script>
@@ -84,7 +47,7 @@ export default {}
 								<svg class="feather" id="Login">
 									<use href="/feather-sprite-v4.29.0.svg#user" />
 								</svg>
-								{{ username || "Login"}}
+								{{ username || "Login" }}
 							</RouterLink>
 						</li>
 						<li class="nav-item">
@@ -103,23 +66,19 @@ export default {}
 								nuovo gruppo
 							</RouterLink>
 						</li>
-
-					</ul>
-
-					<h6
-						class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted text-uppercase">
-						<span>Conversazioni</span>
-					</h6>
-					<ul class="nav flex-column">
-						<li class="nav-item" v-for="conv in conversations" :key="conv.conversation_id">
-							<RouterLink :to="'/conversation/' + conv.conversation_id" :key="route.params.conversation_id" class="nav-link">
+						<li class="nav-item">
+							<RouterLink to="/myconversations" class="nav-link">
 								<svg class="feather">
-									<use href="/feather-sprite-v4.29.0.svg#book" />
+									<use href="/feather-sprite-v4.29.0.svg#message-square" />
 								</svg>
-								{{ conv.name }}
+								conversazioni
 							</RouterLink>
+
 						</li>
+
 					</ul>
+
+					
 
 				</div>
 			</nav>
@@ -133,9 +92,24 @@ export default {}
 
 <style>
 .nav-item {
+
 	background-color: #d1e7dd;
 	border-radius: 13px;
 	border: #888 1px solid;
 	margin: 5px 10px;
+}
+
+.conversation {
+	display: flex;
+	flex-direction: column;
+	font-size: smaller;
+}
+
+#conversation-name {
+	font-size: 15px;
+}
+
+#conversation-message {
+	font-size: 12px;
 }
 </style>

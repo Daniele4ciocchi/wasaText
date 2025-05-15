@@ -3,6 +3,8 @@ import Login from '../views/Login.vue'
 import Users from '../views/Users.vue'
 import CreateGroup from '../views/CreateGroup.vue'
 import Conversation from '../views/Conversation.vue'
+import MyConversations from '../views/MyConversations.vue'
+
 
 const defaultAddress = 'http://100.87.168.104:3000'
 
@@ -15,6 +17,7 @@ const router = createRouter({
 		{path: '/users', component: Users},
 		{path: '/group', component: CreateGroup},
 		{path: '/conversation/:conversationID', component: Conversation},
+		{path: '/myconversations', component: MyConversations},
 
 	]
 })

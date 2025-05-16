@@ -7,8 +7,9 @@
                 placeholder="Inserisci il nome del gruppo" />
         </div>
 
-        <div class="user-list">
-            <h2>Lista Utenti</h2>
+        <h2>Lista Utenti</h2>
+        <div class="users-list">
+            
             <ul>
                 <li class="user" v-for="user in users" :key="user.user_id">
                     <label>
@@ -44,7 +45,7 @@ export default {
             }
 
             try {
-                const response = await this.$axios.post("http://100.87.168.104:3000/group", {
+                const response = await this.$axios.post(__MINE__ + "/group", {
                     name: this.groupName,
                     members: this.selectedUsers,
                 }, {
@@ -69,7 +70,7 @@ export default {
         async fetchUsers() {
             this.loading = true;
             try {
-                const response = await this.$axios.get("http://100.87.168.104:3000/user", {
+                const response = await this.$axios.get(__MINE__ + "/user", {
                     headers: {
                         Authorization: `Bearer ${this.token}`,
                     },
@@ -100,7 +101,7 @@ export default {
 .create-group {
     border: 1px solid #888;
     padding: 10px;
-    height: 400px;
+    height: 600px;
     overflow-y: auto;
     margin: 10px 0px;
     background-color: #f4f6f8;
@@ -114,10 +115,19 @@ export default {
     margin-bottom: 20px;
 }
 
-.user-list {
-    margin-bottom: 20px;
-    text-align: center;
+.users-list {
+    border: 1px solid #888;
+    padding: 10px;
+    height: 400px;
+    overflow-y: auto;
+    margin-bottom: 10px;
+    background-color: #f4f6f8;
+    display: flex;
+    flex-direction: column;
+
+    border-radius: 23px;
 }
+
 
 .user {
     text-align: center;

@@ -46,7 +46,11 @@ type AppDatabase interface {
 	//user
 	AddUser(name string, username string) error
 	GetUser(name string) (utils.User, error)
+	GetUserById(id int) (utils.User, error)
 	GetUsers() ([]utils.User, error)
+	SetUsername(id int, username string) error
+	SetUserPhoto(id int, path string) error
+	GetUserPhoto(id int) (string, error)
 
 	//conversation
 	AddConversation(name string, isGroup bool) (int, error)
@@ -66,6 +70,9 @@ type AppDatabase interface {
 	RemoveUserFromGroup(userID int, groupID int) error
 	GetGroupMembers(id int) ([]utils.User, error)
 	LeaveGroup(userID int, groupID int) error
+	SetGroupName(id int, name string) error
+	GetGroupPhoto(id int) (string, error)
+	SetGroupPhoto(id int, path string) error
 
 	//message
 	AddMessage(senderID int, convID int, content string, repliedMessageID int) (int, error)
@@ -103,7 +110,8 @@ func New(db *sql.DB) (AppDatabase, error) {
 					CREATE TABLE users (
 					    id INTEGER PRIMARY KEY AUTOINCREMENT,
 					    name TEXT NOT NULL UNIQUE,
-					    username TEXT NOT NULL UNIQUE
+					    username TEXT NOT NULL UNIQUE,
+						photoPath TEXT
 					);
 
 					CREATE TABLE messages (
@@ -121,7 +129,8 @@ func New(db *sql.DB) (AppDatabase, error) {
 					CREATE TABLE conversations (
 					    id INTEGER PRIMARY KEY AUTOINCREMENT,
 					    is_group BOOLEAN NOT NULL,
-					    name TEXT NOT NULL
+					    name TEXT NOT NULL,
+						photoPath TEXT
 					);
 
 					CREATE TABLE user_conversations (

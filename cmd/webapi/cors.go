@@ -21,7 +21,7 @@ func applyCORSHandler(h http.Handler) http.Handler {
 		handlers.AllowedOrigins([]string{"http://192.168.1.113:5173"}),
 		handlers.AllowedOrigins([]string{"http://192.168.1.187:5173"}),
 		handlers.AllowedOrigins([]string{"http://https://editor.swagger.io/"}),
-		handlers.AllowedOrigins([]string{"*"}),
+		handlers.AllowedOrigins([]string{"http://100.111.159.67:5173"}),
 		handlers.MaxAge(1),
 	)(h)
 }

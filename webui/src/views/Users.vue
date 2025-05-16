@@ -11,7 +11,7 @@
           class="user"
           @click="startConversation(user.name)"
         >
-          {{ user.name }}
+          {{ user.username }}
         </button>
       </div>
     </div>
@@ -31,13 +31,15 @@ export default {
       error: null,
       token: localStorage.getItem("token"),
       name: localStorage.getItem("name"),
+      username: localStorage.getItem("username"),
+      user_id: localStorage.getItem("user_id"),
     };
   },
   methods: {
     async fetchUsers() {
       this.loading = true;
       try {
-        const response = await this.$axios.get("http://100.87.168.104:3000/user", {
+        const response = await this.$axios.get(__MINE__ + "/user", {
           headers: {
             Authorization: `Bearer ${this.token}`,
           },
@@ -58,7 +60,7 @@ export default {
     async startConversation(userName) {
       try {
         const response = await this.$axios.post(
-          "http://100.87.168.104:3000/conversation",
+           __MINE__ + "/conversation",
           { name: userName },
           {
             headers: {

@@ -175,3 +175,62 @@ func (rt *_router) getLastMessage(w http.ResponseWriter, r *http.Request, ps htt
 	w.WriteHeader(http.StatusOK)
 
 }
+
+func (rt *_router) forwardMessage(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	w.Header().Set("Content-Type", "application/json")
+
+	// Controlla se il token è valido e se si trova all'interno del db
+	id, err := checkAuth(rt, r)
+	if err != nil {
+		http.Error(w, "Token non valido", http.StatusUnauthorized)
+		return
+	}
+
+	var message utils.Message
+	message.ID, err = strconv.Atoi(ps.ByName("messageID"))
+	if err != nil {
+		http.Error(w, "ID messaggio non valido", http.StatusBadRequest)
+		return
+	}
+
+	message, err = rt.db.GetMessage(message.ID)
+	if err != nil {
+		http.Error(w, "Errore durante il recupero del messaggio", http.StatusInternalServerError)
+		return
+	}
+
+	type newreciver struct {
+		ID int `json:"receiver_id"`
+	}
+
+	var reciver newreciver
+	if err := json.NewDecoder(r.Body).Decode(&reciver); err != nil {
+		http.Error(w, "JSON non valido", http.StatusBadRequest)
+		return
+	}
+
+	// Controlla se la conversazione esiste nelle conversazioni del mittente
+	var conv []utils.Conversation
+	conv, err = rt.db.GetConversations(id)
+	if err != nil {
+		http.Error(w, "Errore durante il recupero delle conversazioni", http.StatusInternalServerError)
+		return
+	}
+	var found bool
+	found = false
+	for _, c := range conv {
+		if c.ID == reciver.ID {
+			found = true
+			break
+		}
+	}
+	if !found {
+		http.Error(w, "Conversazione non trovata", http.StatusNotFound)
+		return
+	}
+
+	rt.db.AddMessage(id, reciver.ID, message.Content, message.RepliedMessageID)
+
+	w.WriteHeader(http.StatusCreated)
+
+}

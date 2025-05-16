@@ -8,7 +8,7 @@ import (
 
 // funzione per aggiungere un utente al database
 func (db *appdbimpl) AddUser(name string, username string) error {
-	_, err := db.c.Exec("INSERT INTO users (name, username) VALUES (?, ?)", name, username)
+	_, err := db.c.Exec("INSERT INTO users (name, username, photoPath) VALUES (?, ?, 'service/photos/default.jpg')", name, username)
 	if err != nil {
 		return err
 	}
@@ -36,6 +36,18 @@ func (db *appdbimpl) GetUsers() ([]utils.User, error) {
 	return users, nil
 }
 
+func (db *appdbimpl) GetUserById(id int) (utils.User, error) {
+	var user utils.User
+	err := db.c.QueryRow("SELECT id, name, username FROM users WHERE id = ?", id).Scan(&user.ID, &user.Name, &user.Username)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return user, sql.ErrNoRows
+		}
+		return user, err
+	}
+	return user, nil
+}
+
 // funzione che prende in input il nome di un utente e restituisce
 // l'id, il nome e lo username
 func (db *appdbimpl) GetUser(name string) (utils.User, error) {
@@ -57,4 +69,30 @@ func (db *appdbimpl) GetUser(name string) (utils.User, error) {
 	}
 
 	return user, nil
+}
+
+func (db *appdbimpl) SetUsername(id int, username string) error {
+	_, err := db.c.Exec("UPDATE users SET username = ? WHERE id = ?", username, id)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (db *appdbimpl) SetUserPhoto(id int, path string) error {
+
+	_, err := db.c.Exec("UPDATE users SET photoPath = ? WHERE id = ?", path, id)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (db *appdbimpl) GetUserPhoto(id int) (string, error) {
+	var path string
+	err := db.c.QueryRow("SELECT photoPath FROM users WHERE id = ?", id).Scan(&path)
+	if err != nil {
+		return "", err
+	}
+	return path, nil
 }

@@ -7,7 +7,8 @@ import axios from 'axios'
 const route = useRoute()
 
 const token = localStorage.getItem('token')
-const username = localStorage.getItem('name')
+const name = localStorage.getItem('name')
+const username = localStorage.getItem('username')
 
 
 watch(

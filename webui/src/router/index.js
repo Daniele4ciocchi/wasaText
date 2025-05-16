@@ -6,7 +6,6 @@ import Conversation from '../views/Conversation.vue'
 import MyConversations from '../views/MyConversations.vue'
 
 
-const defaultAddress = 'http://100.87.168.104:3000'
 
 const router = createRouter({
 	history: createWebHashHistory(import.meta.env.BASE_URL),

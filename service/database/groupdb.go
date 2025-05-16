@@ -60,7 +60,7 @@ func (db *appdbimpl) CheckExistingGroup(name string) (utils.Group, error) {
 func (db *appdbimpl) AddGroup(name string) (utils.Group, error) {
 	// Add group to conversations table
 	var group utils.Group
-	res, err := db.c.Exec("INSERT INTO conversations (name, is_group) VALUES (?, 1)", name)
+	res, err := db.c.Exec("INSERT INTO conversations (name, is_group, photoPath) VALUES (?, 1, 'service/photos/default.jpg')", name)
 	if err != nil {
 		group.ID = 0
 		return group, err
@@ -128,4 +128,29 @@ func (db *appdbimpl) LeaveGroup(userID int, groupID int) error {
 		return err
 	}
 	return nil
+}
+
+func (db *appdbimpl) SetGroupName(id int, name string) error {
+	_, err := db.c.Exec("UPDATE conversations SET name = ? WHERE id = ?", name, id)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (db *appdbimpl) SetGroupPhoto(id int, path string) error {
+	_, err := db.c.Exec("UPDATE conversations SET photoPath = ? WHERE id = ?", path, id)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (db *appdbimpl) GetGroupPhoto(id int) (string, error) {
+	var path string
+	err := db.c.QueryRow("SELECT photoPath FROM conversations WHERE id = ? AND is_group + true", id).Scan(&path)
+	if err != nil {
+		return "", err
+	}
+	return path, nil
 }

@@ -15,7 +15,10 @@
                         <svg class="feather">
                             <use href="/feather-sprite-v4.29.0.svg#message-square" />
                         </svg>
-                        {{ conv.message.content }}
+                        {{ conv.message.content.length > 20 ? conv.message.content.slice(0, 20) + '...' : conv.message.content }}
+                        <span id="timestamp">
+                            {{ new Date(conv.message.timestamp).toLocaleString() }}
+                        </span>
                     </div>
                 </div>
             </RouterLink>
@@ -26,17 +29,20 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import axios from 'axios'
-import { useRoute } from 'vue-router'
+
 
 // Token: prendi da props, store o composable
 const token = localStorage.getItem('token') // o come preferisci
 
+
 const conversations = ref([])
 const error = ref(null)
 
+
+
 const getConversations = async () => {
     try {
-        const res = await axios.get('http://100.87.168.104:3000/conversation', {
+        const res = await axios.get(__MINE__ + '/conversation', {
             headers: { Authorization: `Bearer ${token}` },
         })
         const newData = res.data
@@ -46,7 +52,7 @@ const getConversations = async () => {
         for (const conv of conversations.value) {
             try {
                 const res = await axios.get(
-                    `http://100.87.168.104:3000/conversation/${conv.conversation_id}/lastmessage`,
+                    __MINE__ + `/conversation/${conv.conversation_id}/lastmessage`,
                     {
                         headers: { Authorization: `Bearer ${token}` },
                     }
@@ -77,5 +83,15 @@ onMounted(() => {
 .conversation {
     color: black;
 
+}
+#conversation-message {
+    font-size: 10px;
+}
+
+#timestamp {
+    font-size: 8px;
+    color: gray;
+    margin-left: 5px;
+    text-align: right;
 }
 </style>

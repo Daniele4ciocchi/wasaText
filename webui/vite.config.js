@@ -15,7 +15,11 @@ export default defineConfig(({command, mode, ssrBuild}) => {
 	};
 	ret.define = {
 		// Do not modify this constant, it is used in the evaluation.
-		"__API_URL__": JSON.stringify("http://100.87.168.104:3000"),
+		"__API_URL__": JSON.stringify("http://localhost:3000"),
+		//"__MINE__": JSON.stringify("http://100.111.159.67:3000"),
+		"__MINE__": JSON.stringify("http://localhost:3000"),
+		"__MINE__": JSON.stringify("http://192.168.1.165:3000"),
+
 	};
 	return ret;
 })

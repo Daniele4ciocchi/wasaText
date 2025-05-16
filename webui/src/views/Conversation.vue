@@ -15,7 +15,7 @@
                 :class="['message', message.sender === currentUser ? 'user' : 'receiver']">
 
                 <!-- Mostra il contenuto del messaggio a cui si sta rispondendo, se presente -->
-                <div v-if="message.replied_message_id != 0">
+                <div v-if="message.replied_message_id">
                     <p class="replied-message">
                         {{ getMessageById(message.replied_message_id).content }}
                     </p>
@@ -34,7 +34,7 @@
 
 
         <div>
-            <label for="replies" v-if="replyID">
+            <label id="replies" for="replies" v-if="replyID">
                 risposta a : {{ replyContent, replyID }}
             </label>
         </div>
@@ -85,7 +85,7 @@ let intervalID
 
 const getConversation = async () => {
     try {
-        const res = await axios.get(`http://100.87.168.104:3000/conversation/${conversationID.value}`, {
+        const res = await axios.get(__MINE__+ `/conversation/${conversationID.value}`, {
             headers: { Authorization: `Bearer ${token}` }
         })
         conversation.value = res.data
@@ -109,7 +109,7 @@ const scrollToBottom = async () => {
 
 const fetchMessages = async () => {
     try {
-        const res = await axios.get(`http://100.87.168.104:3000/conversation/${conversationID.value}/message`, {
+        const res = await axios.get(__MINE__ + `/conversation/${conversationID.value}/message`, {
             headers: { Authorization: `Bearer ${token}` }
         })
         messages.value = res.data
@@ -127,7 +127,7 @@ const fetchMessages = async () => {
 }
 const fetchUsers = async () => {
     try {
-        const res = await axios.get(`http://100.87.168.104:3000/group/${conversationID.value}`, {
+        const res = await axios.get(__MINE__ + `/group/${conversationID.value}`, {
             headers: { Authorization: `Bearer ${token}` }
         })
         users.value = res.data.members
@@ -151,7 +151,7 @@ const sendMessage = async () => {
 
     try {
         await axios.post(
-            `http://100.87.168.104:3000/conversation/${conversationID.value}/message`,
+            __MINE__ + `/conversation/${conversationID.value}/message`,
             {
                 content: messageToSend.content,
                 replied_message_id: messageToSend.replied_message_id,
@@ -178,7 +178,7 @@ const getMessageById = (id) => {
 
 const leaveGroup = async () => {
     try {
-        await axios.delete(`http://100.87.168.104:3000/group/${conversationID.value}`, {
+        await axios.delete( __MINE__ + `/group/${conversationID.value}`, {
             headers: { Authorization: `Bearer ${token}` }
         })
         alert('Sei uscito dal gruppo')
@@ -242,19 +242,20 @@ watch(() => route.params.conversationID, (newId) => {
     border-radius: 50px;
 }
 
+
 .messages {
     border: 1px solid #888;
     padding: 10px;
     height: 400px;
-    overflow-y: auto;
     margin-bottom: 10px;
     background-color: #f4f6f8;
     display: flex;
     flex-direction: column;
     align-items: flex-end;
-
+    overflow-y: auto;
     border-radius: 23px;
 }
+
 
 .message {
     margin-bottom: 10px;

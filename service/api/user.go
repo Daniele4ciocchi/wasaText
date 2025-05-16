@@ -3,7 +3,10 @@ package api
 import (
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
+	"os"
+	"strconv"
 	"strings"
 
 	"github.com/Daniele4ciocchi/wasaText/service/utils"
@@ -86,4 +89,138 @@ func (rt *_router) getUser(w http.ResponseWriter, r *http.Request, ps httprouter
 		http.Error(w, "Errore nella codifica JSON", http.StatusInternalServerError)
 		return
 	}
+}
+
+func (rt *_router) setMyUsername(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+	w.Header().Set("Content-Type", "application/json")
+
+	//auth control
+	id, err := checkAuth(rt, r)
+	if err != nil {
+		http.Error(w, "Token non valido", http.StatusUnauthorized)
+		return
+	}
+
+	type Username struct {
+		Username string `json:"username"`
+	}
+	var username Username
+	err = json.NewDecoder(r.Body).Decode(&username)
+	if err != nil {
+		http.Error(w, "Errore nella decodifica JSON", http.StatusBadRequest)
+		return
+	}
+
+	err = rt.db.SetUsername(id, username.Username)
+	if err != nil {
+		http.Error(w, "Errore nella modifica dell'username", http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+}
+
+func (rt *_router) getMe(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+	w.Header().Set("Content-Type", "application/json")
+
+	//auth control
+	id, err := checkAuth(rt, r)
+	if err != nil {
+		http.Error(w, "Token non valido", http.StatusUnauthorized)
+		return
+	}
+
+	user, err := rt.db.GetUserById(id)
+	if err != nil {
+		http.Error(w, "Errore nel recupero dell'utente", http.StatusInternalServerError)
+		return
+	}
+
+	if err := json.NewEncoder(w).Encode(user); err != nil {
+		http.Error(w, "Errore nella codifica JSON", http.StatusInternalServerError)
+		return
+	}
+}
+
+func (rt *_router) setMyPhoto(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+	// Auth
+	id, err := checkAuth(rt, r)
+	if err != nil {
+		http.Error(w, "Token non valido", http.StatusUnauthorized)
+		return
+	}
+
+	// ⚠️ IMPORTANTE: parse del form multipart
+	err = r.ParseMultipartForm(10 << 20) // 10 MB
+	if err != nil {
+		http.Error(w, "Errore nel parsing del form", http.StatusBadRequest)
+		return
+	}
+
+	// Recupera il file
+	file, _, err := r.FormFile("photo")
+	if err != nil {
+		http.Error(w, "Errore nel recupero del file", http.StatusBadRequest)
+		return
+	}
+	defer file.Close()
+
+	// Recupera l'utente
+	user, err := rt.db.GetUserById(id)
+	if err != nil {
+		http.Error(w, "Errore nel recupero dell'utente", http.StatusInternalServerError)
+		return
+	}
+
+	// Salva il file
+	path, err := utils.SaveFile(user.Name, file)
+	if err != nil {
+		http.Error(w, "Errore nel salvataggio del file", http.StatusInternalServerError)
+		return
+	}
+
+	// Aggiorna il path nel DB
+	err = rt.db.SetUserPhoto(id, path)
+	if err != nil {
+		http.Error(w, "Errore nella modifica della foto", http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	fmt.Fprintln(w, "Foto salvata correttamente")
+}
+
+func (rt *_router) getUserPhoto(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	w.Header().Set("Content-Type", "image/jpeg")
+	// auth control
+	_, err := checkAuth(rt, r)
+	if err != nil {
+		http.Error(w, "Token non valido", http.StatusUnauthorized)
+		return
+	}
+
+	id, err := strconv.Atoi(ps.ByName("userID"))
+	if err != nil {
+		http.Error(w, "ID non valido", http.StatusBadRequest)
+		return
+	}
+
+	// recupera il percorso della foto
+	filePath, err := rt.db.GetUserPhoto(id)
+	if err != nil {
+		http.Error(w, "Errore nel recupero del percorso della foto", http.StatusInternalServerError)
+		return
+	}
+
+	file, err := os.Open(filePath)
+	if err != nil {
+		http.Error(w, "Foto non trovata", http.StatusNotFound)
+		return
+	}
+	defer file.Close()
+
+	w.WriteHeader(http.StatusOK)
+
+	// Scrive il contenuto del file nella risposta
+	io.Copy(w, file)
 }

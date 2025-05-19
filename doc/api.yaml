@@ -116,7 +116,7 @@ paths:
       summary: Ottieni la lista di utenti
       description: >
         Ottiene la lista di utenti registrati.
-        Restituisce un elenco di utenti con i loro ID e nomi.
+        Restituisce un elenco di utenti
       responses:
         "200":
           description: Elenco degli utenti
@@ -126,16 +126,91 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/User"
-        "500":
-          description: Errore interno del server
+        "401" : { $ref: "#/components/responses/Unauthorized" }
+        "500" : { $ref: "#/components/responses/InternalServerError" }
+    
+  /user/{userID}:
+    parameters:
+      - $ref: "#/components/parameters/userID"
+
+    get:
+      tags:
+        - utente
+      operationId: getUser
+      summary: Ottieni informazioni sull'utente
+      description: >
+        Ottiene le informazioni sull'utente specificato dall'ID.
+        Restituisce tutte le informazioni dell'utente.
+      responses:
+        "200":
+          description: Informazioni sull'utente
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "401" : { $ref: "#/components/responses/Unauthorized" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "500" : { $ref: "#/components/responses/InternalServerError" }
+
+  /user/{userID}/photo:
+    parameters:
+      - $ref: "#/components/parameters/userID"
+
+    get:
+      tags:
+        - utente
+      operationId: getUserPhoto
+      summary: Ottieni la foto dell'utente
+      description: >
+        Ottiene la foto del profilo dell'utente specificato.
+        Restituisce l'ID della foto dell'utente.
+      responses:
+        "200":
+          description: Foto dell'utente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  photoID:
+                    type: integer
+                    example: 1
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "500": { $ref: "#/components/responses/InternalServerError" }
+
+  /me:
+
+    get:
+      tags:
+        - utente
+      operationId: getMessage
+      summary: Ottieni informazioni sull'utente loggato
+      description: >
+        Ottiene le informazioni sull'utente loggato.
+        Restituisce tutte le informazioni dell'utente.
+      responses:
+        "200":
+          description: Informazioni sull'utente loggato
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "500": { $ref: "#/components/responses/InternalServerError" }
+
   /me/username:
+    
     put:
       tags:
         - utente
       operationId: setMyUserName
-      summary: Imposta il nome utente
+      summary: Imposta lo username dell'utente
       description: >
-        Imposta il nome utente per l'utente corrente.
+        Imposta lo username utente per l'utente corrente.
         Se il nome utente è già in uso, restituisce un errore.
       requestBody:
         required: true
@@ -146,8 +221,6 @@ paths:
               properties:
                 username:
                   type: string
-                  minLength: 3
-                  maxLength: 16
               required:
                 - username
       responses:
@@ -161,46 +234,19 @@ paths:
                   id:
                     type: string
                     format: uuid
-        "400":
-          description: Nome utente non valido
-        "409":
-          description: Nome utente già in uso
-        "500":
-          description: Errore interno del server
-    get:
-      tags:
-        - utente
-      operationId: getMyUserName
-      summary: Ottieni il nome utente
-      security:
-        - bearerAuth: []
-      description: >
-        Ottiene il nome utente per l'utente corrente.
-        Restituisce l'ID e il nome dell'utente.
-      responses:
-        "200":
-          description: Nome utente ottenuto correttamente
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  username:
-                    type: string
-                    example: "marta"
-        "404":
-          description: Utente non trovato
-        "500":
-          description: Errore interno del server
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "500": { $ref: "#/components/responses/InternalServerError" }
+
   /me/photo:
-    post:
+
+    put:
       tags:
         - utente
       operationId: setMyPhoto
       summary: Imposta la foto del profilo
       description: >
         Imposta la foto del profilo per l'utente corrente.
-        Restituisce l'ID della foto impostata.
       requestBody:
         required: true
         content:
@@ -216,41 +262,10 @@ paths:
       responses:
         "200":
           description: Foto del profilo impostata correttamente
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  photoID:
-                    type: integer
-                    example: 1
-        "400":
-          description: Foto non valida
-        "500":
-          description: Errore interno del server
-  /user/{userID}:
-    parameters:
-      - $ref: "#/components/parameters/userID"
-
-    get:
-      tags:
-        - utente
-      operationId: getUser
-      summary: Ottieni informazioni sull'utente
-      description: >
-        Ottiene le informazioni sull'utente specificato dall'ID.
-        Restituisce l'ID e il nome dell'utente.
-      responses:
-        "200":
-          description: Informazioni sull'utente
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/User"
-        "404":
-          description: Utente non trovato
-        "500":
-          description: Errore interno del server
+          
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "500": { $ref: "#/components/responses/InternalServerError" }
 
   /conversation:
     get:
@@ -271,10 +286,43 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/Conversation"
-        "404":
-          description: Utente non trovato
-        "500":
-          description: Errore interno del server
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "500": { $ref: "#/components/responses/InternalServerError" }
+
+    post:
+      tags:
+        - conversazione
+      operationId: addConversation
+      summary: Crea una nuova conversazione
+      description: >
+        Crea una nuova conversazione tra gli utenti specificati.
+        Restituisce la conversazione creata.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  
+              required:
+                - name
+      responses:
+        "200":
+          description: Conversazione creata correttamente
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Conversation"
+                  
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "500": { $ref: "#/components/responses/InternalServerError" }
+
 
   /conversation/{conversationID}:
     parameters:
@@ -286,7 +334,6 @@ paths:
       summary: Ottieni una conversazione specifica
       description: >
         Ottiene i dettagli di una conversazione specifica.
-        Restituisce l'ID della conversazione e i messaggi associati.
       responses:
         "200":
           description: Dettagli della conversazione
@@ -294,10 +341,10 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Conversation"
-        "404":
-          description: Conversazione non trovata
-        "500":
-          description: Errore interno del server
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "500": { $ref: "#/components/responses/InternalServerError" }
 
   /conversation/{conversationID}/message:
     parameters:
@@ -320,10 +367,11 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/Message"
-        "404":
-          description: Conversazione non trovata
-        "500":
-          description: Errore interno del server
+
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "500": { $ref: "#/components/responses/InternalServerError" }
 
     post:
       tags:
@@ -345,21 +393,39 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  messageID:
-                    type: integer
-                    example: 1
-        "400":
-          description: Messaggio non valido
-        "404":
-          description: Conversazione non trovata
-        "500":
-          description: Errore interno del server
+                $ref: "#/components/schemas/Message"
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "500": { $ref: "#/components/responses/InternalServerError" }
 
-  /conversation/{conversationID}/message/{messageID}:
+  /conversation/{conversationID}/lastMessage:
     parameters:
       - $ref: "#/components/parameters/conversationID"
+
+    get:
+      tags:
+        - conversazione
+      operationId: getLastMessage
+      summary: Ottieni l'ultimo messaggio di una conversazione
+      description: >
+        Ottiene l'ultimo messaggio di una conversazione specifica.
+        Restituisce i dettagli dell'ultimo messaggio.
+      responses:
+        "200":
+          description: Dettagli dell'ultimo messaggio
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Message"
+
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "500": { $ref: "#/components/responses/InternalServerError" }
+
+  /conversation/{messageID}/forwarded:
+    parameters:
       - $ref: "#/components/parameters/messageID"
 
     post:
@@ -377,52 +443,45 @@ paths:
             schema:
               type: object
               properties:
-                conversationID:
+                reciver_id:
                   type: integer
                   example: 1
-              required:
-                - conversationID
       responses:
         "200":
           description: Messaggio inoltrato correttamente
+          
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "500": { $ref: "#/components/responses/InternalServerError" }
+    
+  /me/newmessage:
+    get:
+      tags:
+        - messaggio
+      operationId: getNewMessages
+      summary: Ottieni i nuovi messaggi
+      description: >
+        Ottiene i nuovi messaggi per l'utente loggato.
+        Restituisce un elenco di nuovi messaggi.
+      responses:
+        "200":
+          description: Elenco dei nuovi messaggi
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  messageID:
-                    type: integer
-                    example: 1
-        "400":
-          description: Messaggio non valido
-        "404":
-          description: Conversazione non trovata
-        "500":
-          description: Errore interno del server
+                type: array
+                items:
+                  $ref: "#/components/schemas/Message"
+
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "500": { $ref: "#/components/responses/InternalServerError" }
 
   /messages/{messageID}:
     parameters:
       - $ref: "#/components/parameters/messageID"
 
-    get:
-      tags:
-        - messaggio
-      operationId: getMessage
-      summary: Ottieni un messaggio specifico
-      description: >
-        Ottiene i dettagli di un messaggio specifico.
-        Restituisce l'ID del messaggio e il contenuto.
-      responses:
-        "200":
-          description: Dettagli del messaggio
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Message"
-        "404":
-          description: Messaggio non trovato
-        "500":
-          description: Errore interno del server
     delete:
       tags:
         - messaggio
@@ -442,81 +501,81 @@ paths:
                   messageID:
                     type: integer
                     example: 1
-        "404":
-          description: Messaggio non trovato
-        "500":
-          description: Errore interno del server
 
-  /messages/{messageID}/comment:
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "500": { $ref: "#/components/responses/InternalServerError" }
+
+  /messages/{messageID}/reaction:
     parameters:
       - $ref: "#/components/parameters/messageID"
 
+    get:
+      tags:
+        - messaggio
+      operationId: getMessageReactions
+      summary: Ottieni le reazioni a un messaggio
+      description: >
+        Ottiene tutte le reazioni a un messaggio specifico.
+        Restituisce un elenco di reazioni.
+      responses:
+        "200":
+          description: Elenco delle reazioni al messaggio
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Reaction"
+
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "500": { $ref: "#/components/responses/InternalServerError" }
     post:
       tags:
         - messaggio
       operationId: commentMessage
-      summary: Aggiungi un commento a un messaggio
+      summary: Aggiungi un commento(reazione) a un messaggio
       description: >
-        Aggiunge un commento a un messaggio specifico.
-        Restituisce l'ID del commento aggiunto.
+        Aggiunge un commento(reazione) a un messaggio specifico.
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                content:
-                  type: string
-                  minLength: 1
-                  maxLength: 500
-              required:
-                - content
+              $ref: "#/components/schemas/Reaction"
       responses:
         "200":
           description: Commento aggiunto correttamente
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  commentID:
-                    type: integer
-                    example: 1
-        "400":
-          description: Commento non valido
-        "404":
-          description: Messaggio non trovato
-        "500":
-          description: Errore interno del server
+          
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "500": { $ref: "#/components/responses/InternalServerError" }
 
-  /messages/{messageID}/comment/{commentID}:
+  /messages/{messageID}/comment/{reactionID}:
     parameters:
       - $ref: "#/components/parameters/messageID"
-      - $ref: "#/components/parameters/commentID"
+      - $ref: "#/components/parameters/reactionID"
     delete:
       tags:
         - messaggio
       operationId: uncommentMessage
-      summary: Rimuovi un commento da un messaggio
+      summary: Rimuovi un commento(reazione) da un messaggio
       description: >
-        Rimuove un commento da un messaggio specifico.
+        Rimuove un commento(reazione) da un messaggio specifico.
         Restituisce l'ID del commento rimosso.
       responses:
         "200":
           description: Commento rimosso correttamente
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  commentID:
-                    type: integer
-                    example: 1
-        "404":
-          description: Messaggio o commento non trovato
-        "500":
-          description: Errore interno del server
+          
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "500": { $ref: "#/components/responses/InternalServerError" }
+
   /group:
     post:
       tags:
@@ -524,7 +583,7 @@ paths:
       operationId: createGroup
       summary: Crea un nuovo gruppo
       description: >
-        Crea un nuovo gruppo di lavoro.
+        Crea un nuovo gruppo.
         Restituisce l'ID del gruppo creato.
       requestBody:
         required: true
@@ -537,6 +596,10 @@ paths:
                   type: string
                   minLength: 1
                   maxLength: 50
+                members:
+                  type: array
+                  items:
+                    type: integer
               required:
                 - name
       responses:
@@ -545,15 +608,12 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  groupID:
-                    type: integer
-                    example: 1
-        "400":
-          description: Nome del gruppo non valido
-        "500":
-          description: Errore interno del server
+                $ref: "#/components/schemas/Group"
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "500": { $ref: "#/components/responses/InternalServerError" }
+        "409": { $ref: "#/components/responses/Conflict" }
 
   /group/{groupID}:
     parameters:
@@ -574,10 +634,108 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Group"
-        "404":
-          description: Gruppo non trovato
-        "500":
-          description: Errore interno del server
+        "404": { $ref: "#/components/responses/NotFound" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "500": { $ref: "#/components/responses/InternalServerError" }
+    
+    delete:
+      tags:
+        - gruppo
+      operationId: leaveGroup
+      summary: esci da un gruppo
+      description: >
+        esci da un gruppo specifico.
+      responses:
+        "200":
+          description: Gruppo eliminato correttamente
+
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "500": { $ref: "#/components/responses/InternalServerError" }
+
+  /group/{groupID}/members:
+    parameters:
+      - $ref: "#/components/parameters/groupID"
+
+    get:
+      tags:
+        - gruppo
+      operationId: getGroupMembers
+      summary: Ottieni i membri di un gruppo
+      description: >
+        Ottiene tutti i membri di un gruppo specifico.
+        Restituisce un elenco di membri del gruppo.
+      responses:
+        "200":
+          description: Elenco dei membri del gruppo
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/User"
+
+        "404": { $ref: "#/components/responses/NotFound" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "500": { $ref: "#/components/responses/InternalServerError" }
+    post:
+      tags:
+        - gruppo
+      operationId: addGroupMembers
+      summary: Aggiungi un membro o più membri a un gruppo
+      description: >
+        Aggiunge un membro o più membri a un gruppo specifico.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: "#/components/schemas/User"
+      responses:
+        "200":
+          description: Membro aggiunto correttamente
+          
+
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "500": { $ref: "#/components/responses/InternalServerError" }
+
+  /group/{groupID}/name:
+    parameters:
+      - $ref: "#/components/parameters/groupID"
+
+    post:
+      tags:
+        - gruppo
+      operationId: setGroupName
+      summary: imposta il nome del gruppo
+      description: >
+        imposta il nome del gruppo specificato.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  minLength: 1
+                  maxLength: 50
+              required:
+                - name
+
+      responses:
+        "200":
+          description: Nome del gruppo
+          
+        "404": { $ref: "#/components/responses/NotFound" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "500": { $ref: "#/components/responses/InternalServerError" }
 
   /group/{groupID}/photo:
     parameters:
@@ -606,176 +764,32 @@ paths:
       responses:
         "200":
           description: Foto del gruppo impostata correttamente
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  photoID:
-                    type: integer
-                    example: 1
-        "400":
-          description: Foto non valida
-        "404":
-          description: Gruppo non trovato
-        "500":
-          description: Errore interno del server
-  /group/{groupID}/name:
+          
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "500": { $ref: "#/components/responses/InternalServerError" }
+
+  /group/{groupID}/photo/:
     parameters:
       - $ref: "#/components/parameters/groupID"
 
     get:
       tags:
         - gruppo
-      operationId: getGroupName
-      summary: Ottieni il nome di un gruppo
+      operationId: getGroupPhoto
+      summary: Ottieni la foto del gruppo
       description: >
-        Ottiene il nome di un gruppo specifico.
-        Restituisce l'ID e il nome del gruppo.
+        Ottiene la foto del gruppo specificato.
       responses:
         "200":
-          description: Nome del gruppo
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  name:
-                    type: string
-                    example: "gruppo di lavoro"
-        "404":
-          description: Gruppo non trovato
-        "500":
-          description: Errore interno del server
-    post:
-      tags:
-        - gruppo
-      operationId: setGroupName
-      summary: Imposta il nome del gruppo
-      description: >
-        Imposta il nome del gruppo specificato.
-        Restituisce l'ID del gruppo aggiornato.
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                name:
-                  type: string
-                  minLength: 1
-                  maxLength: 50
-              required:
-                - name
-      responses:
-        "200":
-          description: Nome del gruppo impostato correttamente
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  groupID:
-                    type: integer
-                    example: 1
-        "400":
-          description: Nome del gruppo non valido
-        "404":
-          description: Gruppo non trovato
-        "500":
-          description: Errore interno del server
-  /group/{groupID}/members:
-    parameters:
-      - $ref: "#/components/parameters/groupID"
+          description: Foto del gruppo
+          
 
-    get:
-      tags:
-        - gruppo
-      operationId: getGroupMembers
-      summary: Ottieni i membri di un gruppo
-      description: >
-        Ottiene tutti i membri di un gruppo specifico.
-        Restituisce un elenco di membri del gruppo.
-      responses:
-        "200":
-          description: Elenco dei membri del gruppo
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/User"
-        "404":
-          description: Gruppo non trovato
-        "500":
-          description: Errore interno del server
-    post:
-      tags:
-        - gruppo
-      operationId: addToGroup
-      summary: Aggiungi un membro a un gruppo
-      description: >
-        Aggiunge un membro a un gruppo specifico.
-        Restituisce l'ID del membro aggiunto.
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                userID:
-                  type: integer
-                  example: 1
-              required:
-                - userID
-      responses:
-        "200":
-          description: Membro aggiunto correttamente
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  memberID:
-                    type: integer
-                    example: 1
-        "400":
-          description: ID utente non valido
-        "404":
-          description: Gruppo non trovato
-        "500":
-          description: Errore interno del server
-
-  /group/{groupID}/members/{userID}:
-    parameters:
-      - $ref: "#/components/parameters/groupID"
-      - $ref: "#/components/parameters/userID"
-
-    delete:
-      tags:
-        - gruppo
-      operationId: leaveGroup
-      summary: Lascia un gruppo
-      description: >
-        Permette a un membro di lasciare un gruppo specifico.
-        Restituisce l'ID del membro rimosso.
-      responses:
-        "200":
-          description: Membro rimosso correttamente
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  memberID:
-                    type: integer
-                    example: 1
-        "404":
-          description: Gruppo o utente non trovato
-        "500":
-          description: Errore interno del server
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "500": { $ref: "#/components/responses/InternalServerError" }
 
 components:
   #schemi per definire oggetti
@@ -789,9 +803,12 @@ components:
     User:
       type: object
       properties:
-        id:
+        user_id:
           type: integer
           example: 1
+        name:
+          type: string
+          example: "Maria"
         username:
           type: string
           example: "marta"
@@ -804,51 +821,68 @@ components:
         name:
           type: string
           example: "gruppo di lavoro"
-        members:
-          type: array
-          items:
-            $ref: "#/components/schemas/User"
     Conversation:
       type: object
       properties:
-        id:
+        conversation_id:
           type: integer
           example: 1
-        Group:
-          $ref: "#/components/schemas/Group"
-        messages:
-          type: array
-          items:
-            $ref: "#/components/schemas/Message"
+        name:
+          type: string
+          example: "conversazione di lavoro"
+        is_group:
+          type: boolean
+          example: true
     Message:
       type: object
       properties:
+        message_id:
+          type: integer
+          example: 1
+        sender_id:
+          type: integer
+          example: 1
         sender:
           type: string
           example: "marta"
+        replied_message_id:
+          type: integer
+          example: 1
+        conversation_id:
+          type: integer
+          example: 1
         content:
           type: string
-          example: "Ciao a tutti!"
+          example: "Ciao, come stai?"
+        photo:
+          type: boolean
+          example: false
+        status:
+          type: integer
+          example: 1
         timestamp:
           type: string
           format: date-time
           example: "2023-10-01T12:00:00Z"
-        conversationId:
+    Reaction:
+      type: object
+      properties:
+        reaction_id:
           type: integer
           example: 1
+        user_id:
+          type: integer
+          example: 1
+        content:
+          type: string
+          example: "UTF-8"
+        message_id:
+          type: integer
+          example: 1
+        
 
   #parametri utilizzati come richieste dell'utente
   parameters:
-    username:
-      name: username
-      in: path
-      required: true
-      schema:
-        type: string
-        minLength: 3
-        maxLength: 16
-      description: il nome dell'utente
-
     userID:
       name: userID
       in: path
@@ -881,7 +915,7 @@ components:
         type: integer
       description: l'identificazione univoca del messaggio
 
-    commentID:
+    reactionID:
       name: commentID
       in: path
       required: true
@@ -891,19 +925,57 @@ components:
 
   #risposte di errore predefinite
   responses:
-    ErrorResponse:
-      description: risposta di errore
+    NotFound:
+      description: Risorsa non trovata
       content:
         application/json:
           schema:
             type: object
             properties:
-              code:
-                type: integer
-                example: 404
-              message:
+              error:
                 type: string
-                example: "element not found"
+                example: "Risorsa non trovata"
+    InternalServerError:
+      description: Errore interno del server
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: "Errore interno del server"
+    Unauthorized:
+      description: Non autorizzato
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: "Non autorizzato"
+    BadRequest:
+      description: Richiesta non valida
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: "Richiesta non valida"
+    Conflict:
+      description: Conflitto
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: "Conflitto"
+
 
 security:
   - bearerAuth: [] # use the same name as above

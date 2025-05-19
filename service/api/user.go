@@ -81,7 +81,7 @@ func (rt *_router) getUser(w http.ResponseWriter, r *http.Request, ps httprouter
 	name := ps.ByName("userID")
 	user, err = rt.db.GetUser(name)
 	if err != nil {
-		http.Error(w, "Errore nel recupero dell'utente", http.StatusInternalServerError)
+		http.Error(w, "Errore nel recupero dell'utente", http.StatusInternalServerError) // da controllare se l'utente esiste, nel caso cambiare il tipo di errore
 		return
 	}
 

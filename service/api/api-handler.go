@@ -15,7 +15,7 @@ func (rt *_router) Handler() http.Handler {
 
 	// users
 	rt.router.GET("/user", rt.getUsers)                   // getListOfUsers
-	rt.router.GET("/user/:userID", rt.getUser)            // getUser
+	rt.router.GET("/user/:userID", rt.getUser)            // getUser ?? da sistemare al posto dell'id si richiede una stringa
 	rt.router.GET("/conversation", rt.getMyConversations) // getMyConversations
 	rt.router.GET("/user/:userID/photo", rt.getUserPhoto) // getUserPhoto
 
@@ -31,6 +31,7 @@ func (rt *_router) Handler() http.Handler {
 	rt.router.GET("/conversation/:conversationID/lastmessage", rt.getLastMessage)
 	rt.router.POST("/message/:messageID/forwarded", rt.forwardMessage) // forwardMessage ?
 	rt.router.GET("/me/newmessage", rt.getNewMessages)                 // getNewMessage
+	// rt.router.DELETE("/messages/:messageID", rt.deleteMessage) // deleteMessage DA IMPLEMENTARE
 
 	// messages // ho creato sti path ma non so se servono
 	// rt.router.GET("/message/:m_id", rt.getMessage) // getMessage

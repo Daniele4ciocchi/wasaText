@@ -40,10 +40,10 @@ import (
 
 // AppDatabase is the high level interface for the DB
 type AppDatabase interface {
-	//GetName() (string, error)
-	//SetName(name string) error
+	// GetName() (string, error)
+	// SetName(name string) error
 
-	//user
+	// user
 	AddUser(name string, username string) error
 	GetUser(name string) (utils.User, error)
 	GetUserById(id int) (utils.User, error)
@@ -52,7 +52,7 @@ type AppDatabase interface {
 	SetUserPhoto(id int, path string) error
 	GetUserPhoto(id int) (string, error)
 
-	//conversation
+	// conversation
 	AddConversation(name string, isGroup bool) (int, error)
 	AddUserConversation(userID int, convID int) error
 	GetConversation(id int) (utils.Conversation, error)
@@ -60,7 +60,7 @@ type AppDatabase interface {
 	GetConversationByName(sender string, reciver string) (utils.Conversation, error)
 	CheckExistingConversation(id1 int, id2 int) (int, error)
 
-	//group
+	// group
 	AddGroup(name string) (utils.Group, error)
 	GetGroupById(id int) (utils.Group, error)
 	GetGroupByName(name string) (utils.Group, error)
@@ -74,13 +74,24 @@ type AppDatabase interface {
 	GetGroupPhoto(id int) (string, error)
 	SetGroupPhoto(id int, path string) error
 
-	//message
+	// message
 	AddMessage(senderID int, convID int, content string, repliedMessageID int) (int, error)
+	AddPhoto(senderID int, convID int, content string, repliedMessageID int) (int, error)
 	GetMessage(id int) (utils.Message, error)
 	GetMessages(convID int) ([]utils.Message, error)
 	GetLastMessage(convID int) (utils.Message, error)
+	GetMessageStatus(messageID int) (int, error)
+	SetSendedMessage(messageID int) error
+	SetArrivedMessage(userID int, messageID int) error
+	SetViewedMessage(userID int, messageID int) error
+	GetNewMessages(userID int) ([]utils.Message, error)
 
-	//utils
+	// reaction
+	AddReaction(userID int, messageID int, content string) error
+	GetReactions(messageID int) ([]utils.Reaction, error)
+	RemoveReaction(reactionID int) error
+
+	// utils
 	SetToken(id int, name string) error
 	GetToken(id int) (string, error)
 	GetUserFromToken(token string) (utils.User, error)
@@ -120,6 +131,7 @@ func New(db *sql.DB) (AppDatabase, error) {
 					    sender_id INTEGER NOT NULL,
 						replied_message_id INTEGER,
 					    content TEXT NOT NULL,
+						photo BOOLEAN DEFAULT FALSE,
 					    timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
 					    FOREIGN KEY (conversation_id) REFERENCES conversations(id),
 					    FOREIGN KEY (sender_id) REFERENCES users(id)
@@ -141,14 +153,22 @@ func New(db *sql.DB) (AppDatabase, error) {
 					    FOREIGN KEY (conversation_id) REFERENCES conversations(id)
 					);
 					
-					CREATE TABLE comments (
+					CREATE TABLE reactions (
 					    id INTEGER PRIMARY KEY AUTOINCREMENT,
 					    message_id INTEGER NOT NULL,
 					    user_id INTEGER NOT NULL,
 					    content TEXT NOT NULL,
-					    timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
 					    FOREIGN KEY (message_id) REFERENCES messages(id),
 					    FOREIGN KEY (user_id) REFERENCES users(id)
+					);
+
+					CREATE TABLE views (
+						id INTEGER PRIMARY KEY AUTOINCREMENT,
+						message_id INTEGER NOT NULL,
+						user_id INTEGER NOT NULL,
+						status INTEGER NOT NULL,
+						FOREIGN KEY (message_id) REFERENCES messages(id),
+						FOREIGN KEY (user_id) REFERENCES users(id)
 					);
 
 					CREATE TABLE tokens (

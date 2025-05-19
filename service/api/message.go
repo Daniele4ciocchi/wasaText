@@ -234,3 +234,36 @@ func (rt *_router) forwardMessage(w http.ResponseWriter, r *http.Request, ps htt
 	w.WriteHeader(http.StatusCreated)
 
 }
+
+func (rt *_router) getNewMessages(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	w.Header().Set("Content-Type", "application/json")
+
+	_, err := checkAuth(rt, r)
+	if err != nil {
+		http.Error(w, "Token non valido", http.StatusUnauthorized)
+		return
+	}
+
+	token := r.Header.Get("Authorization")
+	token = strings.TrimPrefix(token, "Bearer ")
+
+	userID, err := rt.db.GetUserFromToken(token)
+	if err != nil {
+		http.Error(w, "Utente non trovato", http.StatusNotFound)
+		return
+	}
+
+	var messages []utils.Message
+	messages, err = rt.db.GetNewMessages(userID.ID)
+	if err != nil {
+		http.Error(w, "Errore durante il recupero dei messaggi", http.StatusInternalServerError)
+		return
+	}
+
+	if err := json.NewEncoder(w).Encode(messages); err != nil {
+		http.Error(w, "Errore durante l'encoding dei messaggi", http.StatusInternalServerError)
+		return
+	}
+	w.WriteHeader(http.StatusOK)
+
+}

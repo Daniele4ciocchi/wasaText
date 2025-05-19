@@ -35,13 +35,6 @@ func (rt *_router) getGroup(w http.ResponseWriter, r *http.Request, ps httproute
 		http.Error(w, "Errore nel recupero del gruppo", http.StatusInternalServerError)
 		return
 	}
-	var users []utils.User
-	users, err = rt.db.GetGroupMembers(groupID)
-	if err != nil {
-		http.Error(w, "Errore nel recupero degli utenti", http.StatusInternalServerError)
-		return
-	}
-	group.Members = users
 
 	if err := json.NewEncoder(w).Encode(group); err != nil {
 		http.Error(w, "Errore nella codifica JSON", http.StatusInternalServerError)
@@ -294,4 +287,68 @@ func (rt *_router) setGroupPhoto(w http.ResponseWriter, r *http.Request, ps http
 
 	w.WriteHeader(http.StatusOK)
 	fmt.Fprintln(w, "Foto salvata correttamente")
+}
+
+func (rt *_router) getGroupMembers(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	w.Header().Set("Content-Type", "application/json")
+
+	//auth control
+	_, err := checkAuth(rt, r)
+	if err != nil {
+		http.Error(w, "Token non valido", http.StatusUnauthorized)
+		return
+	}
+
+	groupID, err := strconv.Atoi(ps.ByName("groupID"))
+	if err != nil {
+		http.Error(w, "ID del gruppo non valido", http.StatusBadRequest)
+		return
+	}
+
+	var members []utils.User
+	members, err = rt.db.GetGroupMembers(groupID)
+	if err != nil {
+		http.Error(w, "Errore durante il recupero dei membri del gruppo", http.StatusInternalServerError)
+		return
+	}
+
+	if err := json.NewEncoder(w).Encode(members); err != nil {
+		http.Error(w, "Errore nella codifica JSON", http.StatusInternalServerError)
+		return
+	}
+	w.WriteHeader(http.StatusOK)
+
+}
+
+func (rt *_router) addGroupMembers(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	w.Header().Set("Content-Type", "application/json")
+
+	//auth control
+	_, err := checkAuth(rt, r)
+	if err != nil {
+		http.Error(w, "Token non valido", http.StatusUnauthorized)
+		return
+	}
+
+	groupID, err := strconv.Atoi(ps.ByName("groupID"))
+	if err != nil {
+		http.Error(w, "ID del gruppo non valido", http.StatusBadRequest)
+		return
+	}
+
+	var newMembers []utils.User
+	err = json.NewDecoder(r.Body).Decode(&newMembers)
+	if err != nil {
+		http.Error(w, "Errore nella decodifica JSON", http.StatusBadRequest)
+		return
+	}
+
+	for _, member := range newMembers {
+		err = rt.db.AddUserToGroup(member.ID, groupID)
+		if err != nil {
+			http.Error(w, "Errore durante l'aggiunta dell'utente al gruppo", http.StatusInternalServerError)
+			return
+		}
+	}
+	w.WriteHeader(http.StatusOK)
 }

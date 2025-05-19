@@ -112,7 +112,7 @@ paths:
     get:
       tags:
         - utente
-      operationId: getListOfUsers
+      operationId: getUsers
       summary: Ottieni la lista di utenti
       description: >
         Ottiene la lista di utenti registrati.

@@ -30,23 +30,26 @@ func (rt *_router) Handler() http.Handler {
 	rt.router.POST("/conversation/:conversationID/message", rt.sendMessage) // sendMessage
 	rt.router.GET("/conversation/:conversationID/lastmessage", rt.getLastMessage)
 	rt.router.POST("/message/:messageID/forwarded", rt.forwardMessage) // forwardMessage ?
+	rt.router.GET("/me/newmessage", rt.getNewMessages)                 // getNewMessage
 
 	// messages // ho creato sti path ma non so se servono
 	// rt.router.GET("/message/:m_id", rt.getMessage) // getMessage
-	// rt.router.DELETE("/message/:m_id", rt.deleteMessage) // deleteMessage
+	// rt.router.DELETE("/message/:m_id", rt.deleteMessage) // deleteMessage ?
 
-	// comments
-	// rt.router.POST("/message/:m_id/comment", rt.commentMessage) // commentMessage
-	// rt.router.GET("/message/:m_id/comment", rt.getComments) // getComments
-	// rt.router.DELETE("/message/:m_id/comment/:c_id", rt.deleteComment) // deleteComment
+	// reactions
+	rt.router.POST("/message/:messageID/reaction", rt.addReaction) // addReaction
+	rt.router.GET("/message/:messageID/reaction", rt.getReactions) // getReactions
+	rt.router.DELETE("/reaction/:reactionID", rt.deleteReaction)   // deleteReaction
 
 	// groups
-	rt.router.GET("/group/:groupID", rt.getGroup)             // getGroup
-	rt.router.POST("/group", rt.createGroup)                  // createGroup
-	rt.router.DELETE("/group/:groupID", rt.leaveGroup)        // leaveGroup
-	rt.router.POST("/group/:groupID/name", rt.setGroupName)   // setGroupName
-	rt.router.GET("/group/:groupID/photo", rt.getGroupPhoto)  // getGroupPhoto DA FARE URGENTE
-	rt.router.POST("/group/:groupID/photo", rt.setGroupPhoto) // setGroupPhoto
+	rt.router.GET("/group/:groupID", rt.getGroup)                 // getGroup
+	rt.router.POST("/group", rt.createGroup)                      // createGroup
+	rt.router.DELETE("/group/:groupID", rt.leaveGroup)            // leaveGroup
+	rt.router.GET("/group/:groupID/members", rt.getGroupMembers)  // getGroupMembers
+	rt.router.POST("/group/:groupID/members", rt.addGroupMembers) // addGroupMembers
+	rt.router.POST("/group/:groupID/name", rt.setGroupName)       // setGroupName
+	rt.router.GET("/group/:groupID/photo", rt.getGroupPhoto)      // getGroupPhoto DA FARE URGENTE
+	rt.router.POST("/group/:groupID/photo", rt.setGroupPhoto)     // setGroupPhoto
 
 	// Special routes
 	rt.router.GET("/liveness", rt.liveness)

@@ -21,9 +21,8 @@ type User struct {
 }
 
 type Group struct {
-	ID      int    `json:"group_id"`
-	Name    string `json:"name"`
-	Members []User `json:"members"`
+	ID   int    `json:"group_id"`
+	Name string `json:"name"`
 }
 
 type Conversation struct {
@@ -39,7 +38,16 @@ type Message struct {
 	RepliedMessageID int    `json:"replied_message_id"`
 	ConversationID   int    `json:"conversation_id"`
 	Content          string `json:"content"`
+	Photo            bool   `json:"photo"`
+	Status           int    `json:"status"`
 	Timestamp        string `json:"timestamp"`
+}
+
+type Reaction struct {
+	ID        int    `json:"reaction_id"`
+	UserID    int    `json:"user_id"`
+	Content   string `json:"content"`
+	MessageID int    `json:"message_id"`
 }
 
 func SaveFile(name string, fileContent multipart.File) (string, error) {

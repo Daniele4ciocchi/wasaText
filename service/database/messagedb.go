@@ -32,6 +32,14 @@ func (db *appdbimpl) AddMessage(senderID int, convID int, content string, replie
 	return messageID, nil
 }
 
+func (db *appdbimpl) RemoveMessage(messageID int) error {
+	_, err := db.c.Exec("DELETE FROM messages WHERE id = ?", messageID)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 func (db *appdbimpl) AddPhoto(senderID int, convID int, content string, repliedMessageID int) (int, error) {
 	var messageID int
 

@@ -91,6 +91,99 @@ func (rt *_router) sendMessage(w http.ResponseWriter, r *http.Request, ps httpro
 	w.WriteHeader(http.StatusCreated)
 }
 
+func (rt *_router) sendPhoto(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	// Auth
+	id, err := checkAuth(rt, r)
+	if err != nil {
+		http.Error(w, "Token non valido", http.StatusUnauthorized)
+		return
+	}
+
+	// ⚠️ IMPORTANTE: parse del form multipart
+	err = r.ParseMultipartForm(10 << 20) // 10 MB
+	if err != nil {
+		http.Error(w, "Errore nel parsing del form", http.StatusBadRequest)
+		return
+	}
+
+	// Recupera il file
+	file, _, err := r.FormFile("photo")
+	if err != nil {
+		http.Error(w, "Errore nel recupero del file", http.StatusBadRequest)
+		return
+	}
+	defer file.Close()
+
+	// Recupera l'utente
+	user, err := rt.db.GetUserById(id)
+	if err != nil {
+		http.Error(w, "Errore nel recupero dell'utente", http.StatusInternalServerError)
+		return
+	}
+
+	// recupero la conversazione
+	strconvID := ps.ByName("conversationID")
+	convID, err := strconv.Atoi(strconvID)
+	if err != nil {
+		http.Error(w, "ID conversazione non valido", http.StatusBadRequest)
+		return
+	}
+
+	var message utils.Message
+	message, err = rt.db.GetLastMessage(convID)
+	if err != nil {
+		http.Error(w, "Errore durante il recupero del messaggio", http.StatusInternalServerError)
+		return
+	}
+
+	var strmessageID string
+	strmessageID = strconv.Itoa(message.ID)
+
+	path := strmessageID + strconvID
+
+	// Aggiorna il path nel DB
+	_, err = rt.db.AddPhoto(user.ID, convID, path, 0)
+	if err != nil {
+		http.Error(w, "Errore nella modifica della foto", http.StatusInternalServerError)
+		return
+	}
+
+	// Salva il file
+	path, err = utils.SaveFile(path, file)
+	if err != nil {
+		http.Error(w, "Errore nel salvataggio del file", http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	fmt.Fprintln(w, "Foto salvata correttamente")
+}
+
+func (rt *_router) deleteMessage(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	w.Header().Set("Content-Type", "application/json")
+
+	// Controlla se il token è valido e se si trova all'interno del db
+	_, err := checkAuth(rt, r)
+	if err != nil {
+		http.Error(w, "Token non valido", http.StatusUnauthorized)
+		return
+	}
+
+	messageID, err := strconv.Atoi(ps.ByName("messageID"))
+	if err != nil {
+		http.Error(w, "ID messaggio non valido", http.StatusBadRequest)
+		return
+	}
+
+	err = rt.db.RemoveMessage(messageID)
+	if err != nil {
+		http.Error(w, "Errore durante la cancellazione del messaggio", http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+}
+
 func (rt *_router) getMessages(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	w.Header().Set("Content-Type", "application/json")
 

@@ -76,6 +76,7 @@ type AppDatabase interface {
 
 	// message
 	AddMessage(senderID int, convID int, content string, repliedMessageID int) (int, error)
+	RemoveMessage(messageID int) error
 	AddPhoto(senderID int, convID int, content string, repliedMessageID int) (int, error)
 	GetMessage(id int) (utils.Message, error)
 	GetMessages(convID int) ([]utils.Message, error)

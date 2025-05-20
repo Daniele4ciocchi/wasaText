@@ -28,10 +28,11 @@ func (rt *_router) Handler() http.Handler {
 	rt.router.GET("/conversation/:conversationID", rt.getConversation)      // getConversation
 	rt.router.GET("/conversation/:conversationID/message", rt.getMessages)  // getMessages
 	rt.router.POST("/conversation/:conversationID/message", rt.sendMessage) // sendMessage
+	rt.router.POST("/conversation/:conversationID/photo", rt.sendPhoto)     // setConversationPhoto
 	rt.router.GET("/conversation/:conversationID/lastmessage", rt.getLastMessage)
 	rt.router.POST("/message/:messageID/forwarded", rt.forwardMessage) // forwardMessage ?
 	rt.router.GET("/me/newmessage", rt.getNewMessages)                 // getNewMessage
-	// rt.router.DELETE("/messages/:messageID", rt.deleteMessage) // deleteMessage DA IMPLEMENTARE
+	rt.router.DELETE("/messages/:messageID", rt.deleteMessage)         // deleteMessage
 
 	// messages // ho creato sti path ma non so se servono
 	// rt.router.GET("/message/:m_id", rt.getMessage) // getMessage
@@ -49,7 +50,7 @@ func (rt *_router) Handler() http.Handler {
 	rt.router.GET("/group/:groupID/members", rt.getGroupMembers)  // getGroupMembers
 	rt.router.POST("/group/:groupID/members", rt.addGroupMembers) // addGroupMembers
 	rt.router.POST("/group/:groupID/name", rt.setGroupName)       // setGroupName
-	rt.router.GET("/group/:groupID/photo", rt.getGroupPhoto)      // getGroupPhoto DA FARE URGENTE
+	rt.router.GET("/group/:groupID/photo", rt.getGroupPhoto)      // getGroupPhoto
 	rt.router.POST("/group/:groupID/photo", rt.setGroupPhoto)     // setGroupPhoto
 
 	// Special routes

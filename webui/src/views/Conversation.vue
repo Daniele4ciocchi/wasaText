@@ -10,7 +10,7 @@
             </button>
         </div>
 
-        <div class="messages" ref="messagesContainer">
+        <div class="messages"  id = "messagesContainer">
             <div v-for="(message, index) in messages" :key="index"
                 :class="['message', message.sender === currentUser ? 'user' : 'receiver']">
 
@@ -77,8 +77,6 @@ const messages = ref([])
 const newMessage = ref('')
 const replyID = ref(null)
 const replyContent = ref('')
-const lastMessageId = ref(0)
-let messagesContainer = document.getElementById('messagesContainer')
 let intervalID
 
 
@@ -96,14 +94,8 @@ const getConversation = async () => {
 }
 
 const scrollToBottom = async () => {
-    await nextTick()
-    if (messagesContainer.value) {
-        requestAnimationFrame(() => {
-            messagesContainer.scrollTop = messagesContainer.scrollHeight
-            messagesContainer.scrollIntoView({ behavior: 'smooth' })
-        })
-    }
-
+    const messagesContainer = document.getElementById('messagesContainer')
+    messagesContainer.scrollIntoView({ behavior: 'smooth', block: 'end'})
 }
 
 
@@ -117,12 +109,6 @@ const fetchMessages = async () => {
         console.error('Errore nel caricamento dei messaggi:', err)
     }
 
-    if (messages.value.at(-1).message_id != lastMessageId.value.message_id) {
-        lastMessageId.value.message_id = messages.value.at(-1).message_id
-        scrollToBottom()
-        alert('Nuovo messaggio ricevuto')
-    }
-    scrollToBottom()
 
 }
 const fetchUsers = async () => {
@@ -188,11 +174,27 @@ const leaveGroup = async () => {
     }
 }
 
+const getNewMessages = async () => {
+    try {
+        const res = await axios.get(__MINE__ + `/me/newmessage`, {
+            headers: { Authorization: `Bearer ${token}` }
+        })
+        
+        if (res.data != null){
+            fetchMessages()
+            scrollToBottom()
+        }
+    } catch (err) {
+        console.error('Errore nel caricamento dei messaggi:', err)
+    }
+}
+
 onMounted(() => {
     getConversation()
+    getNewMessages()
     fetchMessages()
     scrollToBottom()
-    intervalID = setInterval(fetchMessages, 5000)
+    intervalID = setInterval(getNewMessages, 5000)
 })
 
 onUnmounted(() => {
@@ -201,8 +203,6 @@ onUnmounted(() => {
 
 watch(() => route.params.conversationID, (newId) => {
     conversationID.value = newId
-    getConversation()
-    fetchMessages()
 })
 </script>
 

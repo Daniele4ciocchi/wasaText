@@ -132,6 +132,16 @@ export default {
 					this.error = 'Token non ricevuto dal server.';
 				}
 
+				try {
+					const response = await this.$axios.get(__MINE__ + '/me/newmessage', {
+						headers: {
+							Authorization: `Bearer ${this.token}`
+						}
+					});
+				}catch (err) {
+					this.error = 'Errore durante il recupero dei messaggi.';
+				}
+
 			} catch (err) {
 				this.error = 'Errore durante il login.';
 			}

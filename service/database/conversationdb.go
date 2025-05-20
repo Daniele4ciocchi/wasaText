@@ -47,7 +47,7 @@ func (db *appdbimpl) GetConversation(id int) (utils.Conversation, error) {
 	if err != nil {
 		return utils.Conversation{}, err
 	}
-
+	// impostare tutti i messaggi come letti
 	return conv, nil
 
 }

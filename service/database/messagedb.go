@@ -3,6 +3,7 @@ package database
 import (
 	"database/sql"
 	"fmt"
+	"log"
 
 	"github.com/Daniele4ciocchi/wasaText/service/utils"
 )
@@ -25,7 +26,11 @@ func (db *appdbimpl) AddMessage(senderID int, convID int, content string, replie
 
 	err = db.SetSendedMessage(messageID)
 	if err != nil {
-		fmt.Println(err)
+		return 0, err
+	}
+
+	err = db.SetArrivedMessage(senderID, messageID)
+	if err != nil {
 		return 0, err
 	}
 
@@ -71,10 +76,6 @@ func (db *appdbimpl) GetMessage(id int) (utils.Message, error) {
 	if err != nil {
 		return utils.Message{}, err
 	}
-	message.Status, err = db.GetMessageStatus(message.ID)
-	if err != nil {
-		return utils.Message{}, err
-	}
 	return message, nil
 }
 
@@ -103,10 +104,10 @@ func (db *appdbimpl) GetMessages(convID int) ([]utils.Message, error) {
 		}
 		message.Status, err = db.GetMessageStatus(message.ID)
 		if err != nil {
-			return nil, err
+			log.Println(err)
 		}
 		messages = append(messages, message)
-		db.SetViewedMessage(message.SenderID, message.ID)
+
 	}
 	if err := rows.Err(); err != nil {
 		return nil, err
@@ -116,7 +117,7 @@ func (db *appdbimpl) GetMessages(convID int) ([]utils.Message, error) {
 
 func (db *appdbimpl) GetMessageStatus(messageID int) (int, error) {
 	var status int
-	var conv utils.Conversation
+
 	var mess utils.Message
 
 	mess, err := db.GetMessage(messageID)
@@ -124,13 +125,8 @@ func (db *appdbimpl) GetMessageStatus(messageID int) (int, error) {
 		return 0, err
 	}
 
-	conv, err = db.GetConversation(mess.ConversationID)
-	if err != nil {
-		return 0, err
-	}
-
 	var users []utils.User
-	users, err = db.GetGroupMembers(conv.ID)
+	users, err = db.GetGroupMembers(mess.ConversationID)
 	if err != nil {
 		return 0, err
 	}
@@ -175,21 +171,16 @@ func (db *appdbimpl) SetSendedMessage(messageID int) error {
 		return err
 	}
 
-	var conv utils.Conversation
-	conv, err = db.GetConversation(mess.ConversationID)
-	if err != nil {
-		return err
-	}
-
 	var users []utils.User
-	db.GetGroupMembers(conv.ID)
+	users, err = db.GetGroupMembers(mess.ConversationID)
 	if err != nil {
 		return err
 	}
 
 	for _, user := range users {
-		_, err := db.c.Exec("INSERT INTO views (message_id, user_id, status) VALUE (?, ?, ?) ", messageID, user.ID, 0)
+		_, err := db.c.Exec("INSERT INTO views (message_id, user_id, status) VALUES (?, ?, ?) ", messageID, user.ID, 0)
 		if err != nil {
+			log.Println(err)
 			return err
 		}
 	}

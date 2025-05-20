@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   title: wasaText
-  version: 1.0.0
+  version: 3.0.1
   description: API per il progetto wasaText
 servers:
   - url: http://127.0.0.1:3000
@@ -555,7 +555,7 @@ paths:
         "404": { $ref: "#/components/responses/NotFound" }
         "500": { $ref: "#/components/responses/InternalServerError" }
 
-  /messages/{messageID}/comment/{reactionID}:
+  /messages/{messageID}/reaction/{reactionID}:
     parameters:
       - $ref: "#/components/parameters/messageID"
       - $ref: "#/components/parameters/reactionID"
@@ -916,12 +916,12 @@ components:
       description: l'identificazione univoca del messaggio
 
     reactionID:
-      name: commentID
+      name: reactionID
       in: path
       required: true
       schema:
         type: integer
-      description: l'identificazione univoca del commento
+      description: l'identificazione univoca della reazione
 
   #risposte di errore predefinite
   responses:

@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 	"strconv"
 	"strings"
@@ -196,6 +197,12 @@ func (rt *_router) getMessages(w http.ResponseWriter, r *http.Request, ps httpro
 	token := r.Header.Get("Authorization")
 	token = strings.TrimPrefix(token, "Bearer ")
 
+	user, err := rt.db.GetUserFromToken(token)
+	if err != nil {
+		http.Error(w, "Utente non trovato", http.StatusNotFound)
+		return
+	}
+
 	if err != nil {
 		http.Error(w, "Utente non trovato", http.StatusNotFound)
 		return
@@ -228,6 +235,16 @@ func (rt *_router) getMessages(w http.ResponseWriter, r *http.Request, ps httpro
 		http.Error(w, "Errore durante l'encoding dei messaggi", http.StatusInternalServerError)
 		return
 	}
+
+	for _, mess := range messages {
+		if mess.Status != 2 {
+			err = rt.db.SetViewedMessage(user.ID, mess.ID)
+			if err != nil {
+				http.Error(w, "Errore durante l'aggiornamento del messaggio", http.StatusInternalServerError)
+			}
+		}
+	}
+
 	w.WriteHeader(http.StatusOK)
 }
 
@@ -340,17 +357,25 @@ func (rt *_router) getNewMessages(w http.ResponseWriter, r *http.Request, ps htt
 	token := r.Header.Get("Authorization")
 	token = strings.TrimPrefix(token, "Bearer ")
 
-	userID, err := rt.db.GetUserFromToken(token)
+	user, err := rt.db.GetUserFromToken(token)
 	if err != nil {
 		http.Error(w, "Utente non trovato", http.StatusNotFound)
 		return
 	}
 
 	var messages []utils.Message
-	messages, err = rt.db.GetNewMessages(userID.ID)
+	messages, err = rt.db.GetNewMessages(user.ID)
 	if err != nil {
 		http.Error(w, "Errore durante il recupero dei messaggi", http.StatusInternalServerError)
 		return
+	}
+
+	for _, mess := range messages {
+		err = rt.db.SetArrivedMessage(user.ID, mess.ID)
+		if err != nil {
+			http.Error(w, "Errore durante l'aggiornamento del messaggio", http.StatusInternalServerError)
+			log.Println(err)
+		}
 	}
 
 	if err := json.NewEncoder(w).Encode(messages); err != nil {

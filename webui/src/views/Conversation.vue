@@ -85,7 +85,7 @@ let intervalID
 
 const getConversation = async () => {
     try {
-        const res = await axios.get(__MINE__+ `/conversation/${conversationID.value}`, {
+        const res = await axios.get(`/conversation/${conversationID.value}`, {
             headers: { Authorization: `Bearer ${token}` }
         })
         conversation.value = res.data
@@ -109,7 +109,7 @@ const scrollToBottom = async () => {
 
 const fetchMessages = async () => {
     try {
-        const res = await axios.get(__MINE__ + `/conversation/${conversationID.value}/message`, {
+        const res = await axios.get(`/conversation/${conversationID.value}/message`, {
             headers: { Authorization: `Bearer ${token}` }
         })
         messages.value = res.data
@@ -127,7 +127,7 @@ const fetchMessages = async () => {
 }
 const fetchUsers = async () => {
     try {
-        const res = await axios.get(__MINE__ + `/group/${conversationID.value}`, {
+        const res = await axios.get(`/group/${conversationID.value}`, {
             headers: { Authorization: `Bearer ${token}` }
         })
         users.value = res.data.members
@@ -150,8 +150,7 @@ const sendMessage = async () => {
     }
 
     try {
-        await axios.post(
-            __MINE__ + `/conversation/${conversationID.value}/message`,
+        await axios.post(`/conversation/${conversationID.value}/message`,
             {
                 content: messageToSend.content,
                 replied_message_id: messageToSend.replied_message_id,
@@ -178,7 +177,7 @@ const getMessageById = (id) => {
 
 const leaveGroup = async () => {
     try {
-        await axios.delete( __MINE__ + `/group/${conversationID.value}`, {
+        await axios.delete(`/group/${conversationID.value}`, {
             headers: { Authorization: `Bearer ${token}` }
         })
         alert('Sei uscito dal gruppo')

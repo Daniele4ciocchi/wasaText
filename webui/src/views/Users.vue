@@ -39,7 +39,7 @@ export default {
     async fetchUsers() {
       this.loading = true;
       try {
-        const response = await this.$axios.get(__MINE__ + "/user", {
+        const response = await this.$axios.get("/user", {
           headers: {
             Authorization: `Bearer ${this.token}`,
           },
@@ -60,7 +60,7 @@ export default {
     async startConversation(userName) {
       try {
         const response = await this.$axios.post(
-           __MINE__ + "/conversation",
+           "/conversation",
           { name: userName },
           {
             headers: {

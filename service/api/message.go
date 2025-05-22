@@ -3,7 +3,6 @@ package api
 import (
 	"database/sql"
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"strconv"
 	"strings"
@@ -57,7 +56,6 @@ func (rt *_router) sendMessage(w http.ResponseWriter, r *http.Request, ps httpro
 	var found bool
 	found = false
 	for _, c := range conv {
-		print(c.ID)
 		if c.ID == message.ConversationID {
 
 			found = true
@@ -156,7 +154,6 @@ func (rt *_router) sendPhoto(w http.ResponseWriter, r *http.Request, ps httprout
 	}
 
 	w.WriteHeader(http.StatusOK)
-	fmt.Fprintln(w, "Foto salvata correttamente")
 }
 
 func (rt *_router) deleteMessage(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
@@ -209,7 +206,6 @@ func (rt *_router) getMessages(w http.ResponseWriter, r *http.Request, ps httpro
 	}
 
 	conv, err = rt.db.GetConversation(convID)
-	print(conv.ID)
 	if err != nil {
 		http.Error(w, "Errore durante il recupero della conversazione", http.StatusInternalServerError)
 		return
@@ -219,8 +215,6 @@ func (rt *_router) getMessages(w http.ResponseWriter, r *http.Request, ps httpro
 	messages, err = rt.db.GetMessages(conv.ID)
 	if err != nil {
 		http.Error(w, "Errore durante il recupero dei messaggi", http.StatusInternalServerError)
-		//printo l'errore
-		fmt.Printf("err: %v\n", err)
 		return
 	}
 

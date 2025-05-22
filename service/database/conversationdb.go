@@ -1,8 +1,6 @@
 package database
 
 import (
-	"fmt"
-
 	"github.com/Daniele4ciocchi/wasaText/service/utils"
 )
 
@@ -25,7 +23,6 @@ func (db *appdbimpl) CheckExistingConversation(id1 int, id2 int) (int, error) {
 							WHERE uc1.user_id = ? AND uc2.user_id = ?
 							LIMIT 1`, id1, id2).Scan(&convID)
 	if err != nil {
-		fmt.Println(err)
 		return 0, err
 	}
 	return convID, nil

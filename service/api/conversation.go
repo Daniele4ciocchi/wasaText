@@ -3,7 +3,6 @@ package api
 import (
 	"database/sql"
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"strconv"
 	"strings"
@@ -176,7 +175,6 @@ func (rt *_router) getConversation(w http.ResponseWriter, r *http.Request, ps ht
 	var convID int
 	convID, err = strconv.Atoi(ps.ByName("conversationID"))
 	if err != nil {
-		fmt.Printf("err: %v\n", err)
 		http.Error(w, "ID conversazione non valido", http.StatusBadRequest)
 		return
 	}

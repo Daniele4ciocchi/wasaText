@@ -116,7 +116,7 @@ export default {
 			this.error = '';
 
 			try {
-				const response = await this.$axios.post(__MINE__ + `/session`, {
+				const response = await this.$axios.post(`/session`, {
 					name: this.name
 				});
 
@@ -133,7 +133,7 @@ export default {
 				}
 
 				try {
-					const response = await this.$axios.get(__MINE__ + '/me/newmessage', {
+					const response = await this.$axios.get('/me/newmessage', {
 						headers: {
 							Authorization: `Bearer ${this.token}`
 						}
@@ -162,7 +162,7 @@ export default {
 		async getMe() {
 
 			try {
-				const userResponse = await this.$axios.get(__MINE__ + `/me`, {
+				const userResponse = await this.$axios.get(`/me`, {
 					headers: {
 						Authorization: `Bearer ${this.token}`
 					}
@@ -189,7 +189,7 @@ export default {
 			}
 
 			try {
-				const response = await this.$axios.put(__MINE__ + `/me/username`, {
+				const response = await this.$axios.put(`/me/username`, {
 					username: this.newusername
 				}, {
 					headers: {
@@ -210,7 +210,7 @@ export default {
 		},
 		async loadPhoto() {
 			try {
-				const response = await this.$axios.get(__MINE__ + `/user/${this.user_id}/photo`, {
+				const response = await this.$axios.get(`/user/${this.user_id}/photo`, {
 					headers: {
 						Authorization: `Bearer ${this.token}`
 					},
@@ -235,7 +235,7 @@ export default {
 			formData.append('photo', this.selectedFile);  // metti il file originale qui
 
 			try {
-				const response = await this.$axios.put(__MINE__ + `/me/photo`, formData, {
+				const response = await this.$axios.put(`/me/photo`, formData, {
 					headers: {
 						Authorization: `Bearer ${this.token}`,
 						"Content-Type": "multipart/form-data",

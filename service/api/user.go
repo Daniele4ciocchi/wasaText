@@ -13,10 +13,6 @@ import (
 	"github.com/julienschmidt/httprouter"
 )
 
-type userResponse struct {
-	Name string `json:"name"`
-}
-
 // controlla se il token è valido e se si trova all'interno del db
 // se non è valido restituisce un errore
 // se è valido restituisce l'id dell'utente
@@ -187,7 +183,6 @@ func (rt *_router) setMyPhoto(w http.ResponseWriter, r *http.Request, _ httprout
 	}
 
 	w.WriteHeader(http.StatusOK)
-	fmt.Fprintln(w, "Foto salvata correttamente")
 }
 
 func (rt *_router) getUserPhoto(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
@@ -222,5 +217,9 @@ func (rt *_router) getUserPhoto(w http.ResponseWriter, r *http.Request, ps httpr
 	w.WriteHeader(http.StatusOK)
 
 	// Scrive il contenuto del file nella risposta
-	io.Copy(w, file)
+	_, err = io.Copy(w, file)
+	if err != nil {
+		http.Error(w, "Errore durante la scrittura della foto", http.StatusInternalServerError)
+		return
+	}
 }

@@ -42,7 +42,7 @@ const error = ref(null)
 
 const getConversations = async () => {
     try {
-        const res = await axios.get(__MINE__ + '/conversation', {
+        const res = await axios.get('/conversation', {
             headers: { Authorization: `Bearer ${token}` },
         })
         const newData = res.data
@@ -52,7 +52,7 @@ const getConversations = async () => {
         for (const conv of conversations.value) {
             try {
                 const res = await axios.get(
-                    __MINE__ + `/conversation/${conv.conversation_id}/lastmessage`,
+                    `/conversation/${conv.conversation_id}/lastmessage`,
                     {
                         headers: { Authorization: `Bearer ${token}` },
                     }

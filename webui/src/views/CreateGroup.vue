@@ -45,7 +45,7 @@ export default {
             }
 
             try {
-                const response = await this.$axios.post(__MINE__ + "/group", {
+                const response = await this.$axios.post("/group", {
                     name: this.groupName,
                     members: this.selectedUsers,
                 }, {
@@ -70,7 +70,7 @@ export default {
         async fetchUsers() {
             this.loading = true;
             try {
-                const response = await this.$axios.get(__MINE__ + "/user", {
+                const response = await this.$axios.get("/user", {
                     headers: {
                         Authorization: `Bearer ${this.token}`,
                     },

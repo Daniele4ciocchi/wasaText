@@ -2,7 +2,6 @@ package api
 
 import (
 	"encoding/json"
-	"fmt"
 	"io"
 	"net/http"
 	"os"
@@ -30,7 +29,6 @@ func (rt *_router) getGroup(w http.ResponseWriter, r *http.Request, ps httproute
 
 	var group utils.Group
 	group, err = rt.db.GetGroupById(groupID)
-	println(groupID)
 	if err != nil {
 		http.Error(w, "Errore nel recupero del gruppo", http.StatusInternalServerError)
 		return
@@ -110,7 +108,6 @@ func (rt *_router) createGroup(w http.ResponseWriter, r *http.Request, _ httprou
 		return
 	}
 	for _, member := range group.Members {
-		println(member)
 		err = rt.db.AddUserToGroup(member, createdGroup.ID)
 		if err != nil {
 			http.Error(w, "Errore durante l'aggiunta dell'utente al gruppo", http.StatusInternalServerError)
@@ -229,7 +226,11 @@ func (rt *_router) getGroupPhoto(w http.ResponseWriter, r *http.Request, ps http
 	w.WriteHeader(http.StatusOK)
 
 	// Scrive il contenuto del file nella risposta
-	io.Copy(w, file)
+	_, err = io.Copy(w, file)
+	if err != nil {
+		http.Error(w, "Errore durante la scrittura della foto", http.StatusInternalServerError)
+		return
+	}
 
 }
 
@@ -286,7 +287,6 @@ func (rt *_router) setGroupPhoto(w http.ResponseWriter, r *http.Request, ps http
 	}
 
 	w.WriteHeader(http.StatusOK)
-	fmt.Fprintln(w, "Foto salvata correttamente")
 }
 
 func (rt *_router) getGroupMembers(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {

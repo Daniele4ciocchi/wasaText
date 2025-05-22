@@ -2,7 +2,6 @@ package database
 
 import (
 	"database/sql"
-	"fmt"
 	"log"
 
 	"github.com/Daniele4ciocchi/wasaText/service/utils"
@@ -20,7 +19,6 @@ func (db *appdbimpl) AddMessage(senderID int, convID int, content string, replie
 
 	err := db.c.QueryRow("INSERT INTO messages (sender_id, conversation_id, content, replied_message_id ) VALUES (?, ?, ?, ?) RETURNING id", senderID, convID, content, replied).Scan(&messageID)
 	if err != nil {
-		fmt.Println(err)
 		return 0, err
 	}
 
@@ -57,13 +55,11 @@ func (db *appdbimpl) AddPhoto(senderID int, convID int, content string, repliedM
 
 	err := db.c.QueryRow("INSERT INTO messages (sender_id, conversation_id, content, replied_message_id, photo ) VALUES (?, ?, ?, ?, true) RETURNING id", senderID, convID, content, replied).Scan(&messageID)
 	if err != nil {
-		fmt.Println(err)
 		return 0, err
 	}
 
 	err = db.SetSendedMessage(messageID)
 	if err != nil {
-		fmt.Println(err)
 		return 0, err
 	}
 

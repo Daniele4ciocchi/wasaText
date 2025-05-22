@@ -44,14 +44,14 @@ func (rt *_router) Handler() http.Handler {
 	rt.router.DELETE("/reaction/:reactionID", rt.deleteReaction)   // deleteReaction
 
 	// groups
-	rt.router.GET("/group/:groupID", rt.getGroup)                 // getGroup
-	rt.router.POST("/group", rt.createGroup)                      // createGroup
-	rt.router.DELETE("/group/:groupID", rt.leaveGroup)            // leaveGroup
-	rt.router.GET("/group/:groupID/members", rt.getGroupMembers)  // getGroupMembers
-	rt.router.POST("/group/:groupID/members", rt.addGroupMembers) // addGroupMembers
-	rt.router.POST("/group/:groupID/name", rt.setGroupName)       // setGroupName
-	rt.router.GET("/group/:groupID/photo", rt.getGroupPhoto)      // getGroupPhoto
-	rt.router.POST("/group/:groupID/photo", rt.setGroupPhoto)     // setGroupPhoto
+	rt.router.GET("/group/:groupID", rt.getGroup)                // getGroup
+	rt.router.POST("/group", rt.createGroup)                     // createGroup
+	rt.router.DELETE("/group/:groupID", rt.leaveGroup)           // leaveGroup
+	rt.router.GET("/group/:groupID/members", rt.getGroupMembers) // getGroupMembers
+	rt.router.POST("/group/:groupID/members", rt.addToGroup)     // addGroupMembers
+	rt.router.POST("/group/:groupID/name", rt.setGroupName)      // setGroupName
+	rt.router.GET("/group/:groupID/photo", rt.getGroupPhoto)     // getGroupPhoto
+	rt.router.POST("/group/:groupID/photo", rt.setGroupPhoto)    // setGroupPhoto
 
 	// Special routes
 	rt.router.GET("/liveness", rt.liveness)

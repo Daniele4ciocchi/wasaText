@@ -339,7 +339,16 @@ func (rt *_router) forwardMessage(w http.ResponseWriter, r *http.Request, ps htt
 		return
 	}
 
-	rt.db.AddMessage(id, reciver.ID, message.Content, message.RepliedMessageID)
+	messageID, err := rt.db.AddMessage(id, reciver.ID, message.Content, message.RepliedMessageID)
+	if error.Is(err, sql.ErrNoRows) {
+		http.Error(w, "Errore durante l'invio del messaggio", http.StatusInternalServerError)
+		return
+	}
+
+	if err := json.NewEncoder(w).Encode(message); err != nil {
+		http.Error(w, "Errore durante l'encoding del messaggio", http.StatusInternalServerError)
+		return
+	}
 
 	w.WriteHeader(http.StatusCreated)
 

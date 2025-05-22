@@ -320,7 +320,7 @@ func (rt *_router) getGroupMembers(w http.ResponseWriter, r *http.Request, ps ht
 
 }
 
-func (rt *_router) addGroupMembers(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+func (rt *_router) addToGroup(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	w.Header().Set("Content-Type", "application/json")
 
 	//auth control

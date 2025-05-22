@@ -72,7 +72,7 @@ paths:
                 name:
                   type: string
                   example: Maria
-                  pattern: "ˆ.*?$"
+                  pattern: "^.*?$"
                   minLength: 3
                   maxLength: 16
         required: true
@@ -126,6 +126,9 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/User"
+                minItems: 0
+                maxItems: 200
+
         "401" : { $ref: "#/components/responses/Unauthorized" }
         "500" : { $ref: "#/components/responses/InternalServerError" }
     
@@ -148,6 +151,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/User"
+
         "400": { $ref: "#/components/responses/BadRequest" }
         "401" : { $ref: "#/components/responses/Unauthorized" }
         "404": { $ref: "#/components/responses/NotFound" }
@@ -169,13 +173,11 @@ paths:
         "200":
           description: Foto dell'utente
           content:
-            application/json:
+            image/jpeg:
               schema:
-                type: object
-                properties:
-                  photoID:
-                    type: integer
-                    example: 1
+                type: string
+                format: binary
+
         "400": { $ref: "#/components/responses/BadRequest" }
         "401": { $ref: "#/components/responses/Unauthorized" }
         "404": { $ref: "#/components/responses/NotFound" }
@@ -197,7 +199,8 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/User"
+                $ref: "#/components/schemas/Message"
+
         "401": { $ref: "#/components/responses/Unauthorized" }
         "404": { $ref: "#/components/responses/NotFound" }
         "500": { $ref: "#/components/responses/InternalServerError" }
@@ -214,26 +217,22 @@ paths:
         Se il nome utente è già in uso, restituisce un errore.
       requestBody:
         required: true
+        description: Nome utente da impostare
         content:
           application/json:
             schema:
               type: object
+              description: Nome utente da impostare
               properties:
                 username:
                   type: string
               required:
                 - username
       responses:
-        "200":
+        "204":
           description: Nome utente impostato correttamente
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  id:
-                    type: string
-                    format: uuid
+          
+
         "401": { $ref: "#/components/responses/Unauthorized" }
         "400": { $ref: "#/components/responses/BadRequest" }
         "500": { $ref: "#/components/responses/InternalServerError" }
@@ -248,19 +247,15 @@ paths:
       description: >
         Imposta la foto del profilo per l'utente corrente.
       requestBody:
+        description: la foto del profilo dell'utente
         required: true
         content:
-          application/json:
+          image/jpeg:
             schema:
-              type: object
-              properties:
-                photo:
-                  type: string
-                  format: binary
-              required:
-                - photo
+              type: string
+              format: binary
       responses:
-        "200":
+        "204":
           description: Foto del profilo impostata correttamente
           
         "401": { $ref: "#/components/responses/Unauthorized" }
@@ -286,6 +281,9 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/Conversation"
+                minItems: 0
+                maxItems: 200
+
         "401": { $ref: "#/components/responses/Unauthorized" }
         "404": { $ref: "#/components/responses/NotFound" }
         "500": { $ref: "#/components/responses/InternalServerError" }
@@ -304,6 +302,7 @@ paths:
           application/json:
             schema:
               type: object
+              description: Nome della conversazione
               properties:
                 name:
                   type: string
@@ -330,7 +329,7 @@ paths:
     get:
       tags:
         - conversazione
-      operationId: getConversations
+      operationId: getConversation
       summary: Ottieni una conversazione specifica
       description: >
         Ottiene i dettagli di una conversazione specifica.
@@ -341,6 +340,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Conversation"
+
         "400": { $ref: "#/components/responses/BadRequest" }
         "401": { $ref: "#/components/responses/Unauthorized" }
         "404": { $ref: "#/components/responses/NotFound" }
@@ -367,6 +367,8 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/Message"
+                minItems: 0
+                maxItems: 500
 
         "400": { $ref: "#/components/responses/BadRequest" }
         "401": { $ref: "#/components/responses/Unauthorized" }
@@ -394,6 +396,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Message"
+
         "400": { $ref: "#/components/responses/BadRequest" }
         "401": { $ref: "#/components/responses/Unauthorized" }
         "404": { $ref: "#/components/responses/NotFound" }
@@ -442,12 +445,13 @@ paths:
           application/json:
             schema:
               type: object
+              description: ID della conversazione di destinazione
               properties:
                 reciver_id:
                   type: integer
                   example: 1
       responses:
-        "200":
+        "204":
           description: Messaggio inoltrato correttamente
           
         "400": { $ref: "#/components/responses/BadRequest" }
@@ -473,6 +477,8 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/Message"
+                minItems: 0
+                maxItems: 500
 
         "401": { $ref: "#/components/responses/Unauthorized" }
         "404": { $ref: "#/components/responses/NotFound" }
@@ -497,6 +503,7 @@ paths:
             application/json:
               schema:
                 type: object
+                description: ID del messaggio eliminato
                 properties:
                   messageID:
                     type: integer
@@ -528,6 +535,9 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/Reaction"
+                minItems: 0 
+                maxItems: 500
+                
 
         "400": { $ref: "#/components/responses/BadRequest" }
         "401": { $ref: "#/components/responses/Unauthorized" }
@@ -547,7 +557,7 @@ paths:
             schema:
               $ref: "#/components/schemas/Reaction"
       responses:
-        "200":
+        "204":
           description: Commento aggiunto correttamente
           
         "400": { $ref: "#/components/responses/BadRequest" }
@@ -568,7 +578,7 @@ paths:
         Rimuove un commento(reazione) da un messaggio specifico.
         Restituisce l'ID del commento rimosso.
       responses:
-        "200":
+        "204":
           description: Commento rimosso correttamente
           
         "400": { $ref: "#/components/responses/BadRequest" }
@@ -587,21 +597,29 @@ paths:
         Restituisce l'ID del gruppo creato.
       requestBody:
         required: true
+        description: nome e mebri del gruppo da creare
         content:
           application/json:
             schema:
               type: object
               properties:
                 name:
+                  description: Nome del gruppo
                   type: string
+                  pattern: ^.*?$
+                  example: "gruppo di lavoro"
                   minLength: 1
                   maxLength: 50
                 members:
                   type: array
                   items:
                     type: integer
+                    example: 1
+                  minItems: 1
+                  maxItems: 200
               required:
                 - name
+                - members
       responses:
         "200":
           description: Gruppo creato correttamente
@@ -609,6 +627,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Group"
+
         "400": { $ref: "#/components/responses/BadRequest" }
         "401": { $ref: "#/components/responses/Unauthorized" }
         "404": { $ref: "#/components/responses/NotFound" }
@@ -634,6 +653,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Group"
+
         "404": { $ref: "#/components/responses/NotFound" }
         "401": { $ref: "#/components/responses/Unauthorized" }
         "500": { $ref: "#/components/responses/InternalServerError" }
@@ -646,7 +666,7 @@ paths:
       description: >
         esci da un gruppo specifico.
       responses:
-        "200":
+        "204":
           description: Gruppo eliminato correttamente
 
         "400": { $ref: "#/components/responses/BadRequest" }
@@ -675,6 +695,8 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/User"
+                minItems: 0
+                maxItems: 400
 
         "404": { $ref: "#/components/responses/NotFound" }
         "401": { $ref: "#/components/responses/Unauthorized" }
@@ -682,20 +704,23 @@ paths:
     post:
       tags:
         - gruppo
-      operationId: addGroupMembers
+      operationId: addToGroup
       summary: Aggiungi un membro o più membri a un gruppo
       description: >
         Aggiunge un membro o più membri a un gruppo specifico.
       requestBody:
         required: true
+        description: membri da aggiungere
         content:
           application/json:
             schema:
               type: array
               items:
                 $ref: "#/components/schemas/User"
+              minItems: 1
+              maxItems: 200
       responses:
-        "200":
+        "204":
           description: Membro aggiunto correttamente
           
 
@@ -730,8 +755,8 @@ paths:
                 - name
 
       responses:
-        "200":
-          description: Nome del gruppo
+        "204":
+          description: Nome del gruppo impostato correttamente
           
         "404": { $ref: "#/components/responses/NotFound" }
         "401": { $ref: "#/components/responses/Unauthorized" }
@@ -762,7 +787,7 @@ paths:
               required:
                 - photo
       responses:
-        "200":
+        "204":
           description: Foto del gruppo impostata correttamente
           
         "400": { $ref: "#/components/responses/BadRequest" }
@@ -784,6 +809,11 @@ paths:
       responses:
         "200":
           description: Foto del gruppo
+          content:
+            image/jpeg:
+              schema:
+                type: string
+                format: binary
           
 
         "400": { $ref: "#/components/responses/BadRequest" }
@@ -794,47 +824,63 @@ paths:
 components:
   #schemi per definire oggetti
   securitySchemes:
-    bearerAuth: # arbitrary name for the security scheme
+    bearerAuth: 
       type: http
       scheme: bearer
-      bearerFormat: JWT # optional, arbitrary value for documentation purposes
+      bearerFormat: JWT 
 
   schemas:
     User:
       type: object
+      description: Rappresenta un utente del sistema
       properties:
         user_id:
           type: integer
           example: 1
         name:
           type: string
+          pattern: ^.*?$
           example: "Maria"
+          minLength: 3
+          maxLength: 16
         username:
           type: string
+          pattern: ^.*?$
           example: "marta"
+          minLength: 3
+          maxLength: 16
     Group:
       type: object
+      description: Rappresenta un gruppo all'interno del sistema
       properties:
         id:
           type: integer
           example: 1
         name:
           type: string
+          pattern: ^.*?$
           example: "gruppo di lavoro"
+          minLength: 1
+          maxLength: 50
     Conversation:
       type: object
+      description: Rappresenta una conversazione all'interno del sistema
       properties:
         conversation_id:
           type: integer
           example: 1
         name:
           type: string
+          pattern: ^.*?$
           example: "conversazione di lavoro"
+          minLength: 1
+          maxLength: 50
         is_group:
           type: boolean
           example: true
     Message:
       type: object
+      description: Rappresenta un messaggio all'interno del sistema
       properties:
         message_id:
           type: integer
@@ -844,7 +890,10 @@ components:
           example: 1
         sender:
           type: string
+          pattern: ^.*?$
           example: "marta"
+          minLength: 3
+          maxLength: 16
         replied_message_id:
           type: integer
           example: 1
@@ -853,7 +902,10 @@ components:
           example: 1
         content:
           type: string
+          pattern: ^.*?$
           example: "Ciao, come stai?"
+          minLength: 1
+          maxLength: 10000
         photo:
           type: boolean
           example: false
@@ -863,8 +915,12 @@ components:
         timestamp:
           type: string
           format: date-time
+          pattern: ^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])\s(0\d|1\d|2[0-3]):([0-5]\d):([0-5]\d)$
           example: "2023-10-01T12:00:00Z"
+          minLength: 19
+          maxLength: 19
     Reaction:
+      description: Rappresenta una reazione a un messaggio
       type: object
       properties:
         reaction_id:
@@ -875,7 +931,10 @@ components:
           example: 1
         content:
           type: string
-          example: "UTF-8"
+          pattern: ^(?:\p{Extended_Pictographic}|\p{Emoji_Presentation})+$  
+          example: "👍"
+          minLength: 1
+          maxLength: 1
         message_id:
           type: integer
           example: 1

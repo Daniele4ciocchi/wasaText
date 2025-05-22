@@ -235,7 +235,6 @@ func (db *appdbimpl) GetNewMessages(userID int) ([]utils.Message, error) {
 		message.Sender = user.Name
 		messages = append(messages, message)
 
-		db.SetArrivedMessage(userID, message.ID)
 	}
 	if err := rows.Err(); err != nil {
 		return nil, err

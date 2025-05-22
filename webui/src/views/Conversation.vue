@@ -2,7 +2,7 @@
     <div class="conversation">
         <div class="header">
             <h1 id="convName">{{ conversation.name }}</h1>
-            <button class="leave" v-if="conversation.is_group == 1" @click="leaveGroup()">
+            <button class="leave" v-if="conversation.is_group" @click="leaveGroup">
                 <svg class="feather">
                     <use href="/feather-sprite-v4.29.0.svg#x" />
                 </svg>
@@ -10,21 +10,19 @@
             </button>
         </div>
 
-        <div class="messages"  id = "messagesContainer">
+        <div class="messages" id="messagesContainer">
             <div v-for="(message, index) in messages" :key="index"
-                :class="['message', message.sender === currentUser ? 'user' : 'receiver']">
-
-                <!-- Mostra il contenuto del messaggio a cui si sta rispondendo, se presente -->
+                :class="['message', message.sender === name ? 'user' : 'receiver']">
                 <div v-if="message.replied_message_id">
                     <p class="replied-message">
+                        {{ getMessageById(message.replied_message_id).sender }}:
                         {{ getMessageById(message.replied_message_id).content }}
                     </p>
                 </div>
-
                 <p class="sender">{{ message.sender }}</p>
                 <p class="content">{{ message.content }}</p>
-                <p id="timestamp">{{ new Date(message.timestamp).toLocaleString() }}</p>
-                <button id="replies" @click="replyMessage(message.message_id, message.content)">
+                <p class="timestamp">{{ new Date(message.timestamp).toLocaleString() }}</p>
+                <button class="reply-btn" @click="replyMessage(message.message_id, message.content)">
                     <svg class="feather">
                         <use href="/feather-sprite-v4.29.0.svg#corner-down-right" />
                     </svg>
@@ -32,16 +30,13 @@
             </div>
         </div>
 
-
-        <div>
-            <label id="replies" for="replies" v-if="replyID">
-                risposta a : {{ replyContent, replyID }}
-            </label>
+        <div v-if="replyID" class="reply-info">
+            risposta a: {{ replyContent }} (ID: {{ replyID }})
         </div>
-        <div class="input-area">
 
+        <div class="input-area">
             <input v-model="newMessage" type="text" placeholder="Scrivi un messaggio..." @keyup.enter="sendMessage" />
-            <button id ="send-button"@click="sendMessage">
+            <button id="send-button" @click="sendMessage">
                 <svg class="feather">
                     <use href="/feather-sprite-v4.29.0.svg#send" />
                 </svg>
@@ -55,154 +50,136 @@
                     {{ user.name }}
                 </li>
             </ul>
-
         </div>
     </div>
 </template>
 
-<script setup>
-import { ref, onMounted, onUnmounted, watch, nextTick } from 'vue'
-import { useRoute } from 'vue-router'
-import axios from 'axios'
-
-
-const route = useRoute()
-const token = localStorage.getItem('token')
-const currentUser = localStorage.getItem('name')
-
-const conversationID = ref(route.params.conversationID)
-const conversation = ref({})
-const users = ref([])
-const messages = ref([])
-const newMessage = ref('')
-const replyID = ref(null)
-const replyContent = ref('')
-let intervalID
-
-
-
-const getConversation = async () => {
-    try {
-        const res = await axios.get(`/conversation/${conversationID.value}`, {
-            headers: { Authorization: `Bearer ${token}` }
-        })
-        conversation.value = res.data
-    } catch (err) {
-        console.error('Errore nel caricamento della conversazione:', err)
-    }
-    if (conversation.value.is_group === true) fetchUsers()
-}
-
-const scrollToBottom = async () => {
-    const messagesContainer = document.getElementById('messagesContainer')
-    messagesContainer.scrollIntoView({ behavior: 'smooth', block: 'end'})
-}
-
-
-const fetchMessages = async () => {
-    try {
-        const res = await axios.get(`/conversation/${conversationID.value}/message`, {
-            headers: { Authorization: `Bearer ${token}` }
-        })
-        messages.value = res.data
-    } catch (err) {
-        console.error('Errore nel caricamento dei messaggi:', err)
-    }
-
-
-}
-const fetchUsers = async () => {
-    try {
-        const res = await axios.get(`/group/${conversationID.value}`, {
-            headers: { Authorization: `Bearer ${token}` }
-        })
-        users.value = res.data.members
-
-    } catch (err) {
-        console.error('Errore nel caricamento degli utenti:', err)
-    }
-
-}
-
-const sendMessage = async () => {
-    if (newMessage.value.trim() === '') return
-
-
-    const messageToSend = {
-        replied_message_id: replyID.value,
-        content: newMessage.value,
-        sender: currentUser,
-        timestamp: new Date().toISOString()
-    }
-
-    try {
-        await axios.post(`/conversation/${conversationID.value}/message`,
-            {
-                content: messageToSend.content,
-                replied_message_id: messageToSend.replied_message_id,
-            },
-            { headers: { Authorization: `Bearer ${token}` } }
-        )
-
-        messages.value.push(messageToSend)
-        newMessage.value = ''
-    } catch (err) {
-        console.error('Errore durante l\'invio del messaggio:', err)
-    }
-    replyID.value = null
-    replyContent.value = ''
-}
-const replyMessage = (messageId, messageContent) => {
-    replyID.value = messageId
-    replyContent.value = messageContent
-}
-
-const getMessageById = (id) => {
-    return messages.value.find(message => message.message_id === id) || {};
-}
-
-const leaveGroup = async () => {
-    try {
-        await axios.delete(`/group/${conversationID.value}`, {
-            headers: { Authorization: `Bearer ${token}` }
-        })
-        alert('Sei uscito dal gruppo')
-        window.location.href = '/'
-    } catch (err) {
-        console.error('Errore durante l\'uscita dal gruppo:', err)
-    }
-}
-
-const getNewMessages = async () => {
-    try {
-        const res = await axios.get(__MINE__ + `/me/newmessage`, {
-            headers: { Authorization: `Bearer ${token}` }
-        })
-        
-        if (res.data != null){
-            fetchMessages()
-            scrollToBottom()
+<script>
+export default {
+    name: 'Conversation',
+    data() {
+        return {
+            conversationID: this.$route.params.conversationID,
+            conversation: {},
+            users: [],
+            messages: [],
+            newMessage: '',
+            replyID: null,
+            replyContent: '',
+            token: localStorage.getItem("token"),
+            name: localStorage.getItem("name"),
+            username: localStorage.getItem("username"),
+            user_id: localStorage.getItem("user_id"),
         }
-    } catch (err) {
-        console.error('Errore nel caricamento dei messaggi:', err)
+    },
+    methods: {
+        async getConversation() {
+            try {
+                const res = await this.$axios.get(`/conversation/${this.conversationID}`, {
+                    headers: { Authorization: `Bearer ${this.token}` }
+                })
+                this.conversation = res.data
+
+                if (this.conversation.is_group) fetchUsers()
+            } catch (err) {
+                console.error('Errore nel caricamento della conversazione:', err)
+            }
+        },
+        async fetchUsers() {
+            try {
+                const res = await this.$axios.get(`/group/${this.conversationID}`, {
+                    headers: { Authorization: `Bearer ${this.token}` }
+                })
+                this.users = res.data.members
+            } catch (err) {
+                console.error('Errore nel caricamento degli utenti:', err)
+            }
+        },
+        async fetchMessages() {
+            try {
+                const res = await this.$axios.get(`/conversation/${this.conversationID}/message`, {
+                    headers: { Authorization: `Bearer ${this.token}` }
+                })
+                this.messages = res.data
+            } catch (err) {
+                console.error('Errore nel caricamento dei messaggi:', err)
+            }
+        },
+        async sendMessage() {
+
+            const messageToSend = {
+                replied_message_id: this.replyID,
+                content: this.newMessage,
+                sender: this.name,
+                timestamp: new Date().toISOString()
+            }
+
+            try {
+                await this.$axios.post(
+                    `/conversation/${this.conversationID}/message`,
+                    {
+                        content: messageToSend.content,
+                        replied_message_id: messageToSend.replied_message_id
+                    },
+                    { headers: { Authorization: `Bearer ${this.token}` } }
+                )
+                this.messages.push(messageToSend)
+                this.newMessage = ''
+                this.$nextTick(() => {
+                    this.scrollToBottom()
+                })
+            } catch (err) {
+                console.error("Errore durante l'invio del messaggio:", err)
+            }
+
+            this.replyID = null
+            this.replyContent = ''
+        },
+        replyMessage(messageId, messageContent) {
+            this.replyID = messageId
+            this.replyContent = messageContent
+        },
+        getMessageById(id) {
+            return this.messages.find((m) => m.message_id === id) || {}
+        },
+        async leaveGroup() {
+            try {
+                await this.$axios.delete(`/group/${conversationID.value}`, {
+                    headers: { Authorization: `Bearer ${this.token}` }
+                })
+                alert('Sei uscito dal gruppo')
+                window.location.href = '/'
+            } catch (err) {
+                console.error("Errore durante l'uscita dal gruppo:", err)
+            }
+        },
+        scrollToBottom() {
+            const container = document.getElementById('messagesContainer')
+            container.scrollTop = container.scrollHeight
+        },
+        async getNewMessages() {
+            try {
+                const res = await this.$axios.get('/me/newmessage', {
+                    headers: { Authorization: `Bearer ${token}` }
+                })
+
+                if (res.data != null) {
+                    await fetchMessages()
+                    scrollToBottom()
+                }
+            } catch (err) {
+                console.error('Errore nel caricamento dei nuovi messaggi:', err)
+            }
+        }
+    },
+    mounted() {
+        this.getConversation()
+        this.fetchMessages().then(this.scrollToBottom)
+    },
+    beforeDestroy() {
+        clearInterval(this.intervalID)
     }
 }
-
-onMounted(() => {
-    getConversation()
-    getNewMessages()
-    fetchMessages()
-    scrollToBottom()
-    intervalID = setInterval(getNewMessages, 5000)
-})
-
-onUnmounted(() => {
-    clearInterval(intervalID)
-})
-
-watch(() => route.params.conversationID, (newId) => {
-    conversationID.value = newId
-})
 </script>
 
 <style scoped>

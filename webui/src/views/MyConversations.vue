@@ -26,58 +26,57 @@
     </ul>
 </template>
 
-<script setup>
-import { ref, onMounted } from 'vue'
-import axios from 'axios'
-
-
-// Token: prendi da props, store o composable
-const token = localStorage.getItem('token') // o come preferisci
-
-
-const conversations = ref([])
-const error = ref(null)
-
-
-
-const getConversations = async () => {
-    try {
-        const res = await axios.get('/conversation', {
-            headers: { Authorization: `Bearer ${token}` },
-        })
-        const newData = res.data
-        if (JSON.stringify(newData.value) === JSON.stringify(conversations.value)) return
-        conversations.value = newData
-
-        for (const conv of conversations.value) {
-            try {
-                const res = await axios.get(
-                    `/conversation/${conv.conversation_id}/lastmessage`,
-                    {
-                        headers: { Authorization: `Bearer ${token}` },
-                    }
-                )
-                conv.message = res.data
-            } catch (err) {
-                error.value = `Errore nel caricamento dell'ultimo messaggio per la conversazione ${conv.conversation_id}`
-                console.error(err)
-            }
+<script>
+export default {
+    name: 'MyConversations',
+    data() {
+        return {
+            token: localStorage.getItem('token'),
+            name: localStorage.getItem('name'),
+            username: localStorage.getItem('username'),
+            user_id: localStorage.getItem('user_id'),
+            conversations: [],
+            error: null,
         }
-    } catch (err) {
-        error.value = 'Errore nel caricamento delle conversazioni'
-        console.error(err)
-        return
-    }
+    },
+    mounted() {
+        this.getConversations()
+    },
+    methods: {
+        async getConversations() {
+            try {
+                const res = await this.$axios.get('/conversation', {
+                    headers: { Authorization: `Bearer ${this.token}` },
+                })
+                const newData = res.data
+                if (JSON.stringify(newData.value) === JSON.stringify(this.conversations)) return
+                this.conversations = newData
 
-
+                for (const conv of this.conversations) {
+                    try {
+                        const res = await this.$axios.get(
+                            `/conversation/${conv.conversation_id}/lastmessage`,
+                            {
+                                headers: { Authorization: `Bearer ${this.token}` },
+                            }
+                        )
+                        conv.message = res.data
+                    } catch (err) {
+                        this.error = `Errore nel caricamento dell'ultimo messaggio per la conversazione ${conv.conversation_id}`
+                        console.error(err)
+                    }
+                }
+            } catch (err) {
+                this.error = 'Errore nel caricamento delle conversazioni'
+                console.error(err)
+                return
+            }
+        },
+    },
 }
 
-
-onMounted(() => {
-    getConversations()
-    
-})
 </script>
+
 
 <style>
 .conversation {

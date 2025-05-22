@@ -24,6 +24,7 @@
 
 <script>
 export default {
+  name: "Users",
   data() {
     return {
       users: [],
@@ -59,8 +60,7 @@ export default {
 
     async startConversation(userName) {
       try {
-        const response = await this.$axios.post(
-           "/conversation",
+        const response = await this.$axios.post("/conversation",
           { name: userName },
           {
             headers: {

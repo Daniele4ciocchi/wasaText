@@ -333,8 +333,8 @@ func (rt *_router) forwardMessage(w http.ResponseWriter, r *http.Request, ps htt
 		return
 	}
 
-	messageID, err := rt.db.AddMessage(id, reciver.ID, message.Content, message.RepliedMessageID)
-	if error.Is(err, sql.ErrNoRows) {
+	_, err = rt.db.AddMessage(id, reciver.ID, message.Content, message.RepliedMessageID)
+	if err != nil {
 		http.Error(w, "Errore durante l'invio del messaggio", http.StatusInternalServerError)
 		return
 	}

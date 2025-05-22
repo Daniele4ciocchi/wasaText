@@ -18,9 +18,7 @@ func applyCORSHandler(h http.Handler) http.Handler {
 		handlers.AllowedMethods([]string{"GET", "POST", "OPTIONS", "DELETE", "PUT"}),
 		// Do not modify the CORS origin and max age, they are used in the evaluation.
 		handlers.AllowedOrigins([]string{
-			"http://localhost:5173",
-			"http://localhost:3000",
-			"http://https://editor.swagger.io/",
+			"*",
 		}),
 
 		handlers.MaxAge(1),

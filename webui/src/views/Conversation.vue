@@ -1,6 +1,7 @@
 <template>
     <div class="conversation">
         <div class="header">
+            <img :src="conversationImage" alt="Foto profilo" style="width: 40px; height:40px; border-radius: 10px;" />
             <h1 id="convName">{{ conversation.name }}</h1>
             <button class="leave" v-if="conversation.is_group" @click="leaveGroup">
                 <svg class="feather">
@@ -22,21 +23,43 @@
                 <p class="sender">{{ message.sender }}</p>
                 <p class="content">{{ message.content }}</p>
                 <p class="timestamp">{{ new Date(message.timestamp).toLocaleString() }}</p>
-                <button class="reply-btn" @click="replyMessage(message.message_id, message.content)">
-                    <svg class="feather">
-                        <use href="/feather-sprite-v4.29.0.svg#corner-down-right" />
+
+                <div class ="message-footer">
+                    <svg v-if="message.status === 0" class="feather view">
+                        <use href="/feather-sprite-v4.29.0.svg#check" />
                     </svg>
-                </button>
+                    <svg v-if="message.status === 1" class="feather view">
+                        <use href="/feather-sprite-v4.29.0.svg#check-circle" />
+                    </svg>
+                    <svg v-if="message.status === 2" class="feather view">
+                        <use href="/feather-sprite-v4.29.0.svg#check-square" />
+                    </svg>
+
+                    <button class="reply-btn" @click="replyMessage(message.message_id, message.content)">
+                        <svg class="feather">
+                            <use href="/feather-sprite-v4.29.0.svg#corner-down-right" />
+                        </svg>
+                    </button>
+                </div>
+
             </div>
         </div>
 
         <div v-if="replyID" class="reply-info">
-            risposta a: {{ replyContent }} (ID: {{ replyID }})
+            <p>
+                risposta a: {{ replyContent }}
+            </p>
+            <button @click="replyID = null; replyContent = ''">Annulla</button>
         </div>
 
         <div class="input-area">
             <input v-model="newMessage" type="text" placeholder="Scrivi un messaggio..." @keyup.enter="sendMessage" />
-            <button id="send-button" @click="sendMessage">
+            <button id="photo" @click="sendPhoto">
+                <svg class="feather">
+                    <use href="/feather-sprite-v4.29.0.svg#image" />
+                </svg>
+            </button>
+            <button id="send-button" @click="sendMessage" :disabled="!newMessage.trim()">
                 <svg class="feather">
                     <use href="/feather-sprite-v4.29.0.svg#send" />
                 </svg>
@@ -61,6 +84,7 @@ export default {
         return {
             conversationID: this.$route.params.conversationID,
             conversation: {},
+            conversationImage: '',
             users: [],
             messages: [],
             newMessage: '',
@@ -79,18 +103,44 @@ export default {
                     headers: { Authorization: `Bearer ${this.token}` }
                 })
                 this.conversation = res.data
-
-                if (this.conversation.is_group) fetchUsers()
+                await this.fetchUsers()
+                await this.fetchPhoto()
             } catch (err) {
                 console.error('Errore nel caricamento della conversazione:', err)
             }
         },
+        async fetchPhoto() {
+            if (this.conversation.is_group) {
+                try {
+                    const res = await this.$axios.get(`/group/${this.conversationID}/photo`, {
+                        headers: { Authorization: `Bearer ${this.token}` },
+                        responseType: 'blob'
+                    })
+                    this.conversationImage = URL.createObjectURL(res.data);
+                } catch (err) {
+                    console.error('Errore nel caricamento della foto del gruppo:', err)
+                }
+            } else {
+                try {
+                    console.log("Utenti disponibili:", this.users)
+
+                    const user = this.users.find(user => user.name === this.conversation.name);
+                    const res = await this.$axios.get(`/user/${user.user_id}/photo`, {
+                        headers: { Authorization: `Bearer ${this.token}` },
+                        responseType: 'blob'
+                    })
+                    this.conversationImage = URL.createObjectURL(res.data);
+                } catch (err) {
+                    console.error('Errore nel caricamento della foto dell\'utente:', err)
+                }
+            }
+        },
         async fetchUsers() {
             try {
-                const res = await this.$axios.get(`/group/${this.conversationID}`, {
+                const res = await this.$axios.get(`/group/${this.conversationID}/members`, {
                     headers: { Authorization: `Bearer ${this.token}` }
                 })
-                this.users = res.data.members
+                this.users = res.data
             } catch (err) {
                 console.error('Errore nel caricamento degli utenti:', err)
             }
@@ -123,10 +173,11 @@ export default {
                     },
                     { headers: { Authorization: `Bearer ${this.token}` } }
                 )
-                this.messages.push(messageToSend)
+
                 this.newMessage = ''
                 this.$nextTick(() => {
                     this.scrollToBottom()
+                    this.fetchMessages()
                 })
             } catch (err) {
                 console.error("Errore durante l'invio del messaggio:", err)
@@ -144,7 +195,7 @@ export default {
         },
         async leaveGroup() {
             try {
-                await this.$axios.delete(`/group/${conversationID.value}`, {
+                await this.$axios.delete(`/group/${this.conversationID}`, {
                     headers: { Authorization: `Bearer ${this.token}` }
                 })
                 alert('Sei uscito dal gruppo')
@@ -160,12 +211,11 @@ export default {
         async getNewMessages() {
             try {
                 const res = await this.$axios.get('/me/newmessage', {
-                    headers: { Authorization: `Bearer ${token}` }
+                    headers: { Authorization: `Bearer ${this.token}` }
                 })
-
                 if (res.data != null) {
-                    await fetchMessages()
-                    scrollToBottom()
+                    await this.fetchMessages()
+                    this.scrollToBottom()
                 }
             } catch (err) {
                 console.error('Errore nel caricamento dei nuovi messaggi:', err)
@@ -175,10 +225,14 @@ export default {
     mounted() {
         this.getConversation()
         this.fetchMessages().then(this.scrollToBottom)
+        this.intervalID = setInterval(() => {
+            this.getNewMessages()
+        }, 5000)
     },
     beforeDestroy() {
         clearInterval(this.intervalID)
     }
+
 }
 </script>
 
@@ -197,8 +251,13 @@ export default {
 
 .header {
     display: flex;
-    justify-content: space-between;
     align-items: center;
+    gap: 20px;
+}
+
+.reply-info {
+    display: flex;
+    justify-content: left
 }
 
 .leave {
@@ -227,7 +286,6 @@ export default {
     background-color: #f4f6f8;
     display: flex;
     flex-direction: column;
-    align-items: flex-end;
     overflow-y: auto;
     border-radius: 23px;
 }
@@ -242,6 +300,19 @@ export default {
     display: block;
 }
 
+.message-footer {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.view {
+    width: 15px;
+    height: 15px;
+    color: #6b6b6b;
+    align-self: left;
+}
 .message.user {
     background-color: #d1e7dd;
     text-align: right;
@@ -314,7 +385,7 @@ button:hover {
     margin: 0px;
 }
 
-#timestamp {
+.timestamp {
     font-size: 0.8em;
     color: #888;
 }

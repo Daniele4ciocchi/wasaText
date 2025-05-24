@@ -1,13 +1,10 @@
-<script setup>
 
-
-</script>
 <template>
 	<div class="home">
-		<h1>Login</h1>
 
 		<!-- Form di login -->
 		<form v-if="!isLoggedIn" @submit.prevent="login">
+			<h1>Login</h1>
 			<div>
 				<label for="name">Nome:</label>
 				<input class="form-control" type="text" v-model="name" id="username" required />
@@ -17,18 +14,17 @@
 
 		<!-- Info utente -->
 		<form v-if="isLoggedIn">
+			<h2>
+				{{ username }}
+				<button v-if="changeUsername == false" class="btn btn-link" @click="changeUsername = true">
+					<svg class="feather">
+						<use href="/feather-sprite-v4.29.0.svg#edit-3" />
+					</svg>
+				</button>
+			</h2>
 			<div>
-				<img :src="photoUrl" alt="Foto profilo" style="width: 150px; border-radius: 50%;" />
-				<p>Sei loggato come <strong>{{ name }}</strong></p>
-				<p>
-					il tuo username è
-					<strong>
-						{{ username }}
-					</strong>
-					<button v-if="changeUsername == false" class="btn btn-link" @click="changeUsername = true">
-						cambia username
-					</button>
-				</p>
+				<img :src="photoUrl" alt="Foto profilo" style="width: 150px; height: 150px; border-radius: 50%;" />
+				<p>nome :  <strong>{{ name }}</strong></p>
 			</div>
 
 
@@ -138,7 +134,7 @@ export default {
 							Authorization: `Bearer ${this.token}`
 						}
 					});
-				}catch (err) {
+				} catch (err) {
 					this.error = 'Errore durante il recupero dei messaggi.';
 				}
 

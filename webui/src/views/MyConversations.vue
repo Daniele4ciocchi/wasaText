@@ -77,6 +77,9 @@ export default {
                 console.error(err)
                 return
             }
+            await this.sortConversations()
+        },
+        async sortConversations() {
             this.conversations.sort((a, b) => {
                 return new Date(b.message.timestamp) - new Date(a.message.timestamp)
             })

@@ -65,7 +65,7 @@ func (rt *_router) getUsers(w http.ResponseWriter, r *http.Request, _ httprouter
 func (rt *_router) getUser(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	w.Header().Set("Content-Type", "application/json")
 
-	//auth control
+	// auth control
 	_, err := checkAuth(rt, r)
 	if err != nil {
 		http.Error(w, "Token non valido", http.StatusUnauthorized)
@@ -90,7 +90,7 @@ func (rt *_router) getUser(w http.ResponseWriter, r *http.Request, ps httprouter
 func (rt *_router) setMyUsername(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	w.Header().Set("Content-Type", "application/json")
 
-	//auth control
+	// auth control
 	id, err := checkAuth(rt, r)
 	if err != nil {
 		http.Error(w, "Token non valido", http.StatusUnauthorized)
@@ -119,7 +119,7 @@ func (rt *_router) setMyUsername(w http.ResponseWriter, r *http.Request, _ httpr
 func (rt *_router) getMe(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	w.Header().Set("Content-Type", "application/json")
 
-	//auth control
+	// auth control
 	id, err := checkAuth(rt, r)
 	if err != nil {
 		http.Error(w, "Token non valido", http.StatusUnauthorized)
@@ -146,7 +146,6 @@ func (rt *_router) setMyPhoto(w http.ResponseWriter, r *http.Request, _ httprout
 		return
 	}
 
-	// ⚠️ IMPORTANTE: parse del form multipart
 	err = r.ParseMultipartForm(10 << 20) // 10 MB
 	if err != nil {
 		http.Error(w, "Errore nel parsing del form", http.StatusBadRequest)

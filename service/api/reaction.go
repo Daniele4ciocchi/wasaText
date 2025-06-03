@@ -13,7 +13,7 @@ import (
 func (rt *_router) addReaction(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	w.Header().Set("Content-Type", "application/json")
 
-	//auth control
+	// auth control
 	_, err := checkAuth(rt, r)
 	if err != nil {
 		http.Error(w, "Token non valido", http.StatusUnauthorized)
@@ -56,7 +56,7 @@ func (rt *_router) addReaction(w http.ResponseWriter, r *http.Request, ps httpro
 func (rt *_router) deleteReaction(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	w.Header().Set("Content-Type", "application/json")
 
-	//auth control
+	// auth control
 	_, err := checkAuth(rt, r)
 	if err != nil {
 		http.Error(w, "Token non valido", http.StatusUnauthorized)
@@ -81,7 +81,7 @@ func (rt *_router) deleteReaction(w http.ResponseWriter, r *http.Request, ps htt
 func (rt *_router) getReactions(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	w.Header().Set("Content-Type", "application/json")
 
-	//auth control
+	// auth control
 	_, err := checkAuth(rt, r)
 	if err != nil {
 		http.Error(w, "Token non valido", http.StatusUnauthorized)

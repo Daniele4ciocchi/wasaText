@@ -55,7 +55,8 @@ servers:
 paths:
   /session:
     post:
-      tags: ["login"]
+      tags: 
+        - login
       summary: Logs in the user
       description: |-
         If the user does not exist, it will be created,
@@ -86,27 +87,12 @@ paths:
                 properties:
                   identifier:
                     type: string
+                    pattern: "^[a-zA-Z0-9]+$"
+                    minLength: 2
+                    maxLength: 12
                     example: "abcdef012345"
-        "400":
-          description: Invalid request
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  error:
-                    type: string
-                    example: "Invalid username"
-        "500":
-          description: Internal server error
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  error:
-                    type: string
-                    example: "Internal server error"
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "500": { $ref: "#/components/responses/InternalServerError" }
 
   /user:
     get:
@@ -226,6 +212,10 @@ paths:
               properties:
                 username:
                   type: string
+                  pattern: ^.*?$
+                  example: "marta"
+                  minLength: 3
+                  maxLength: 16
               required:
                 - username
       responses:
@@ -306,6 +296,10 @@ paths:
               properties:
                 name:
                   type: string
+                  pattern: ^.*?$
+                  example: "conversazione di lavoro"
+                  minLength: 1
+                  maxLength: 50
                   
               required:
                 - name
@@ -749,6 +743,8 @@ paths:
               properties:
                 name:
                   type: string
+                  pattern: ^.*?$
+                  example: "gruppo di lavoro"
                   minLength: 1
                   maxLength: 50
               required:
@@ -835,15 +831,18 @@ components:
       description: Rappresenta un utente del sistema
       properties:
         user_id:
+          description: L'identificatore univoco dell'utente 
           type: integer
           example: 1
         name:
+          description: Il nome dell'utente
           type: string
           pattern: ^.*?$
           example: "Maria"
           minLength: 3
           maxLength: 16
         username:
+          description: Lo username dell'utente
           type: string
           pattern: ^.*?$
           example: "marta"
@@ -854,9 +853,11 @@ components:
       description: Rappresenta un gruppo all'interno del sistema
       properties:
         id:
+          description: L'identificatore univoco del gruppo (della conversazione)
           type: integer
           example: 1
         name:
+          description: Il nome del gruppo
           type: string
           pattern: ^.*?$
           example: "gruppo di lavoro"
@@ -867,15 +868,18 @@ components:
       description: Rappresenta una conversazione all'interno del sistema
       properties:
         conversation_id:
+          description: L'identificatore univoco della conversazione
           type: integer
           example: 1
         name:
+          description: Il nome della conversazione
           type: string
           pattern: ^.*?$
           example: "conversazione di lavoro"
           minLength: 1
           maxLength: 50
         is_group:
+          description: Indica se la conversazione è un gruppo
           type: boolean
           example: true
     Message:
@@ -883,36 +887,45 @@ components:
       description: Rappresenta un messaggio all'interno del sistema
       properties:
         message_id:
+          description: L'identificatore univoco del messaggio
           type: integer
           example: 1
         sender_id:
+          description: L'identificatore univoco dell'utente che ha inviato il messaggio
           type: integer
           example: 1
         sender:
+          description: Il nome dell'utente che ha inviato il messaggio
           type: string
           pattern: ^.*?$
           example: "marta"
           minLength: 3
           maxLength: 16
         replied_message_id:
+          description: L'identificatore del messaggio a cui si sta rispondendo (opzionale)
           type: integer
           example: 1
         conversation_id:
+          description: L'identificatore della conversazione a cui appartiene il messaggio
           type: integer
           example: 1
         content:
+          description: Il contenuto del messaggio
           type: string
           pattern: ^.*?$
           example: "Ciao, come stai?"
           minLength: 1
           maxLength: 10000
         photo:
+          description: indica se il messaggio è una foto (opzionale)
           type: boolean
           example: false
         status:
+          description: Lo stato del messaggio (0 - inviato, 1 - ricevuto, 2 - letto)
           type: integer
           example: 1
         timestamp:
+          description: La data e l'ora in cui il messaggio è stato inviato
           type: string
           format: date-time
           pattern: ^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])\s(0\d|1\d|2[0-3]):([0-5]\d):([0-5]\d)$
@@ -924,18 +937,22 @@ components:
       type: object
       properties:
         reaction_id:
+          description: L'identificatore univoco della reazione
           type: integer
           example: 1
         user_id:
+          description: L'identificatore univoco dell'utente che ha aggiunto la reazione
           type: integer
           example: 1
         content:
+          description: Il contenuto della reazione (emoji)
           type: string
           pattern: ^(?:\p{Extended_Pictographic}|\p{Emoji_Presentation})+$  
           example: "👍"
           minLength: 1
           maxLength: 1
         message_id:
+          description: L'identificatore del messaggio a cui è stata aggiunta la reazione
           type: integer
           example: 1
         
@@ -948,6 +965,10 @@ components:
       required: true
       schema:
         type: string
+        pattern: "^[a-zA-Z0-9]+$"
+        minLength: 2
+        maxLength: 12
+        example: "abcdef012345"
       description: l'identificazione univoca dell'utente
 
     groupID:
@@ -956,6 +977,10 @@ components:
       required: true
       schema:
         type: string
+        pattern: "^[a-zA-Z0-9]+$"
+        minLength: 2
+        maxLength: 12
+        example: "abcdef012345"
       description: l'identificazione univoca del gruppo
 
     conversationID:
@@ -964,6 +989,10 @@ components:
       required: true
       schema:
         type: string
+        pattern: "^[a-zA-Z0-9]+$"
+        minLength: 2
+        maxLength: 12
+        example: "abcdef012345"
       description: l'identificazione univoca della conversazione
 
     messageID:
@@ -971,7 +1000,11 @@ components:
       in: path
       required: true
       schema:
-        type: integer
+        type: string
+        pattern: "^[a-zA-Z0-9]+$"
+        minLength: 2
+        maxLength: 12
+        example: "abcdef012345"
       description: l'identificazione univoca del messaggio
 
     reactionID:
@@ -979,7 +1012,11 @@ components:
       in: path
       required: true
       schema:
-        type: integer
+        type: string
+        pattern: "^[a-zA-Z0-9]+$"
+        minLength: 2
+        maxLength: 12
+        example: "abcdef012345"
       description: l'identificazione univoca della reazione
 
   #risposte di errore predefinite

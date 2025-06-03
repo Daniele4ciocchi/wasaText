@@ -39,7 +39,7 @@ func (rt *_router) sendMessage(w http.ResponseWriter, r *http.Request, ps httpro
 		return
 	}
 
-	//ottengo il mittente dal suo token
+	// ottengo il mittente dal suo token
 	sender, err := rt.db.GetUserFromToken(token)
 	if err != nil {
 		http.Error(w, "Utente non trovato", http.StatusNotFound)
@@ -68,7 +68,6 @@ func (rt *_router) sendMessage(w http.ResponseWriter, r *http.Request, ps httpro
 		return
 	}
 
-	//
 	message.SenderID = sender.ID
 
 	messageID, err := rt.db.AddMessage(message.SenderID, message.ConversationID, message.Content, message.RepliedMessageID)
@@ -98,7 +97,6 @@ func (rt *_router) sendPhoto(w http.ResponseWriter, r *http.Request, ps httprout
 		return
 	}
 
-	// ⚠️ IMPORTANTE: parse del form multipart
 	err = r.ParseMultipartForm(10 << 20) // 10 MB
 	if err != nil {
 		http.Error(w, "Errore nel parsing del form", http.StatusBadRequest)

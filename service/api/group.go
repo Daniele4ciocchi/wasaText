@@ -45,7 +45,7 @@ func (rt *_router) getGroup(w http.ResponseWriter, r *http.Request, ps httproute
 func (rt *_router) createGroup(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	w.Header().Set("Content-Type", "application/json")
 
-	//auth control
+	// auth control
 	_, err := checkAuth(rt, r)
 	if err != nil {
 		http.Error(w, "Token non valido", http.StatusUnauthorized)
@@ -82,7 +82,7 @@ func (rt *_router) createGroup(w http.ResponseWriter, r *http.Request, _ httprou
 		}
 	}
 
-	//controllo se il gruppo esiste già
+	// controllo se il gruppo esiste già
 	existingGroup, err := rt.db.CheckExistingGroup(group.Name)
 	if err != nil {
 		http.Error(w, "Errore durante il recupero del gruppo", http.StatusInternalServerError)
@@ -93,7 +93,7 @@ func (rt *_router) createGroup(w http.ResponseWriter, r *http.Request, _ httprou
 		return
 	}
 
-	//creo il gruppo
+	// creo il gruppo
 	var createdGroup utils.Group
 	createdGroup, err = rt.db.AddGroup(group.Name)
 	if err != nil {
@@ -101,7 +101,7 @@ func (rt *_router) createGroup(w http.ResponseWriter, r *http.Request, _ httprou
 		return
 	}
 
-	//aggiungo gli utenti al gruppo
+	// aggiungo gli utenti al gruppo
 	err = rt.db.AddUserToGroup(user.ID, createdGroup.ID)
 	if err != nil {
 		http.Error(w, "Errore durante l'aggiunta dell'utente al gruppo", http.StatusInternalServerError)
@@ -126,7 +126,7 @@ func (rt *_router) createGroup(w http.ResponseWriter, r *http.Request, _ httprou
 func (rt *_router) leaveGroup(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	w.Header().Set("Content-Type", "application/json")
 
-	//auth control
+	// auth control
 	_, err := checkAuth(rt, r)
 	if err != nil {
 		http.Error(w, "Token non valido", http.StatusUnauthorized)
@@ -162,7 +162,7 @@ func (rt *_router) leaveGroup(w http.ResponseWriter, r *http.Request, ps httprou
 func (rt *_router) setGroupName(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	w.Header().Set("Content-Type", "application/json")
 
-	//auth control
+	// auth control
 	_, err := checkAuth(rt, r)
 	if err != nil {
 		http.Error(w, "Token non valido", http.StatusUnauthorized)
@@ -198,7 +198,7 @@ func (rt *_router) setGroupName(w http.ResponseWriter, r *http.Request, ps httpr
 func (rt *_router) getGroupPhoto(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	w.Header().Set("Content-Type", "image/jpeg")
 
-	//auth control
+	// auth control
 	_, err := checkAuth(rt, r)
 	if err != nil {
 		http.Error(w, "Token non valido", http.StatusUnauthorized)
@@ -242,7 +242,6 @@ func (rt *_router) setGroupPhoto(w http.ResponseWriter, r *http.Request, ps http
 		return
 	}
 
-	// ⚠️ IMPORTANTE: parse del form multipart
 	err = r.ParseMultipartForm(10 << 20) // 10 MB
 	if err != nil {
 		http.Error(w, "Errore nel parsing del form", http.StatusBadRequest)
@@ -292,7 +291,7 @@ func (rt *_router) setGroupPhoto(w http.ResponseWriter, r *http.Request, ps http
 func (rt *_router) getGroupMembers(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	w.Header().Set("Content-Type", "application/json")
 
-	//auth control
+	// auth control
 	_, err := checkAuth(rt, r)
 	if err != nil {
 		http.Error(w, "Token non valido", http.StatusUnauthorized)
@@ -323,7 +322,7 @@ func (rt *_router) getGroupMembers(w http.ResponseWriter, r *http.Request, ps ht
 func (rt *_router) addToGroup(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	w.Header().Set("Content-Type", "application/json")
 
-	//auth control
+	// auth control
 	_, err := checkAuth(rt, r)
 	if err != nil {
 		http.Error(w, "Token non valido", http.StatusUnauthorized)

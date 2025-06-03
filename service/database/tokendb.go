@@ -2,6 +2,7 @@ package database
 
 import (
 	"database/sql"
+	"errors"
 	"strconv"
 
 	"github.com/Daniele4ciocchi/wasaText/service/utils"
@@ -19,7 +20,7 @@ func (db *appdbimpl) GetToken(id int) (string, error) {
 	var token string
 	err := db.c.QueryRow("SELECT tokens.token FROM tokens WHERE user_id = ?", id).Scan(&token)
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if errors.Is(err, sql.ErrNoRows) {
 			return "", nil
 		}
 		return "", err

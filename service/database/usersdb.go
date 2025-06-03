@@ -2,6 +2,7 @@ package database
 
 import (
 	"database/sql"
+	"errors"
 
 	"github.com/Daniele4ciocchi/wasaText/service/utils"
 )
@@ -40,7 +41,7 @@ func (db *appdbimpl) GetUserById(id int) (utils.User, error) {
 	var user utils.User
 	err := db.c.QueryRow("SELECT id, name, username FROM users WHERE id = ?", id).Scan(&user.ID, &user.Name, &user.Username)
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if errors.Is(err, sql.ErrNoRows) {
 			return user, sql.ErrNoRows
 		}
 		return user, err

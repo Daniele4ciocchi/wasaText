@@ -3,6 +3,7 @@ package api
 import (
 	"database/sql"
 	"encoding/json"
+	"errors"
 	"log"
 	"net/http"
 	"strconv"
@@ -265,7 +266,7 @@ func (rt *_router) getLastMessage(w http.ResponseWriter, r *http.Request, ps htt
 	var message utils.Message
 	message, err = rt.db.GetLastMessage(convID)
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if errors.Is(err, sql.ErrNoRows) {
 			message = utils.Message{}
 		}
 	}

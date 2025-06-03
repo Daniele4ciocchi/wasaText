@@ -421,7 +421,7 @@ paths:
         "404": { $ref: "#/components/responses/NotFound" }
         "500": { $ref: "#/components/responses/InternalServerError" }
 
-  /conversation/{messageID}/forwarded:
+  /message/{messageID}/forwarded:
     parameters:
       - $ref: "#/components/parameters/messageID"
 
@@ -478,7 +478,7 @@ paths:
         "404": { $ref: "#/components/responses/NotFound" }
         "500": { $ref: "#/components/responses/InternalServerError" }
 
-  /messages/{messageID}:
+  /message/{messageID}:
     parameters:
       - $ref: "#/components/parameters/messageID"
 
@@ -508,7 +508,7 @@ paths:
         "404": { $ref: "#/components/responses/NotFound" }
         "500": { $ref: "#/components/responses/InternalServerError" }
 
-  /messages/{messageID}/reaction:
+  /message/{messageID}/reaction:
     parameters:
       - $ref: "#/components/parameters/messageID"
 
@@ -559,7 +559,7 @@ paths:
         "404": { $ref: "#/components/responses/NotFound" }
         "500": { $ref: "#/components/responses/InternalServerError" }
 
-  /messages/{messageID}/reaction/{reactionID}:
+  /message/{messageID}/reaction/{reactionID}:
     parameters:
       - $ref: "#/components/parameters/messageID"
       - $ref: "#/components/parameters/reactionID"
@@ -668,7 +668,7 @@ paths:
         "401": { $ref: "#/components/responses/Unauthorized" }
         "500": { $ref: "#/components/responses/InternalServerError" }
 
-  /group/{groupID}/members:
+  /group/{groupID}/member:
     parameters:
       - $ref: "#/components/parameters/groupID"
 

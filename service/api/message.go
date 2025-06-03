@@ -160,9 +160,16 @@ func (rt *_router) deleteMessage(w http.ResponseWriter, r *http.Request, ps http
 	w.Header().Set("Content-Type", "application/json")
 
 	// Controlla se il token è valido e se si trova all'interno del db
-	_, err := checkAuth(rt, r)
+	userID, err := checkAuth(rt, r)
 	if err != nil {
 		http.Error(w, "Token non valido", http.StatusUnauthorized)
+		return
+	}
+
+	var user utils.User
+	user, err = rt.db.GetUserById(userID)
+	if err != nil {
+		http.Error(w, "Utente non trovato", http.StatusNotFound)
 		return
 	}
 
@@ -172,8 +179,25 @@ func (rt *_router) deleteMessage(w http.ResponseWriter, r *http.Request, ps http
 		return
 	}
 
+	// Controlla se l'utente è il mittente del messaggio
+	message, err := rt.db.GetMessage(messageID)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			http.Error(w, "Messaggio non trovato", http.StatusNotFound)
+			return
+		}
+		http.Error(w, "Errore durante il recupero del messaggio", http.StatusInternalServerError)
+		return
+	}
+
+	if message.SenderID != user.ID {
+		http.Error(w, "Non sei il mittente di questo messaggio", http.StatusForbidden)
+		return
+	}
+
 	err = rt.db.RemoveMessage(messageID)
 	if err != nil {
+		log.Println(err)
 		http.Error(w, "Errore durante la cancellazione del messaggio", http.StatusInternalServerError)
 		return
 	}

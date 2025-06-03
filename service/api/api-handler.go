@@ -32,7 +32,7 @@ func (rt *_router) Handler() http.Handler {
 	rt.router.GET("/conversation/:conversationID/lastmessage", rt.getLastMessage)
 	rt.router.POST("/message/:messageID/forwarded", rt.forwardMessage) // forwardMessage ?
 	rt.router.GET("/me/newmessage", rt.getNewMessages)                 // getNewMessage
-	rt.router.DELETE("/messages/:messageID", rt.deleteMessage)         // deleteMessage
+	rt.router.DELETE("/message/:messageID", rt.deleteMessage)          // deleteMessage
 
 	// messages // ho creato sti path ma non so se servono
 	// rt.router.GET("/message/:m_id", rt.getMessage) // getMessage

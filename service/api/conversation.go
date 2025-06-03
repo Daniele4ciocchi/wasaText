@@ -140,8 +140,10 @@ func (rt *_router) getMyConversations(w http.ResponseWriter, r *http.Request, _ 
 	}
 
 	for i, conv := range convs {
-		conv.Name = strings.Replace(conv.Name, user.Name, "", -1)
-		convs[i] = conv
+		if !conv.IsGroup {
+			conv.Name = strings.Replace(conv.Name, user.Name, "", -1)
+			convs[i] = conv
+		}
 	}
 
 	if err := json.NewEncoder(w).Encode(convs); err != nil {
@@ -186,7 +188,9 @@ func (rt *_router) getConversation(w http.ResponseWriter, r *http.Request, ps ht
 		return
 	}
 
-	conv.Name = strings.Replace(conv.Name, user.Name, "", -1)
+	if !conv.IsGroup {
+		conv.Name = strings.Replace(conv.Name, user.Name, "", -1)
+	}
 
 	if err := json.NewEncoder(w).Encode(conv); err != nil {
 		http.Error(w, "Errore nella codifica JSON", http.StatusInternalServerError)

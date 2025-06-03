@@ -36,7 +36,12 @@ func (db *appdbimpl) AddMessage(senderID int, convID int, content string, replie
 }
 
 func (db *appdbimpl) RemoveMessage(messageID int) error {
-	_, err := db.c.Exec("DELETE FROM messages WHERE id = ?", messageID)
+	// Rimuove il messaggio dalla tabella views
+	_, err := db.c.Exec("DELETE FROM views WHERE message_id = ?", messageID)
+	if err != nil {
+		return err
+	}
+	_, err = db.c.Exec("DELETE FROM messages WHERE id = ?", messageID)
 	if err != nil {
 		return err
 	}

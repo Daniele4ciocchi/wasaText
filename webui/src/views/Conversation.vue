@@ -24,18 +24,32 @@
                 <p class="content">{{ message.content }}</p>
                 <p class="timestamp">{{ new Date(message.timestamp).toLocaleString() }}</p>
 
-                <div class ="message-footer">
-                    <svg v-if="message.status === 0" class="feather view">
-                        <use href="/feather-sprite-v4.29.0.svg#check" />
-                    </svg>
-                    <svg v-if="message.status === 1" class="feather view">
-                        <use href="/feather-sprite-v4.29.0.svg#check-circle" />
-                    </svg>
-                    <svg v-if="message.status === 2" class="feather view">
-                        <use href="/feather-sprite-v4.29.0.svg#check-square" />
-                    </svg>
+                <div class="message-footer">
+                    <div v-if="message.sender === name" class="view">
+                        <svg v-if="message.status === 0" class="feather">
+                            <use href="/feather-sprite-v4.29.0.svg#check" />
+                        </svg>
+                        <svg v-if="message.status === 1" class="feather">
+                            <use href="/feather-sprite-v4.29.0.svg#check-circle" />
+                        </svg>
+                        <svg v-if="message.status === 2" class="feather">
+                            <use href="/feather-sprite-v4.29.0.svg#check-square" />
+                        </svg>
+
+                    </div>
 
                     <button class="reply-btn" @click="replyMessage(message.message_id, message.content)">
+                        <svg class="feather">
+                            <use href="/feather-sprite-v4.29.0.svg#repeat" />
+                        </svg>
+                    </button>
+                    <button v-if="message.sender === name" class="delete-btn"
+                        @click="deleteMessage(message.message_id)">
+                        <svg class="feather">
+                            <use href="/feather-sprite-v4.29.0.svg#trash" />
+                        </svg>
+                    </button>
+                    <button class="forward-btn" @click="forwardMessage(message.message_id)">
                         <svg class="feather">
                             <use href="/feather-sprite-v4.29.0.svg#corner-down-right" />
                         </svg>
@@ -69,11 +83,38 @@
         <div class="user-list" v-if="conversation.is_group">
             <h2>Utenti nella conversazione</h2>
             <ul>
-                <li v-for="user in users" :key="user.name">
+                <li v-for="user in members" :key="user.name">
                     {{ user.name }}
                 </li>
             </ul>
         </div>
+
+        <div class="popup" v-if="forward">
+            <div class="forward">
+
+                <div class="forward-header">
+                    <h3>invia a</h3>
+                    <button @click="closeForwardMessage">
+                        <svg class="feather">
+                            <use href="/feather-sprite-v4.29.0.svg#x" />
+                        </svg>
+                    </button>
+                </div>
+                <ul>
+                    <li v-for="conv in conversations" class="users">
+                        <label>
+                            <input type="checkbox" :value="conv" v-model="forwardList" />
+                            {{ conv.name }}
+                        </label>
+                    </li>
+                </ul>
+                <button @click="forwardMessage">
+                    invia
+                </button>
+
+            </div>
+        </div>
+
     </div>
 </template>
 
@@ -85,11 +126,15 @@ export default {
             conversationID: this.$route.params.conversationID,
             conversation: {},
             conversationImage: '',
-            users: [],
+            members: [],
+            conversations: [],
             messages: [],
             newMessage: '',
             replyID: null,
             replyContent: '',
+            forward: false,
+            forwardList: [],
+            forwardMessageId: null,
             token: localStorage.getItem("token"),
             name: localStorage.getItem("name"),
             username: localStorage.getItem("username"),
@@ -103,7 +148,7 @@ export default {
                     headers: { Authorization: `Bearer ${this.token}` }
                 })
                 this.conversation = res.data
-                await this.fetchUsers()
+                await this.fetchMembers()
                 await this.fetchPhoto()
             } catch (err) {
                 console.error('Errore nel caricamento della conversazione:', err)
@@ -122,9 +167,9 @@ export default {
                 }
             } else {
                 try {
-                    console.log("Utenti disponibili:", this.users)
+                    console.log("Utenti disponibili:", this.members)
 
-                    const user = this.users.find(user => user.name === this.conversation.name);
+                    const user = this.members.find(user => user.name === this.conversation.name);
                     const res = await this.$axios.get(`/user/${user.user_id}/photo`, {
                         headers: { Authorization: `Bearer ${this.token}` },
                         responseType: 'blob'
@@ -135,12 +180,12 @@ export default {
                 }
             }
         },
-        async fetchUsers() {
+        async fetchMembers() {
             try {
-                const res = await this.$axios.get(`/group/${this.conversationID}/members`, {
+                const res = await this.$axios.get(`/group/${this.conversationID}/member`, {
                     headers: { Authorization: `Bearer ${this.token}` }
                 })
-                this.users = res.data
+                this.members = res.data
             } catch (err) {
                 console.error('Errore nel caricamento degli utenti:', err)
             }
@@ -189,6 +234,75 @@ export default {
         replyMessage(messageId, messageContent) {
             this.replyID = messageId
             this.replyContent = messageContent
+        },
+        async fetchMyConversations() {
+            this.loading = true;
+            try {
+                const response = await this.$axios.get("/conversation", {
+                    headers: {
+                        Authorization: `Bearer ${this.token}`,
+                    },
+                });
+                this.conversations = response.data;
+            } catch (err) {
+                this.error = "Errore nel recupero degli utenti";
+            } finally {
+                this.loading = false;
+            }
+            for (const conv of this.conversations) {
+                if (conv.name === this.name) {
+                    this.users.splice(this.users.indexOf(user), 1);
+                }
+            }
+        },
+        async forwardMessage(messageId) {
+            if (this.forward === false) {
+                this.forward = true
+                this.forwardMessageId = messageId
+                this.fetchMyConversations()
+                return
+            } else {
+                for (const conv of this.forwardList) {
+                    try {
+                        await this.$axios.post(
+                            `/message/${this.forwardMessageId}/forwarded`,
+                            {
+                                receiver_id: conv.conversation_id,
+                            },
+                            { headers: { Authorization: `Bearer ${this.token}` } }
+                        )
+
+                        this.newMessage = ''
+                        this.$nextTick(() => {
+                            this.scrollToBottom()
+                            this.fetchMessages()
+                        })
+                    } catch (err) {
+                        console.error("Errore durante l'invio del messaggio:", err)
+                    }
+                }
+                this.forwardList = []
+                this.forwardMessageId = null
+                this.forward = false
+
+            }
+
+        },
+        closeForwardMessage() {
+            this.forwardList = []
+            this.forwardMessageId = null
+            this.forward = false
+        },
+        async deleteMessage(messageId) {
+            try {
+                await this.$axios.delete(`/message/${messageId}`, {
+                    headers: { Authorization: `Bearer ${this.token}` }
+                })
+                this.messages = this.messages.filter((m) => m.message_id !== messageId)
+            } catch (err) {
+                console.error("Errore durante l'eliminazione del messaggio:", err)
+            }
+            this.fetchMessages()
         },
         getMessageById(id) {
             return this.messages.find((m) => m.message_id === id) || {}
@@ -257,7 +371,17 @@ export default {
 
 .reply-info {
     display: flex;
-    justify-content: left
+    justify-content: left;
+    margin-bottom: 10px;
+    gap: 10px;
+}
+
+.reply-info p {
+    margin: 0;
+    padding: 5px;
+    background-color: #d1e7dd;
+    border-radius: 10px;
+    border: #888 1px solid;
 }
 
 .leave {
@@ -311,8 +435,9 @@ export default {
     width: 15px;
     height: 15px;
     color: #6b6b6b;
-    align-self: left;
+    align-self: center;
 }
+
 .message.user {
     background-color: #d1e7dd;
     text-align: right;
@@ -353,6 +478,47 @@ export default {
     border: 1px solid #888;
     border-radius: 15px;
     background-color: #f4f6f8;
+}
+
+.popup {
+    position: absolute;
+    width: calc(100vw - 315px);
+    height: 100vh;
+    background-color: rgba(138, 137, 137, 0.87);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.users {
+    text-align: center;
+    width: 60%;
+    display: flex;
+    margin-bottom: 10px;
+    border: 1px solid #888;
+    border-radius: 10px;
+    padding: 10px;
+    background-color: #d1e7dd;
+
+}
+
+.forward-header {
+    display: flex;
+    justify-content: space-between;
+}
+
+.forward {
+    border: 1px solid #888;
+    padding: 10px;
+    margin: 10px 0px;
+    background-color: #f4f6f8;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    border-radius: 23px;
+    position: absolute;
+    width: 80%;
+    height: 80%;
 }
 
 input {

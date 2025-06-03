@@ -65,6 +65,7 @@ export default {
                     this.message = "❌ Errore di rete o server non raggiungibile.";
                 }
             }
+            this.$router.push("/myconversations")
         }
         ,
         async fetchUsers() {

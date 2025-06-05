@@ -28,6 +28,9 @@ func (db *appdbimpl) GetReactions(messageID int) ([]utils.Reaction, error) {
 		reaction.MessageID = messageID
 		reactions = append(reactions, reaction)
 	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
 
 	return reactions, nil
 }

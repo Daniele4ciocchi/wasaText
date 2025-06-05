@@ -19,8 +19,8 @@ func (db *appdbimpl) AddConversation(name string, isGroup bool) (int, error) {
 func (db *appdbimpl) CheckExistingConversation(id1 int, id2 int) (int, error) {
 	var convID int
 	err := db.c.QueryRow(`SELECT uc1.conversation_id
-							FROM user_conversations uc1 JOIN user_conversations uc2 ON uc1.conversation_id = uc2.conversation_id
-							WHERE uc1.user_id = ? AND uc2.user_id = ?
+							FROM user_conversations uc1 JOIN user_conversations uc2 JOIN conversations c ON uc1.conversation_id = uc2.conversation_id AND uc1.conversation_id = c.id
+							WHERE uc1.user_id = ? AND uc2.user_id = ? AND c.is_group = false
 							LIMIT 1`, id1, id2).Scan(&convID)
 	if err != nil {
 		return 0, err

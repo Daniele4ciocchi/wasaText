@@ -130,12 +130,16 @@ func (rt *_router) sendPhoto(w http.ResponseWriter, r *http.Request, ps httprout
 	var message utils.Message
 	message, err = rt.db.GetLastMessage(convID)
 	if err != nil {
-		http.Error(w, "Errore durante il recupero del messaggio", http.StatusInternalServerError)
-		return
+		if errors.Is(err, sql.ErrNoRows) {
+			message = utils.Message{ID: 0, SenderID: user.ID, ConversationID: convID, Content: "", RepliedMessageID: 0}
+		} else {
+			http.Error(w, "Errore durante il recupero del messaggio", http.StatusInternalServerError)
+			return
+		}
 	}
 
 	var strmessageID string
-	strmessageID = strconv.Itoa(message.ID)
+	strmessageID = strconv.Itoa(message.ID + 1)
 
 	path := strmessageID + strconvID
 

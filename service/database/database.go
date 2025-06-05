@@ -179,8 +179,6 @@ func New(db *sql.DB) (AppDatabase, error) {
 						FOREIGN KEY (user_id) REFERENCES users(id)
 					);
 
-					INSERT INTO users (name, username) VALUES ('admin', 'admin');
-
 					`
 		_, err = db.Exec(sqlStmt)
 		if err != nil {

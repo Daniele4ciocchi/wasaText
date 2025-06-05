@@ -31,7 +31,7 @@ func (rt *_router) doLogin(w http.ResponseWriter, r *http.Request, _ httprouter.
 
 	if err != nil {
 
-		//crea un nuovo utente
+		// crea un nuovo utente
 		if err := rt.db.AddUser(name.Name, name.Name); err != nil {
 			http.Error(w, "Errore nell'aggiunta dell'utente", http.StatusInternalServerError)
 			return

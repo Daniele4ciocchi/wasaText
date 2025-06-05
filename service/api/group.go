@@ -82,17 +82,6 @@ func (rt *_router) createGroup(w http.ResponseWriter, r *http.Request, _ httprou
 		}
 	}
 
-	// controllo se il gruppo esiste già
-	existingGroup, err := rt.db.CheckExistingGroup(group.Name)
-	if err != nil {
-		http.Error(w, "Errore durante il recupero del gruppo", http.StatusInternalServerError)
-		return
-	}
-	if existingGroup.ID != 0 {
-		http.Error(w, "Il gruppo esiste già", http.StatusConflict)
-		return
-	}
-
 	// creo il gruppo
 	var createdGroup utils.Group
 	createdGroup, err = rt.db.AddGroup(group.Name)

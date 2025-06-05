@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"encoding/json"
 	"errors"
+	"log"
 	"net/http"
 	"strconv"
 	"strings"
@@ -61,6 +62,7 @@ func (rt *_router) addConversation(w http.ResponseWriter, r *http.Request, _ htt
 	convID, err = rt.db.CheckExistingConversation(user1.ID, user2.ID)
 	if err != nil {
 		if !errors.Is(err, sql.ErrNoRows) {
+			log.Println(err)
 			http.Error(w, "Errore durante il recupero della conversazione", http.StatusInternalServerError)
 			return
 		}

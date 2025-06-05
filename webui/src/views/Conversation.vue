@@ -12,7 +12,7 @@
         </div>
 
         <div class="messages" id="messagesContainer">
-            <div v-for="(message, index) in messages" :key="index"
+            <div v-if="!forward && !photo" v-for="(message, index) in messages" :key="index"
                 :class="['message', message.sender === name ? 'user' : 'receiver']">
                 <div v-if="message.replied_message_id">
                     <p class="replied-message">
@@ -57,6 +57,58 @@
                 </div>
 
             </div>
+            <div class="backpopup" v-if="forward">
+                <div class="popup">
+
+                    <div class="popup-header">
+                        <h3>invia a</h3>
+                        <button @click="forward = false">
+                            <svg class="feather">
+                                <use href="/feather-sprite-v4.29.0.svg#x" />
+                            </svg>
+                        </button>
+                    </div>
+                    <div class="popup-content">
+                        <ul>
+                            <li v-for="conv in conversations" class="users">
+                                <label>
+                                    <input type="checkbox" :value="conv" v-model="forwardList" />
+                                    {{ conv.name }}
+                                </label>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="popup-footer">
+                        <button @click="forwardMessage">
+                            invia
+                        </button>
+                    </div>
+
+
+                </div>
+            </div>
+            <div class="backpopup" v-if="photo">
+                <div class="popup">
+                    <div class="popup-header">
+                        <h3>Carica una foto</h3>
+                        <button @click="photo = false">
+                            <svg class="feather">
+                                <use href="/feather-sprite-v4.29.0.svg#x" />
+                            </svg>
+                        </button>
+                    </div>
+                    <div class="popup-content">
+                        <input type="file" @change="uploadImage" accept="image/*" />
+                    </div>
+                    <div class="popup-footer">
+                        <button @click="sendImage">
+                            invia
+                        </button>
+                    </div>
+
+                </div>
+
+            </div>
         </div>
 
         <div v-if="replyID" class="reply-info">
@@ -68,7 +120,7 @@
 
         <div class="input-area">
             <input v-model="newMessage" type="text" placeholder="Scrivi un messaggio..." @keyup.enter="sendMessage" />
-            <button id="photo" @click="sendPhoto">
+            <button id="photo" @click="photo = true">
                 <svg class="feather">
                     <use href="/feather-sprite-v4.29.0.svg#image" />
                 </svg>
@@ -89,31 +141,7 @@
             </ul>
         </div>
 
-        <div class="popup" v-if="forward">
-            <div class="forward">
 
-                <div class="forward-header">
-                    <h3>invia a</h3>
-                    <button @click="closeForwardMessage">
-                        <svg class="feather">
-                            <use href="/feather-sprite-v4.29.0.svg#x" />
-                        </svg>
-                    </button>
-                </div>
-                <ul>
-                    <li v-for="conv in conversations" class="users">
-                        <label>
-                            <input type="checkbox" :value="conv" v-model="forwardList" />
-                            {{ conv.name }}
-                        </label>
-                    </li>
-                </ul>
-                <button @click="forwardMessage">
-                    invia
-                </button>
-
-            </div>
-        </div>
 
     </div>
 </template>
@@ -133,12 +161,20 @@ export default {
             replyID: null,
             replyContent: '',
             forward: false,
+            photo: false,
+            photoUrl: '',
+			selectedFile: null,
+			previewImage: null,
             forwardList: [],
             forwardMessageId: null,
+
             token: localStorage.getItem("token"),
             name: localStorage.getItem("name"),
             username: localStorage.getItem("username"),
             user_id: localStorage.getItem("user_id"),
+
+            mesage: '',
+            error: '',
         }
     },
     methods: {
@@ -199,7 +235,48 @@ export default {
             } catch (err) {
                 console.error('Errore nel caricamento dei messaggi:', err)
             }
+            this.$nextTick(() => {
+                this.scrollToBottom()
+            })
+
         },
+        async fetchPhotoMessage(){
+            
+        },
+        uploadImage(e) {
+            const file = e.target.files[0];
+            this.selectedFile = file;   // salva il file originale
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = e => {
+                this.previewImage = e.target.result;  // questa è la base64 per l'anteprima
+                console.log(this.previewImage);
+            };
+        },
+        async sendImage() {
+			this.message = '';
+			this.error = '';
+
+			if (!this.selectedFile) {
+				this.error = 'Seleziona un file prima di caricare.';
+				return;
+			}
+
+			const formData = new FormData();
+			formData.append('photo', this.selectedFile);  // metti il file originale qui
+
+			try {
+				const response = await this.$axios.post(`/conversation/${this.conversationID}/photo`, formData, {
+					headers: {
+						Authorization: `Bearer ${this.token}`,
+						"Content-Type": "multipart/form-data",
+					},
+				});
+				this.message = 'Foto profilo caricata con successo!';
+			} catch (err) {
+				this.error = 'Errore durante il caricamento della foto profilo.';
+			}
+		},
         async sendMessage() {
 
             const messageToSend = {
@@ -220,17 +297,19 @@ export default {
                 )
 
                 this.newMessage = ''
-                this.$nextTick(() => {
-                    this.scrollToBottom()
-                    this.fetchMessages()
-                })
+
+                this.fetchMessages()
+
+
             } catch (err) {
                 console.error("Errore durante l'invio del messaggio:", err)
             }
 
             this.replyID = null
             this.replyContent = ''
+
         },
+
         replyMessage(messageId, messageContent) {
             this.replyID = messageId
             this.replyContent = messageContent
@@ -343,7 +422,7 @@ export default {
             this.getNewMessages()
         }, 5000)
     },
-    beforeDestroy() {
+    beforeUnmount() {
         clearInterval(this.intervalID)
     }
 
@@ -404,7 +483,7 @@ export default {
 
 .messages {
     border: 1px solid #888;
-    padding: 10px;
+
     height: 400px;
     margin-bottom: 10px;
     background-color: #f4f6f8;
@@ -416,6 +495,7 @@ export default {
 
 
 .message {
+    margin: 0px 15px;
     margin-bottom: 10px;
     padding: 5px 15px;
     border-radius: 15px;
@@ -478,21 +558,22 @@ export default {
     border: 1px solid #888;
     border-radius: 15px;
     background-color: #f4f6f8;
+    justify-content: center;
 }
 
-.popup {
-    position: absolute;
-    width: calc(100vw - 315px);
-    height: 100vh;
+.backpopup {
+    position: relative;
+    width: 100%;
+    height: 100%;
     background-color: rgba(138, 137, 137, 0.87);
     display: flex;
     justify-content: center;
     align-items: center;
+
 }
 
 .users {
     text-align: center;
-    width: 60%;
     display: flex;
     margin-bottom: 10px;
     border: 1px solid #888;
@@ -502,12 +583,7 @@ export default {
 
 }
 
-.forward-header {
-    display: flex;
-    justify-content: space-between;
-}
-
-.forward {
+.popup {
     border: 1px solid #888;
     padding: 10px;
     margin: 10px 0px;
@@ -516,9 +592,34 @@ export default {
     flex-direction: column;
     overflow-y: auto;
     border-radius: 23px;
-    position: absolute;
+    position: relative;
     width: 80%;
     height: 80%;
+}
+
+.popup-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+}
+
+.popup-content {
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+}
+
+.popup-content ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.popup-footer {
+    position: bottom fixed;
+    display: flex;
+    justify-content: center;
+    margin-top: 10px;
 }
 
 input {

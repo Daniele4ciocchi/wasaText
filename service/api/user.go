@@ -87,7 +87,7 @@ func (rt *_router) getUser(w http.ResponseWriter, r *http.Request, ps httprouter
 	}
 }
 
-func (rt *_router) setMyUsername(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+func (rt *_router) setMyUserName(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	w.Header().Set("Content-Type", "application/json")
 
 	// auth control

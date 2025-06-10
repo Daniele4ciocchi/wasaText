@@ -11,47 +11,44 @@ func (rt *_router) Handler() http.Handler {
 	rt.router.GET("/context", rt.wrap(rt.getContextReply))
 
 	// session
-	rt.router.POST("/session", rt.doLogin) // doLogin
+	rt.router.POST("/session", rt.doLogin) // doLogin OK
 
 	// users
-	rt.router.GET("/user", rt.getUsers)                   // getListOfUsers
-	rt.router.GET("/user/:userID", rt.getUser)            // getUser ?? da sistemare al posto dell'id si richiede una stringa
-	rt.router.GET("/conversation", rt.getMyConversations) // getMyConversations
-	rt.router.GET("/user/:userID/photo", rt.getUserPhoto) // getUserPhoto
+	rt.router.GET("/user", rt.getUsers)                   // getListOfUsers OK
+	rt.router.GET("/user/:userID", rt.getUser)            // getUser OK
+	rt.router.GET("/conversation", rt.getMyConversations) // getMyConversations OK
+	rt.router.GET("/user/:userID/photo", rt.getUserPhoto) // getUserPhoto OK
 
-	rt.router.GET("/me", rt.getMe)                  // getMe
-	rt.router.PUT("/me/username", rt.setMyUsername) // SetMyUsername
-	rt.router.PUT("/me/photo", rt.setMyPhoto)       // SetMyPhoto
+	rt.router.GET("/me", rt.getMe)                  // getMe OK
+	rt.router.PUT("/me/username", rt.setMyUserName) // SetMyUsername OK
+	rt.router.PUT("/me/photo", rt.setMyPhoto)       // SetMyPhoto OK
 
 	// conversation
-	rt.router.POST("/conversation", rt.addConversation)                                      // addConversation ?
-	rt.router.GET("/conversation/:conversationID", rt.getConversation)                       // getConversation
-	rt.router.GET("/conversation/:conversationID/member", rt.getConversationMembers)         // getGroupMembers
-	rt.router.GET("/conversation/:conversationID/message", rt.getMessages)                   // getMessages
-	rt.router.POST("/conversation/:conversationID/message", rt.sendMessage)                  // sendMessage
-	rt.router.POST("/conversation/:conversationID/photo", rt.sendPhoto)                      // setConversationPhoto
-	rt.router.GET("/conversation/:conversationID/photo/:messageID", rt.getConversationPhoto) // getConversationPhoto DA AGGIUNGERE
-	rt.router.GET("/conversation/:conversationID/lastmessage", rt.getLastMessage)
-	rt.router.POST("/message/:messageID/forwarded", rt.forwardMessage) // forwardMessage ?
-	rt.router.GET("/me/newmessage", rt.getNewMessages)                 // getNewMessage
-	rt.router.DELETE("/message/:messageID", rt.deleteMessage)          // deleteMessage
-
-	// messages // ho creato sti path ma non so se servono
-	// rt.router.GET("/message/:m_id", rt.getMessage) // getMessage
-	// rt.router.DELETE("/message/:m_id", rt.deleteMessage) // deleteMessage ?
+	rt.router.POST("/conversation", rt.addConversation)                                      // addConversation OK
+	rt.router.GET("/conversation/:conversationID", rt.getConversation)                       // getConversation OK
+	rt.router.GET("/conversation/:conversationID/member", rt.getConversationMembers)         // getGroupMembers OK
+	rt.router.POST("/conversation/:conversationID/member", rt.addToGroup)                    // addToGroup OK VA RIVISTO IN QUANTO SOTTO UN'ALTRO PATH
+	rt.router.GET("/conversation/:conversationID/message", rt.getMessages)                   // getMessages OK
+	rt.router.POST("/conversation/:conversationID/message", rt.sendMessage)                  // sendMessage OK
+	rt.router.POST("/conversation/:conversationID/photo", rt.sendPhoto)                      // sendPhoto OK
+	rt.router.GET("/conversation/:conversationID/photo/:messageID", rt.getConversationPhoto) // getConversationPhoto OK
+	rt.router.GET("/conversation/:conversationID/lastmessage", rt.getLastMessage)            // getLastMessage OK
+	rt.router.POST("/message/:messageID/forwarded", rt.forwardMessage)                       // forwardMessage OK
+	rt.router.GET("/me/newmessage", rt.getNewMessages)                                       // getNewMessage OK
+	rt.router.DELETE("/message/:messageID", rt.deleteMessage)                                // deleteMessage OK
 
 	// reactions
-	rt.router.POST("/message/:messageID/reaction", rt.addReaction)                  // addReaction
-	rt.router.GET("/message/:messageID/reaction", rt.getReactions)                  // getReactions
-	rt.router.DELETE("/message/:messageID/reaction/:reactionID", rt.deleteReaction) // deleteReaction
+	rt.router.POST("/message/:messageID/reaction", rt.commentMessage)                 // addReaction OK
+	rt.router.GET("/message/:messageID/reaction", rt.getComments)                     // getReactions OK
+	rt.router.DELETE("/message/:messageID/reaction/:reactionID", rt.uncommentMessage) // deleteReaction OK
 
 	// groups
-	rt.router.GET("/group/:groupID", rt.getGroup)             // getGroup
-	rt.router.POST("/group", rt.createGroup)                  // createGroup
-	rt.router.DELETE("/group/:groupID", rt.leaveGroup)        // leaveGroup
-	rt.router.POST("/group/:groupID/name", rt.setGroupName)   // setGroupName
-	rt.router.GET("/group/:groupID/photo", rt.getGroupPhoto)  // getGroupPhoto
-	rt.router.POST("/group/:groupID/photo", rt.setGroupPhoto) // setGroupPhoto
+	rt.router.GET("/group/:groupID", rt.getGroup)             // getGroup OK
+	rt.router.POST("/group", rt.createGroup)                  // createGroup OK
+	rt.router.DELETE("/group/:groupID", rt.leaveGroup)        // leaveGroup OK
+	rt.router.POST("/group/:groupID/name", rt.setGroupName)   // setGroupName OK
+	rt.router.GET("/group/:groupID/photo", rt.getGroupPhoto)  // getGroupPhoto OK
+	rt.router.POST("/group/:groupID/photo", rt.setGroupPhoto) // setGroupPhoto OK
 
 	// Special routes
 	rt.router.GET("/liveness", rt.liveness)

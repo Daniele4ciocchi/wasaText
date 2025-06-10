@@ -133,15 +133,14 @@ func (rt *_router) sendPhoto(w http.ResponseWriter, r *http.Request, ps httprout
 	message, err = rt.db.GetLastMessage(convID)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			message = utils.Message{ID: 0, SenderID: user.ID, ConversationID: convID, Content: "", RepliedMessageID: 0}
+			message = utils.Message{}
 		} else {
 			http.Error(w, "Errore durante il recupero del messaggio", http.StatusInternalServerError)
 			return
 		}
 	}
 
-	var strmessageID string
-	strmessageID = strconv.Itoa(message.ID + 1)
+	strmessageID := strconv.Itoa(message.ID + 1)
 
 	path := strmessageID + strconvID
 
@@ -283,11 +282,6 @@ func (rt *_router) getMessages(w http.ResponseWriter, r *http.Request, ps httpro
 		return
 	}
 
-	if err != nil {
-		http.Error(w, "Utente non trovato", http.StatusNotFound)
-		return
-	}
-
 	var conv utils.Conversation
 	convID, err := strconv.Atoi(ps.ByName("conversationID"))
 	if err != nil {
@@ -331,13 +325,6 @@ func (rt *_router) getLastMessage(w http.ResponseWriter, r *http.Request, ps htt
 	_, err := checkAuth(rt, r)
 	if err != nil {
 		http.Error(w, "Token non valido", http.StatusUnauthorized)
-		return
-	}
-
-	token := r.Header.Get("Authorization")
-	token = strings.TrimPrefix(token, "Bearer ")
-	if err != nil {
-		http.Error(w, "Utente non trovato", http.StatusNotFound)
 		return
 	}
 

@@ -174,7 +174,7 @@ paths:
     get:
       tags:
         - utente
-      operationId: getMessage
+      operationId: getMe
       summary: Ottieni informazioni sull'utente loggato
       description: >
         Ottiene le informazioni sull'utente loggato.
@@ -334,6 +334,64 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Conversation"
+
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "500": { $ref: "#/components/responses/InternalServerError" }
+
+  /conversation/{conversationID}/photo:
+    parameters:
+      - $ref: "#/components/parameters/conversationID"
+
+    post:
+      tags:
+        - conversazione
+      operationId: sendPhoto
+      summary: invia una foto 
+      description: >
+        Invia una foto alla conversazione specificata.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                photo:
+                  type: string
+                  format: binary
+              required:
+                - photo
+      responses:
+        "204":
+          description: Foto inviata correttamente
+          
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "500": { $ref: "#/components/responses/InternalServerError" }
+
+  /conversation/{conversationID}/photo/{messageID}:
+    parameters:
+      - $ref: "#/components/parameters/conversationID"
+      - $ref: "#/components/parameters/messageID"
+
+    get:
+      tags:
+        - conversazione
+      operationId: getConversationPhoto
+      summary: Ottieni una foto inviata in una conversazione
+      description: >
+        Ottiene una foto inviata in una conversazione specifica.
+      responses:
+        "200":
+          description: Foto della conversazione
+          content:
+            image/jpeg:
+              schema:
+                type: string
+                format: binary
 
         "400": { $ref: "#/components/responses/BadRequest" }
         "401": { $ref: "#/components/responses/Unauthorized" }
@@ -515,7 +573,7 @@ paths:
     get:
       tags:
         - messaggio
-      operationId: getMessageReactions
+      operationId: getComments
       summary: Ottieni le reazioni a un messaggio
       description: >
         Ottiene tutte le reazioni a un messaggio specifico.
@@ -668,14 +726,14 @@ paths:
         "401": { $ref: "#/components/responses/Unauthorized" }
         "500": { $ref: "#/components/responses/InternalServerError" }
 
-  /group/{groupID}/member:
+  /conversation/{conversationID}/member:
     parameters:
       - $ref: "#/components/parameters/groupID"
 
     get:
       tags:
         - gruppo
-      operationId: getGroupMembers
+      operationId: getConversationMembers
       summary: Ottieni i membri di un gruppo
       description: >
         Ottiene tutti i membri di un gruppo specifico.
@@ -790,10 +848,6 @@ paths:
         "404": { $ref: "#/components/responses/NotFound" }
         "401": { $ref: "#/components/responses/Unauthorized" }
         "500": { $ref: "#/components/responses/InternalServerError" }
-
-  /group/{groupID}/photo/:
-    parameters:
-      - $ref: "#/components/parameters/groupID"
 
     get:
       tags:

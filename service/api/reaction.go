@@ -10,7 +10,7 @@ import (
 	"github.com/julienschmidt/httprouter"
 )
 
-func (rt *_router) addReaction(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+func (rt *_router) commentMessage(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	w.Header().Set("Content-Type", "application/json")
 
 	// auth control
@@ -53,7 +53,7 @@ func (rt *_router) addReaction(w http.ResponseWriter, r *http.Request, ps httpro
 	w.WriteHeader(http.StatusOK)
 }
 
-func (rt *_router) deleteReaction(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+func (rt *_router) uncommentMessage(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	w.Header().Set("Content-Type", "application/json")
 
 	// auth control
@@ -78,7 +78,7 @@ func (rt *_router) deleteReaction(w http.ResponseWriter, r *http.Request, ps htt
 	w.WriteHeader(http.StatusOK)
 }
 
-func (rt *_router) getReactions(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+func (rt *_router) getComments(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	w.Header().Set("Content-Type", "application/json")
 
 	// auth control

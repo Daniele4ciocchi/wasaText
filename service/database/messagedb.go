@@ -127,7 +127,7 @@ func (db *appdbimpl) GetMessageStatus(messageID int) (int, error) {
 	}
 
 	var users []utils.User
-	users, err = db.GetGroupMembers(mess.ConversationID)
+	users, err = db.GetConversationMembers(mess.ConversationID)
 	if err != nil {
 		return 0, err
 	}
@@ -173,7 +173,7 @@ func (db *appdbimpl) SetSendedMessage(messageID int) error {
 	}
 
 	var users []utils.User
-	users, err = db.GetGroupMembers(mess.ConversationID)
+	users, err = db.GetConversationMembers(mess.ConversationID)
 	if err != nil {
 		return err
 	}

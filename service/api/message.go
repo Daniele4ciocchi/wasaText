@@ -4,8 +4,10 @@ import (
 	"database/sql"
 	"encoding/json"
 	"errors"
+	"io"
 	"log"
 	"net/http"
+	"os"
 	"strconv"
 	"strings"
 
@@ -143,13 +145,6 @@ func (rt *_router) sendPhoto(w http.ResponseWriter, r *http.Request, ps httprout
 
 	path := strmessageID + strconvID
 
-	// Aggiorna il path nel DB
-	_, err = rt.db.AddPhoto(user.ID, convID, path, 0)
-	if err != nil {
-		http.Error(w, "Errore nella modifica della foto", http.StatusInternalServerError)
-		return
-	}
-
 	// Salva il file
 	path, err = utils.SaveFile(path, file)
 	if err != nil {
@@ -157,7 +152,68 @@ func (rt *_router) sendPhoto(w http.ResponseWriter, r *http.Request, ps httprout
 		return
 	}
 
+	// Aggiorna il path nel DB
+	_, err = rt.db.AddPhoto(user.ID, convID, path, 0)
+	if err != nil {
+		http.Error(w, "Errore nella modifica della foto", http.StatusInternalServerError)
+		return
+	}
+
 	w.WriteHeader(http.StatusOK)
+}
+func (rt *_router) getConversationPhoto(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	w.Header().Set("Content-Type", "application/json")
+
+	// Controlla se il token è valido e se si trova all'interno del db
+	_, err := checkAuth(rt, r)
+	if err != nil {
+		http.Error(w, "Token non valido", http.StatusUnauthorized)
+		return
+	}
+
+	convID, err := strconv.Atoi(ps.ByName("conversationID"))
+	if err != nil {
+		http.Error(w, "ID conversazione non valido", http.StatusBadRequest)
+		return
+	}
+
+	messageID, err := strconv.Atoi(ps.ByName("messageID"))
+	if err != nil {
+		http.Error(w, "ID messaggio non valido", http.StatusBadRequest)
+		return
+	}
+
+	message, err := rt.db.GetMessage(messageID)
+	if err != nil {
+		http.Error(w, "Errore durante il recupero del messaggio", http.StatusInternalServerError)
+		return
+	}
+
+	if message.ConversationID != convID {
+		http.Error(w, "Messaggio non trovato nella conversazione", http.StatusNotFound)
+		return
+	}
+
+	if message.Content == "" {
+		http.Error(w, "Nessuna foto associata a questo messaggio", http.StatusNotFound)
+		return
+	}
+
+	file, err := os.Open(message.Content)
+	if err != nil {
+		http.Error(w, "Foto non trovata", http.StatusNotFound)
+		return
+	}
+	defer file.Close()
+
+	w.WriteHeader(http.StatusOK)
+
+	// Scrive il contenuto del file nella risposta
+	_, err = io.Copy(w, file)
+	if err != nil {
+		http.Error(w, "Errore durante la scrittura della foto", http.StatusInternalServerError)
+		return
+	}
 }
 
 func (rt *_router) deleteMessage(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {

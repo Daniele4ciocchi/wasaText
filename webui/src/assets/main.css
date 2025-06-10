@@ -35,6 +35,20 @@
 	fill: currentcolor;
 }
 
+button {
+    padding: 5px 10px;
+    border: none;
+    background-color: #d7f2ba;
+    color: black;
+    border-radius: 10px;
+    cursor: pointer;
+    border: #888 1px solid;
+}
+
+button:hover {
+    background-color: #bde4a8;
+}
+
 .nav-scroller {
 	position: relative;
 	z-index: 2;

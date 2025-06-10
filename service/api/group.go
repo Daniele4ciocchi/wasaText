@@ -277,37 +277,6 @@ func (rt *_router) setGroupPhoto(w http.ResponseWriter, r *http.Request, ps http
 	w.WriteHeader(http.StatusOK)
 }
 
-func (rt *_router) getGroupMembers(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	w.Header().Set("Content-Type", "application/json")
-
-	// auth control
-	_, err := checkAuth(rt, r)
-	if err != nil {
-		http.Error(w, "Token non valido", http.StatusUnauthorized)
-		return
-	}
-
-	groupID, err := strconv.Atoi(ps.ByName("groupID"))
-	if err != nil {
-		http.Error(w, "ID del gruppo non valido", http.StatusBadRequest)
-		return
-	}
-
-	var members []utils.User
-	members, err = rt.db.GetGroupMembers(groupID)
-	if err != nil {
-		http.Error(w, "Errore durante il recupero dei membri del gruppo", http.StatusInternalServerError)
-		return
-	}
-
-	if err := json.NewEncoder(w).Encode(members); err != nil {
-		http.Error(w, "Errore nella codifica JSON", http.StatusInternalServerError)
-		return
-	}
-	w.WriteHeader(http.StatusOK)
-
-}
-
 func (rt *_router) addToGroup(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	w.Header().Set("Content-Type", "application/json")
 

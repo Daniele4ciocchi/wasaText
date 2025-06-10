@@ -6,10 +6,10 @@ import axios from 'axios'
 // Stato reattivo per le conversazioni
 const route = useRoute()
 
-const token = localStorage.getItem('token')
-const name = localStorage.getItem('name')
-const username = localStorage.getItem('username')
-
+const token = ref(localStorage.getItem("token"));
+const name = ref(localStorage.getItem("name"));
+const username = ref(localStorage.getItem("username"));
+const user_id = ref(localStorage.getItem("user_id"));
 
 watch(
 	() => route.params.conversation_id,
@@ -79,7 +79,7 @@ export default {}
 
 					</ul>
 
-					
+
 
 				</div>
 			</nav>

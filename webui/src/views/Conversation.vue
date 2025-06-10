@@ -1,7 +1,16 @@
 <template>
+
     <div class="conversation">
+
+        <!-- header pagina -->
         <div class="header">
             <img :src="conversationImage" alt="Foto profilo" style="width: 40px; height:40px; border-radius: 10px;" />
+            <button v-if="conversation.is_group" @click="groupPhotoPopup = true">
+                <svg class="feather">
+                    <use href="/feather-sprite-v4.29.0.svg#edit" />
+                </svg>
+            </button>
+
             <h1 id="convName">{{ conversation.name }}</h1>
             <button class="leave" v-if="conversation.is_group" @click="leaveGroup">
                 <svg class="feather">
@@ -11,19 +20,40 @@
             </button>
         </div>
 
+        <!-- conversazione -->
         <div class="messages" id="messagesContainer">
-            <div v-if="!forward && !photo" v-for="(message, index) in messages" :key="index"
+            <div v-if="!forwardPopup && !photoPopup && !groupPhotoPopup && !reactionPopup"
+                v-for="(message, index) in messages" :key="index"
                 :class="['message', message.sender === name ? 'user' : 'receiver']">
                 <div v-if="message.replied_message_id">
                     <p class="replied-message">
                         {{ getMessageById(message.replied_message_id).sender }}:
-                        {{ getMessageById(message.replied_message_id).content }}
+                        {{ (getMessageById(message.replied_message_id).photo ==
+                            false) ? getMessageById(message.replied_message_id).content : "photo" }}
                     </p>
                 </div>
-                <p class="sender">{{ message.sender }}</p>
-                <p class="content">{{ message.content }}</p>
-                <p class="timestamp">{{ new Date(message.timestamp).toLocaleString() }}</p>
 
+                <!-- contenuto del messaggio in caso di testo -->
+                <div v-if="!message.photo" class="normal-message">
+
+                    <p class="sender">{{ message.sender }}</p>
+                    <p class="content">{{ message.content }}</p>
+                    <p class="timestamp">{{ new Date(message.timestamp).toLocaleString() }}</p>
+
+
+                </div>
+
+                <!-- contenuto del messaggio in caso di immagine -->
+                <div v-else class="photo-message">
+
+                    <p class="sender">{{ message.sender }}</p>
+                    <img :src="message.photoUrl" alt="Foto del messaggio"
+                        style="max-width: 100%; border-radius: 10px;" />
+                    <p class="timestamp">{{ new Date(message.timestamp).toLocaleString() }}</p>
+
+                </div>
+
+                <!-- footer del messaggio  -->
                 <div class="message-footer">
                     <div v-if="message.sender === name" class="view">
                         <svg v-if="message.status === 0" class="feather">
@@ -38,7 +68,7 @@
 
                     </div>
 
-                    <button class="reply-btn" @click="replyMessage(message.message_id, message.content)">
+                    <button class="reply-btn" @click="replyMessage(message)">
                         <svg class="feather">
                             <use href="/feather-sprite-v4.29.0.svg#repeat" />
                         </svg>
@@ -54,29 +84,51 @@
                             <use href="/feather-sprite-v4.29.0.svg#corner-down-right" />
                         </svg>
                     </button>
+                    <button>
+                        <svg class="feather" @click="reactionPopup = true">
+                            <use href="/feather-sprite-v4.29.0.svg#plus-circle" />
+                        </svg>
+                    </button>
                 </div>
-
             </div>
-            <div class="backpopup" v-if="forward">
+
+            <!-- popup per inoltro messaggi -->
+            <div class="backpopup" v-if="forwardPopup">
                 <div class="popup">
 
                     <div class="popup-header">
                         <h3>invia a</h3>
-                        <button @click="forward = false">
+                        <button id="exit-button" @click="forwardPopup = false">
                             <svg class="feather">
                                 <use href="/feather-sprite-v4.29.0.svg#x" />
                             </svg>
                         </button>
                     </div>
                     <div class="popup-content">
-                        <ul>
-                            <li v-for="conv in conversations" class="users">
-                                <label>
-                                    <input type="checkbox" :value="conv" v-model="forwardList" />
-                                    {{ conv.name }}
-                                </label>
-                            </li>
-                        </ul>
+                        <div v-if="groups.length != 0" class="popup-content-conversations">
+                            <h4>Gruppi</h4>
+                            <ul>
+                                <li v-for="group in groups" class="users">
+                                    <label>
+                                        <input type="checkbox" :value="conv" v-model="forwardGroupsList" />
+                                        {{ group.name }}
+                                    </label>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="popup-content-users">
+                            <h4>Utenti</h4>
+                            <ul>
+                                <li v-for="user in users" class="users">
+                                    <label>
+                                        <input type="checkbox" :value="user" v-model="forwardUsersList" />
+                                        {{ user.name }}
+                                    </label>
+                                </li>
+                            </ul>
+
+                        </div>
+
                     </div>
                     <div class="popup-footer">
                         <button @click="forwardMessage">
@@ -87,11 +139,13 @@
 
                 </div>
             </div>
-            <div class="backpopup" v-if="photo">
+
+            <!-- popup per invio di foto -->
+            <div class="backpopup" v-if="photoPopup">
                 <div class="popup">
                     <div class="popup-header">
                         <h3>Carica una foto</h3>
-                        <button @click="photo = false">
+                        <button id="exit-button" @click="photoPopup = false">
                             <svg class="feather">
                                 <use href="/feather-sprite-v4.29.0.svg#x" />
                             </svg>
@@ -105,22 +159,73 @@
                             invia
                         </button>
                     </div>
-
                 </div>
-
             </div>
+
+            <!-- popup per impostare la foto di un gruppo -->
+            <div class="backpopup" v-if="groupPhotoPopup">
+                <div class="popup">
+                    <div class="popup-header">
+                        <h3>Carica una foto</h3>
+                        <button id="exit-button" @click="groupPhotoPopup = false">
+                            <svg class="feather">
+                                <use href="/feather-sprite-v4.29.0.svg#x" />
+                            </svg>
+                        </button>
+                    </div>
+                    <div class="popup-content">
+                        <input type="file" @change="" accept="image/*" />
+                    </div>
+                    <div class="popup-footer">
+                        <button @click="">
+                            imposta immagine del gruppo
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- popup per aggiungere una reazione -->
+            <div class="backpopup" v-if="reactionPopup">
+                <div class="popup">
+                    <div class="popup-header">
+                        <h3>aggiungi una reazione</h3>
+                        <button id="exit-button" @click="reactionPopup = false">
+                            <svg class="feather">
+                                <use href="/feather-sprite-v4.29.0.svg#x" />
+                            </svg>
+                        </button>
+                    </div>
+                    <div class="popup-content">
+                        <ul id="reaction">
+                            <li v-for="reaction in ['👍', '❤️', '😂', '😮', '😢', '😡']" :key="reaction">
+                                <button @click="">
+                                    {{ reaction }}
+                                </button>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="popup-footer">
+                        <button @click="">
+                            imposta reazione al messaggio
+                        </button>
+                    </div>
+                </div>
+            </div>
+
         </div>
 
-        <div v-if="replyID" class="reply-info">
+        <!-- barra del messaggio risposto -->
+        <div v-if="replyedMessage.replied_message_id" class="reply-info">
             <p>
-                risposta a: {{ replyContent }}
+                risposta a: {{ (replyedMessage.photo == 0) ? replyedMessage.content : "photo" }}
             </p>
-            <button @click="replyID = null; replyContent = ''">Annulla</button>
+            <button @click="replyedMessage.replied_message_id = null; replyedMessage.content = ''">Annulla</button>
         </div>
 
+        <!-- barra di inserimento -->
         <div class="input-area">
             <input v-model="newMessage" type="text" placeholder="Scrivi un messaggio..." @keyup.enter="sendMessage" />
-            <button id="photo" @click="photo = true">
+            <button id="photo" @click="photoPopup = true">
                 <svg class="feather">
                     <use href="/feather-sprite-v4.29.0.svg#image" />
                 </svg>
@@ -131,43 +236,49 @@
                 </svg>
             </button>
         </div>
-
-        <div class="user-list" v-if="conversation.is_group">
-            <h2>Utenti nella conversazione</h2>
-            <ul>
-                <li v-for="user in members" :key="user.name">
-                    {{ user.name }}
-                </li>
-            </ul>
-        </div>
-
+        
+        <!-- lista degli utenti  -->
+        <MembersList v-if="conversation.is_group" :conversation="conversation" :conversationID="conversationID"/>
+        
 
 
     </div>
 </template>
 
 <script>
+import MembersList from '@/components/MembersList.vue';
+import Chat from '@/components/Chat.vue';
 export default {
     name: 'Conversation',
+    components: {
+        MembersList,
+        Chat
+    },
     data() {
         return {
-            conversationID: this.$route.params.conversationID,
             conversation: {},
             conversationImage: '',
-            members: [],
-            conversations: [],
+            groups: [],
+            users: [],
             messages: [],
+
             newMessage: '',
-            replyID: null,
-            replyContent: '',
-            forward: false,
-            photo: false,
+            replyedMessage: {},
+
+            forwardPopup: false,
+            photoPopup: false,
+            groupPhotoPopup: false,
+            reactionPopup: false,
+
             photoUrl: '',
-			selectedFile: null,
-			previewImage: null,
-            forwardList: [],
+            selectedFile: null,
+            previewImage: null,
+            forwardGroupsList: [],
+            forwardUsersList: [],
+
             forwardMessageId: null,
 
+            conversationID: this.$route.params.conversationID,
             token: localStorage.getItem("token"),
             name: localStorage.getItem("name"),
             username: localStorage.getItem("username"),
@@ -184,7 +295,6 @@ export default {
                     headers: { Authorization: `Bearer ${this.token}` }
                 })
                 this.conversation = res.data
-                await this.fetchMembers()
                 await this.fetchPhoto()
             } catch (err) {
                 console.error('Errore nel caricamento della conversazione:', err)
@@ -203,8 +313,6 @@ export default {
                 }
             } else {
                 try {
-                    console.log("Utenti disponibili:", this.members)
-
                     const user = this.members.find(user => user.name === this.conversation.name);
                     const res = await this.$axios.get(`/user/${user.user_id}/photo`, {
                         headers: { Authorization: `Bearer ${this.token}` },
@@ -216,14 +324,20 @@ export default {
                 }
             }
         },
-        async fetchMembers() {
+
+        async fetchUsers() {
+            this.loading = true;
             try {
-                const res = await this.$axios.get(`/group/${this.conversationID}/member`, {
-                    headers: { Authorization: `Bearer ${this.token}` }
-                })
-                this.members = res.data
+                const response = await this.$axios.get("/user", {
+                    headers: {
+                        Authorization: `Bearer ${this.token}`,
+                    },
+                });
+                this.users = response.data;
             } catch (err) {
-                console.error('Errore nel caricamento degli utenti:', err)
+                this.error = "Errore nel recupero degli utenti";
+            } finally {
+                this.loading = false;
             }
         },
         async fetchMessages() {
@@ -232,16 +346,28 @@ export default {
                     headers: { Authorization: `Bearer ${this.token}` }
                 })
                 this.messages = res.data
+
             } catch (err) {
                 console.error('Errore nel caricamento dei messaggi:', err)
             }
-            this.$nextTick(() => {
-                this.scrollToBottom()
-            })
+            for (const message of this.messages) {
+                if (message.photo == true) {
+                    try {
+                        const res = await this.$axios.get(`/conversation/${message.conversation_id}/photo/${message.message_id}`, {
+                            headers: { Authorization: `Bearer ${this.token}` },
+                            responseType: 'blob'
+                        })
+                        message.photoUrl = URL.createObjectURL(res.data);
+                    } catch (err) {
+                        console.error('Errore nel caricamento della foto del messaggio:', err)
+                    }
+                }
+                this.$nextTick(() => {
+                    this.scrollToBottom()
+                })
 
-        },
-        async fetchPhotoMessage(){
-            
+
+            }
         },
         uploadImage(e) {
             const file = e.target.files[0];
@@ -254,33 +380,44 @@ export default {
             };
         },
         async sendImage() {
-			this.message = '';
-			this.error = '';
+            this.message = '';
+            this.error = '';
 
-			if (!this.selectedFile) {
-				this.error = 'Seleziona un file prima di caricare.';
-				return;
-			}
+            if (!this.selectedFile) {
+                this.error = 'Seleziona un file prima di caricare.';
+                return;
+            }
 
-			const formData = new FormData();
-			formData.append('photo', this.selectedFile);  // metti il file originale qui
+            const formData = new FormData();
+            formData.append('photo', this.selectedFile);  // metti il file originale qui
 
-			try {
-				const response = await this.$axios.post(`/conversation/${this.conversationID}/photo`, formData, {
-					headers: {
-						Authorization: `Bearer ${this.token}`,
-						"Content-Type": "multipart/form-data",
-					},
-				});
-				this.message = 'Foto profilo caricata con successo!';
-			} catch (err) {
-				this.error = 'Errore durante il caricamento della foto profilo.';
-			}
-		},
+            if (this.replyedMessage.replied_message_id) {
+                formData.append('reply_message_id', this.replyedMessage.message_id);
+            }
+
+
+            try {
+                const response = await this.$axios.post(`/conversation/${this.conversationID}/photo`, formData,
+                    {
+
+                        headers: {
+                            Authorization: `Bearer ${this.token}`,
+                            "Content-Type": "multipart/form-data",
+                        },
+                    });
+                this.message = 'Foto profilo caricata con successo!';
+            } catch (err) {
+                this.error = 'Errore durante il caricamento della foto profilo.';
+            }
+            this.photoPopup = false;
+            this.selectedFile = null;  // resetta il file selezionato
+            this.scrollToBottom()
+            this.fetchMessages()
+        },
         async sendMessage() {
 
             const messageToSend = {
-                replied_message_id: this.replyID,
+                replied_message_id: this.replyedMessage.replied_message_id,
                 content: this.newMessage,
                 sender: this.name,
                 timestamp: new Date().toISOString()
@@ -305,14 +442,13 @@ export default {
                 console.error("Errore durante l'invio del messaggio:", err)
             }
 
-            this.replyID = null
-            this.replyContent = ''
+            this.replyedMessage.replied_message_id = null
+            this.replyedMessage.content = ''
 
         },
-
-        replyMessage(messageId, messageContent) {
-            this.replyID = messageId
-            this.replyContent = messageContent
+        replyMessage(message) {
+            this.replyedMessage.replied_message_id = message.message_id
+            this.replyedMessage.content = message.content
         },
         async fetchMyConversations() {
             this.loading = true;
@@ -322,26 +458,28 @@ export default {
                         Authorization: `Bearer ${this.token}`,
                     },
                 });
-                this.conversations = response.data;
+                this.groups = response.data;
             } catch (err) {
                 this.error = "Errore nel recupero degli utenti";
             } finally {
                 this.loading = false;
             }
-            for (const conv of this.conversations) {
+            for (const conv of this.groups) {
                 if (conv.name === this.name) {
                     this.users.splice(this.users.indexOf(user), 1);
                 }
             }
+            this.groups = this.groups.filter(conv => conv.is_group === true)
         },
         async forwardMessage(messageId) {
-            if (this.forward === false) {
-                this.forward = true
+            if (this.forwardPopup === false) {
+                this.forwardPopup = true
                 this.forwardMessageId = messageId
-                this.fetchMyConversations()
+                await this.fetchMyConversations()
+                await this.fetchUsers()
                 return
             } else {
-                for (const conv of this.forwardList) {
+                for (const conv of this.forwardGroupsList) {
                     try {
                         await this.$axios.post(
                             `/message/${this.forwardMessageId}/forwarded`,
@@ -360,17 +498,75 @@ export default {
                         console.error("Errore durante l'invio del messaggio:", err)
                     }
                 }
-                this.forwardList = []
+
+                for (const user of this.forwardUsersList) {
+                    try {
+                        const response = await this.$axios.post("/conversation",
+                            { name: user.name },
+                            {
+                                headers: {
+                                    Authorization: `Bearer ${this.token}`,
+                                },
+                            }
+                        );
+
+                        const conversation = response.data;
+                        try {
+                            await this.$axios.post(
+                                `/message/${this.forwardMessageId}/forwarded`,
+                                {
+                                    receiver_id: conversation.conversation_id,
+                                },
+                                { headers: { Authorization: `Bearer ${this.token}` } }
+                            )
+
+                            this.newMessage = ''
+                            this.$nextTick(() => {
+                                this.scrollToBottom()
+                                this.fetchMessages()
+                            })
+                        } catch (err) {
+                            console.error("Errore durante l'invio del messaggio:", err)
+                        }
+                    } catch (err) {
+                        if (err.response?.status === 409 && err.response?.data?.conversation_id) {
+                            try {
+                                await this.$axios.post(
+                                    `/message/${this.forwardMessageId}/forwarded`,
+                                    {
+                                        receiver_id: err.response.data.conversation_id,
+                                    },
+                                    { headers: { Authorization: `Bearer ${this.token}` } }
+                                )
+
+                                this.newMessage = ''
+                                this.$nextTick(() => {
+                                    this.scrollToBottom()
+                                    this.fetchMessages()
+                                })
+
+                            } catch (err) {
+                                console.error("Errore durante l'invio del messaggio:", err)
+                            }
+                        } else {
+                            console.error("Errore nella creazione della conversazione", err);
+                            this.error = "Impossibile avviare la conversazione.";
+                        }
+                    }
+
+                }
+                this.forwardGroupsList = []
+                this.forwardUsersList = []
                 this.forwardMessageId = null
-                this.forward = false
+                this.forwardPopup = false
 
             }
 
         },
         closeForwardMessage() {
-            this.forwardList = []
+            this.forwardGroupsList = []
             this.forwardMessageId = null
-            this.forward = false
+            this.forwardPopup = false
         },
         async deleteMessage(messageId) {
             try {
@@ -530,6 +726,21 @@ export default {
     align-self: flex-start;
 }
 
+.photo-message {
+    width: 200px;
+    height: 200px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    border-radius: 10px;
+}
+
+.photo-message img {
+    max-height: 600px;
+
+    border-radius: 10px;
+}
+
 .replied-message {
     background-color: #e2e3e5;
     border-radius: 10px;
@@ -545,6 +756,9 @@ export default {
 
 .content {
     margin: 5px 0;
+    border: #888 1px solid;
+    border-radius: 10px;
+    padding: 5px;
 }
 
 .input-area {
@@ -552,14 +766,7 @@ export default {
     gap: 10px;
 }
 
-.user-list {
-    margin-top: 20px;
-    padding: 10px;
-    border: 1px solid #888;
-    border-radius: 15px;
-    background-color: #f4f6f8;
-    justify-content: center;
-}
+
 
 .backpopup {
     position: relative;
@@ -615,6 +822,14 @@ export default {
     margin: 0;
 }
 
+#reaction {
+    font-size: 40px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+}
+
 .popup-footer {
     position: bottom fixed;
     display: flex;
@@ -631,19 +846,6 @@ input {
     color: black;
 }
 
-button {
-    padding: 5px 10px;
-    border: none;
-    background-color: #d7f2ba;
-    color: black;
-    border-radius: 10px;
-    cursor: pointer;
-    border: #888 1px solid;
-}
-
-button:hover {
-    background-color: #bde4a8;
-}
 
 #replies {
     align-items: left;

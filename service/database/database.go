@@ -58,6 +58,7 @@ type AppDatabase interface {
 	GetConversation(id int) (utils.Conversation, error)
 	GetConversations(id int) ([]utils.Conversation, error)
 	GetConversationByName(sender string, reciver string) (utils.Conversation, error)
+	GetConversationMembers(id int) ([]utils.User, error)
 	CheckExistingConversation(id1 int, id2 int) (int, error)
 
 	// group
@@ -68,7 +69,7 @@ type AppDatabase interface {
 	CheckExistingGroup(name string) (utils.Group, error)
 	AddUserToGroup(userID int, groupID int) error
 	RemoveUserFromGroup(userID int, groupID int) error
-	GetGroupMembers(id int) ([]utils.User, error)
+
 	LeaveGroup(userID int, groupID int) error
 	SetGroupName(id int, name string) error
 	GetGroupPhoto(id int) (string, error)

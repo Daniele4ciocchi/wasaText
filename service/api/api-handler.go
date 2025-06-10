@@ -24,11 +24,13 @@ func (rt *_router) Handler() http.Handler {
 	rt.router.PUT("/me/photo", rt.setMyPhoto)       // SetMyPhoto
 
 	// conversation
-	rt.router.POST("/conversation", rt.addConversation)                     // addConversation ?
-	rt.router.GET("/conversation/:conversationID", rt.getConversation)      // getConversation
-	rt.router.GET("/conversation/:conversationID/message", rt.getMessages)  // getMessages
-	rt.router.POST("/conversation/:conversationID/message", rt.sendMessage) // sendMessage
-	rt.router.POST("/conversation/:conversationID/photo", rt.sendPhoto)     // setConversationPhoto
+	rt.router.POST("/conversation", rt.addConversation)                                      // addConversation ?
+	rt.router.GET("/conversation/:conversationID", rt.getConversation)                       // getConversation
+	rt.router.GET("/conversation/:conversationID/member", rt.getConversationMembers)         // getGroupMembers
+	rt.router.GET("/conversation/:conversationID/message", rt.getMessages)                   // getMessages
+	rt.router.POST("/conversation/:conversationID/message", rt.sendMessage)                  // sendMessage
+	rt.router.POST("/conversation/:conversationID/photo", rt.sendPhoto)                      // setConversationPhoto
+	rt.router.GET("/conversation/:conversationID/photo/:messageID", rt.getConversationPhoto) // getConversationPhoto DA AGGIUNGERE
 	rt.router.GET("/conversation/:conversationID/lastmessage", rt.getLastMessage)
 	rt.router.POST("/message/:messageID/forwarded", rt.forwardMessage) // forwardMessage ?
 	rt.router.GET("/me/newmessage", rt.getNewMessages)                 // getNewMessage
@@ -44,14 +46,12 @@ func (rt *_router) Handler() http.Handler {
 	rt.router.DELETE("/message/:messageID/reaction/:reactionID", rt.deleteReaction) // deleteReaction
 
 	// groups
-	rt.router.GET("/group/:groupID", rt.getGroup)               // getGroup
-	rt.router.POST("/group", rt.createGroup)                    // createGroup
-	rt.router.DELETE("/group/:groupID", rt.leaveGroup)          // leaveGroup
-	rt.router.GET("/group/:groupID/member", rt.getGroupMembers) // getGroupMembers
-	rt.router.POST("/group/:groupID/member", rt.addToGroup)     // addGroupMembers
-	rt.router.POST("/group/:groupID/name", rt.setGroupName)     // setGroupName
-	rt.router.GET("/group/:groupID/photo", rt.getGroupPhoto)    // getGroupPhoto
-	rt.router.POST("/group/:groupID/photo", rt.setGroupPhoto)   // setGroupPhoto
+	rt.router.GET("/group/:groupID", rt.getGroup)             // getGroup
+	rt.router.POST("/group", rt.createGroup)                  // createGroup
+	rt.router.DELETE("/group/:groupID", rt.leaveGroup)        // leaveGroup
+	rt.router.POST("/group/:groupID/name", rt.setGroupName)   // setGroupName
+	rt.router.GET("/group/:groupID/photo", rt.getGroupPhoto)  // getGroupPhoto
+	rt.router.POST("/group/:groupID/photo", rt.setGroupPhoto) // setGroupPhoto
 
 	// Special routes
 	rt.router.GET("/liveness", rt.liveness)

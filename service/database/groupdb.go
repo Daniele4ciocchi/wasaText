@@ -106,29 +106,6 @@ func (db *appdbimpl) RemoveUserFromGroup(userID int, groupID int) error {
 	return nil
 }
 
-func (db *appdbimpl) GetGroupMembers(groupID int) ([]utils.User, error) {
-	rows, err := db.c.Query("SELECT u.id, u.name, u.username FROM user_conversations uc JOIN users u ON uc.user_id = u.id WHERE uc.conversation_id = ?", groupID)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-
-	var members []utils.User
-	for rows.Next() {
-		var member utils.User
-		if err := rows.Scan(&member.ID, &member.Name, &member.Username); err != nil {
-			return nil, err
-		}
-		members = append(members, member)
-	}
-
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-
-	return members, nil
-}
-
 func (db *appdbimpl) LeaveGroup(userID int, groupID int) error {
 	_, err := db.c.Exec("DELETE FROM user_conversations WHERE user_id = ? AND conversation_id = ?", userID, groupID)
 	if err != nil {

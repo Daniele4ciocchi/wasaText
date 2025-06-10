@@ -82,3 +82,26 @@ func (db *appdbimpl) GetConversationByName(sender string, reciver string) (utils
 	}
 	return conv, nil
 }
+
+func (db *appdbimpl) GetConversationMembers(groupID int) ([]utils.User, error) {
+	rows, err := db.c.Query("SELECT u.id, u.name, u.username FROM user_conversations uc JOIN users u ON uc.user_id = u.id WHERE uc.conversation_id = ?", groupID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var members []utils.User
+	for rows.Next() {
+		var member utils.User
+		if err := rows.Scan(&member.ID, &member.Name, &member.Username); err != nil {
+			return nil, err
+		}
+		members = append(members, member)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return members, nil
+}

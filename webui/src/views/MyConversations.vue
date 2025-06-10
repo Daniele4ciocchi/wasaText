@@ -86,7 +86,7 @@ export default {
         },
         async getMembers(conversation) {
             try {
-                const res = await this.$axios.get(`/group/${conversation.conversation_id}/member`, {
+                const res = await this.$axios.get(`/conversation/${conversation.conversation_id}/member`, {
                     headers: { Authorization: `Bearer ${this.token}` },
                 })
                 conversation.members = res.data

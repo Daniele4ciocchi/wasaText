@@ -201,3 +201,34 @@ func (rt *_router) getConversation(w http.ResponseWriter, r *http.Request, ps ht
 	w.WriteHeader(http.StatusOK)
 
 }
+
+func (rt *_router) getConversationMembers(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	w.Header().Set("Content-Type", "application/json")
+
+	// auth control
+	_, err := checkAuth(rt, r)
+	if err != nil {
+		http.Error(w, "Token non valido", http.StatusUnauthorized)
+		return
+	}
+
+	conversationID, err := strconv.Atoi(ps.ByName("conversationID"))
+	if err != nil {
+		http.Error(w, "ID della conversazione non valido", http.StatusBadRequest)
+		return
+	}
+
+	var members []utils.User
+	members, err = rt.db.GetConversationMembers(conversationID)
+	if err != nil {
+		http.Error(w, "Errore durante il recupero dei membri del gruppo", http.StatusInternalServerError)
+		return
+	}
+
+	if err := json.NewEncoder(w).Encode(members); err != nil {
+		http.Error(w, "Errore nella codifica JSON", http.StatusInternalServerError)
+		return
+	}
+	w.WriteHeader(http.StatusOK)
+
+}

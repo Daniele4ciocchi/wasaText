@@ -85,7 +85,7 @@
                         </svg>
                     </button>
                     <button>
-                        <svg class="feather" @click="reactionPopup = true">
+                        <svg class="feather" @click="reactMessage(message.message_id)">
                             <use href="/feather-sprite-v4.29.0.svg#plus-circle" />
                         </svg>
                     </button>
@@ -198,14 +198,14 @@
                     <div class="popup-content">
                         <ul id="reaction">
                             <li v-for="reaction in ['👍', '❤️', '😂', '😮', '😢', '😡']" :key="reaction">
-                                <button @click="">
+                                <button @click="this.reactionContent = reaction">
                                     {{ reaction }}
                                 </button>
                             </li>
                         </ul>
                     </div>
                     <div class="popup-footer">
-                        <button @click="">
+                        <button @click=" reactMessage(reactMessageID)">
                             imposta reazione al messaggio
                         </button>
                     </div>
@@ -236,10 +236,10 @@
                 </svg>
             </button>
         </div>
-        
+
         <!-- lista degli utenti  -->
-        <MembersList v-if="conversation.is_group" :conversation="conversation" :conversationID="conversationID"/>
-        
+        <MembersList v-if="conversation.is_group" :conversation="conversation" :conversationID="conversationID" />
+
 
 
     </div>
@@ -247,12 +247,10 @@
 
 <script>
 import MembersList from '@/components/MembersList.vue';
-import Chat from '@/components/Chat.vue';
 export default {
     name: 'Conversation',
     components: {
         MembersList,
-        Chat
     },
     data() {
         return {
@@ -275,6 +273,8 @@ export default {
             previewImage: null,
             forwardGroupsList: [],
             forwardUsersList: [],
+            reactionContent: '',
+            reactMessageID: null,
 
             forwardMessageId: null,
 
@@ -324,7 +324,6 @@ export default {
                 }
             }
         },
-
         async fetchUsers() {
             this.loading = true;
             try {
@@ -561,6 +560,30 @@ export default {
                 this.forwardPopup = false
 
             }
+
+        },
+        async reactMessage(messageId) {
+            if (this.reactionPopup === false) {
+                this.reactionPopup = true
+                this.reactMessageID = messageId
+                return
+            }
+            else {
+                try {
+                    await this.$axios.post(`/message/${messageId}/reaction`, 
+                    {
+                        user_id: this.user_id,
+                        content: this.reactionContent,
+                        message_id: messageId,
+                    },
+                    { headers: { Authorization: `Bearer ${this.token}` } }
+                    )
+                    this.reactionContent = ''
+                } catch (err) {
+                    console.error("Errore durante l'invio della reazione:", err)
+                }
+            }
+
 
         },
         closeForwardMessage() {

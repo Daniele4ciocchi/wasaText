@@ -280,14 +280,14 @@ func (rt *_router) setGroupPhoto(w http.ResponseWriter, r *http.Request, ps http
 func (rt *_router) addToGroup(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	w.Header().Set("Content-Type", "application/json")
 
-	// auth control
+	// Auth
 	_, err := checkAuth(rt, r)
 	if err != nil {
 		http.Error(w, "Token non valido", http.StatusUnauthorized)
 		return
 	}
 
-	groupID, err := strconv.Atoi(ps.ByName("groupID"))
+	groupID, err := strconv.Atoi(ps.ByName("conversationID"))
 	if err != nil {
 		http.Error(w, "ID del gruppo non valido", http.StatusBadRequest)
 		return
@@ -303,6 +303,7 @@ func (rt *_router) addToGroup(w http.ResponseWriter, r *http.Request, ps httprou
 	for _, member := range newMembers {
 		err = rt.db.AddUserToGroup(member.ID, groupID)
 		if err != nil {
+
 			http.Error(w, "Errore durante l'aggiunta dell'utente al gruppo", http.StatusInternalServerError)
 			return
 		}

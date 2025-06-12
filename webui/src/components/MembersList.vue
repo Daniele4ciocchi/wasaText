@@ -1,8 +1,40 @@
 <template>
-    <div class="users-list">
+    <div class="users-list" v-if="addUser">
         <div class="users-list-header">
             <h2>Utenti nella conversazione</h2>
-            <button>
+            <button @click="addUser = !addUser">
+                <svg class="feather">
+                    <use href="/feather-sprite-v4.29.0.svg#x" />
+                </svg>
+            </button>
+        </div>
+        <div class="users-list-content">
+            <h2>{{ this.users.length != 0? "seleziona gli utenti da aggiungere" : "nessun utente disponibile"  }}</h2>
+
+            <ul>
+                <li v-for="user in users" :key="user.name">
+
+                    <label>
+                        <input type="checkbox" :value="user" v-model="selectedUsers" />
+                        {{ user.name }}
+                    </label>
+                </li>
+            </ul>
+            
+
+            <button v-if="this.users.length != 0" @click="addUser = !addUser, addMembers()">
+                aggiungi
+            </button>
+
+        </div>
+
+
+
+    </div>
+    <div class="users-list" v-if="!addUser">
+        <div class="users-list-header">
+            <h2>Utenti nella conversazione</h2>
+            <button @click="addUser = !addUser; getUsers()">
                 <svg class="feather">
                     <use href="/feather-sprite-v4.29.0.svg#user-plus" />
                 </svg>
@@ -30,14 +62,16 @@ export default {
             type: [String, Number],
             required: true,
         },
-        token: {
-            type: String,
-            default: localStorage.getItem("token"),
-        },
+
     },
     data() {
         return {
             members: [],
+            addUser: false,
+            users: [],
+            selectedUsers: [],
+
+            token: localStorage.getItem("token"),
         };
     },
     mounted() {
@@ -55,7 +89,43 @@ export default {
             } catch (error) {
                 console.error("Errore nel recupero degli utenti:", error);
             }
+
         },
+        async getUsers() {
+            try {
+                const response = await this.$axios.get('/user', {
+                    headers: {
+                        Authorization: `Bearer ${this.token}`,
+                    },
+                });
+                this.users = response.data;
+            } catch (error) {
+                console.error("Errore nel recupero degli utenti:", error);
+            }
+
+            this.users = this.users.filter(user =>
+                !this.members.some(member => member.user_id === user.user_id)
+            );
+        },
+
+        async addMembers() {
+            try {
+                const response = await this.$axios.post(
+                    `/conversation/${this.conversationID}/member`,
+                    this.selectedUsers, // dati da inviare
+                    {
+                        headers: {
+                            Authorization: `Bearer ${this.token}`,
+                        },
+                    }
+                );
+                // Aggiorna la lista membri dopo l'aggiunta
+                await this.getMembers();
+                this.selectedUsers = [];
+            } catch (error) {
+                console.error("Errore nell'aggiunta di un utente:", error);
+            }
+        }
     },
 };
 </script>
@@ -103,6 +173,7 @@ export default {
 
 .users-list-header {
     display: flex;
+    justify-content:space-between;
     align-items: left;
     margin-bottom: 10px;
     gap: 10px;

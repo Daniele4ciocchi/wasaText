@@ -2,7 +2,7 @@
     <!-- conversazione -->
     <div class="messages" id="messagesContainer">
         <div v-if="!forwardPopup && !photoPopup && !groupPhotoPopup && !reactionPopup"
-            v-for="(message, index) in messages" :key="index"
+            v-for="(message, index) in messages" v-bind:key="index"
             :class="['message', message.sender === name ? 'user' : 'receiver']">
             <div v-if="message.replied_message_id">
                 <p class="replied-message">
@@ -85,7 +85,7 @@
                     <div v-if="groups.length != 0" class="popup-content-conversations">
                         <h4>Gruppi</h4>
                         <ul>
-                            <li v-for="group in groups" class="users">
+                            <li v-for="group in groups" class="users" v-bind:key="group.id"> >
                                 <label>
                                     <input type="checkbox" :value="conv" v-model="forwardGroupsList" />
                                     {{ group.name }}
@@ -96,7 +96,7 @@
                     <div class="popup-content-users">
                         <h4>Utenti</h4>
                         <ul>
-                            <li v-for="user in users" class="users">
+                            <li v-for="user in users" v-bind:key="user.id" class="users">
                                 <label>
                                     <input type="checkbox" :value="user" v-model="forwardUsersList" />
                                     {{ user.name }}
@@ -204,32 +204,184 @@ export default {
             type: [String, Number],
             required: true,
         },
-        token: {
-            type: String,
-            default: localStorage.getItem("token"),
-        },
-        name: {
-            type: String,
-            default: localStorage.getItem("name"),
-        },
+
     },
     data() {
         return {
             messages: [],
+
             forwardPopup: false,
             photoPopup: false,
             groupPhotoPopup: false,
             reactionPopup: false,
+
             forwardGroupsList: [],
             forwardUsersList: [],
             groups: [],
             users: [],
+
+            token: localStorage.getItem("token"),
+            name: localStorage.getItem("name"),
         };
     },
     mounted() {
 
     },
     methods: {
+        async leaveGroup() {
+            try {
+                await this.$axios.delete(`/group/${this.conversationID}`, {
+                    headers: { Authorization: `Bearer ${this.token}` }
+                })
+                alert('Sei uscito dal gruppo')
+                window.location.href = '/'
+            } catch (err) {
+                console.error("Errore durante l'uscita dal gruppo:", err)
+            }
+        },
+        replyMessage(message) {
+            this.replyedMessage.replied_message_id = message.message_id
+            this.replyedMessage.content = message.content
+        },
+        async deleteMessage(messageId) {
+            try {
+                await this.$axios.delete(`/message/${messageId}`, {
+                    headers: { Authorization: `Bearer ${this.token}` }
+                })
+                this.messages = this.messages.filter((m) => m.message_id !== messageId)
+            } catch (err) {
+                console.error("Errore durante l'eliminazione del messaggio:", err)
+            }
+            this.fetchMessages()
+        },
+        async forwardMessage(messageId) {
+            if (this.forwardPopup === false) {
+                this.forwardPopup = true
+                this.forwardMessageId = messageId
+                await this.fetchMyConversations()
+                await this.fetchUsers()
+                return
+            } else {
+                for (const conv of this.forwardGroupsList) {
+                    try {
+                        await this.$axios.post(
+                            `/message/${this.forwardMessageId}/forwarded`,
+                            {
+                                receiver_id: conv.conversation_id,
+                            },
+                            { headers: { Authorization: `Bearer ${this.token}` } }
+                        )
+
+                        this.newMessage = ''
+                        this.$nextTick(() => {
+                            this.scrollToBottom()
+                            this.fetchMessages()
+                        })
+                    } catch (err) {
+                        console.error("Errore durante l'invio del messaggio:", err)
+                    }
+                }
+
+                for (const user of this.forwardUsersList) {
+                    try {
+                        const response = await this.$axios.post("/conversation",
+                            { name: user.name },
+                            {
+                                headers: {
+                                    Authorization: `Bearer ${this.token}`,
+                                },
+                            }
+                        );
+
+                        const conversation = response.data;
+                        try {
+                            await this.$axios.post(
+                                `/message/${this.forwardMessageId}/forwarded`,
+                                {
+                                    receiver_id: conversation.conversation_id,
+                                },
+                                { headers: { Authorization: `Bearer ${this.token}` } }
+                            )
+
+                            this.newMessage = ''
+                            this.$nextTick(() => {
+                                this.scrollToBottom()
+                                this.fetchMessages()
+                            })
+                        } catch (err) {
+                            console.error("Errore durante l'invio del messaggio:", err)
+                        }
+                    } catch (err) {
+                        if (err.response?.status === 409 && err.response?.data?.conversation_id) {
+                            try {
+                                await this.$axios.post(
+                                    `/message/${this.forwardMessageId}/forwarded`,
+                                    {
+                                        receiver_id: err.response.data.conversation_id,
+                                    },
+                                    { headers: { Authorization: `Bearer ${this.token}` } }
+                                )
+
+                                this.newMessage = ''
+                                this.$nextTick(() => {
+                                    this.scrollToBottom()
+                                    this.fetchMessages()
+                                })
+
+                            } catch (err) {
+                                console.error("Errore durante l'invio del messaggio:", err)
+                            }
+                        } else {
+                            console.error("Errore nella creazione della conversazione", err);
+                            this.error = "Impossibile avviare la conversazione.";
+                        }
+                    }
+
+                }
+                this.forwardGroupsList = []
+                this.forwardUsersList = []
+                this.forwardMessageId = null
+                this.forwardPopup = false
+
+            }
+
+        },
+        async sendImage() {
+            this.message = '';
+            this.error = '';
+
+            if (!this.selectedFile) {
+                this.error = 'Seleziona un file prima di caricare.';
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('photo', this.selectedFile);  // metti il file originale qui
+
+            if (this.replyedMessage.replied_message_id) {
+                formData.append('reply_message_id', this.replyedMessage.message_id);
+            }
+
+
+            try {
+                const response = await this.$axios.post(`/conversation/${this.conversationID}/photo`, formData,
+                    {
+
+                        headers: {
+                            Authorization: `Bearer ${this.token}`,
+                            "Content-Type": "multipart/form-data",
+                        },
+                    });
+                this.message = 'Foto profilo caricata con successo!';
+            } catch (err) {
+                this.error = 'Errore durante il caricamento della foto profilo.';
+            }
+            this.photoPopup = false;
+            this.selectedFile = null;  // resetta il file selezionato
+            this.scrollToBottom()
+            this.fetchMessages()
+        },
+
     },
 }
 </script>

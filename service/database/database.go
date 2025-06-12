@@ -153,6 +153,7 @@ func New(db *sql.DB) (AppDatabase, error) {
 					    conversation_id INTEGER NOT NULL,
 					    FOREIGN KEY (user_id) REFERENCES users(id),
 					    FOREIGN KEY (conversation_id) REFERENCES conversations(id)
+						UNIQUE (user_id, conversation_id)
 					);
 					
 					CREATE TABLE reactions (

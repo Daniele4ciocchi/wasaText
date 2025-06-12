@@ -68,6 +68,7 @@ paths:
         content:
           application/json:
             schema:
+              description: User name for login
               type: object
               properties:
                 name:
@@ -83,6 +84,7 @@ paths:
           content:
             application/json:
               schema:
+                description: User identifier
                 type: object
                 properties:
                   identifier:
@@ -109,6 +111,7 @@ paths:
           content:
             application/json:
               schema:
+                description: Lista di utenti
                 type: array
                 items:
                   $ref: "#/components/schemas/User"
@@ -390,6 +393,7 @@ paths:
           content:
             image/jpeg:
               schema:
+                description: Foto della conversazione
                 type: string
                 format: binary
 
@@ -728,7 +732,7 @@ paths:
 
   /conversation/{conversationID}/member:
     parameters:
-      - $ref: "#/components/parameters/groupID"
+      - $ref: "#/components/parameters/conversationID"
 
     get:
       tags:

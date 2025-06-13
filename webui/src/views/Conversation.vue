@@ -47,7 +47,8 @@
 
         <!-- conversazione -->
         <div class="container">
-            <div v-if="!forwardPopup && !photoPopup && !groupPhotoPopup && !reactionPopup" class="messages" id="messagesContainer">
+            <div v-if="!forwardPopup && !photoPopup && !groupPhotoPopup && !reactionPopup" class="messages"
+                id="messagesContainer">
                 <div v-for="(message, index) in messages" :key="index"
                     :class="['message', message.sender === name ? 'user' : 'receiver']">
                     <div v-if="message.replied_message_id">
@@ -115,11 +116,22 @@
                             </svg>
                         </button>
                     </div>
-                    <div class = "message-reactions" v-if="message.reactions">
+                    <div class="message-reactions" v-if="message.reactions">
                         <span v-for="reaction in message.reactions" :key="reaction.reaction_id" class="reaction">
-                            {{ reaction.content }}
+                            {{ reaction.content }} {{ reaction.users.length }}
+
+                            <button v-if="reaction.users.some(user => user.user_id == this.user_id)"
+                                @click="deletereaction(message.message_id, reaction.users.find(user => user.user_id == this.user_id).reaction_id)"
+                                class="reaction-delete-button">
+                                <svg class="feather">
+                                    <use href="/feather-sprite-v4.29.0.svg#x" />
+                                </svg>
+                            </button>
+
+
                         </span>
                     </div>
+
                 </div>
             </div>
 
@@ -617,15 +629,37 @@ export default {
             this.reactionPopup = false
             this.fetchMessages()
         },
+        async deletereaction(messageId, reactionId) {
+            try {
+                await this.$axios.delete(`message/${messageId}/reaction/${reactionId}`,
+                    { headers: { Authorization: `Bearer ${this.token}` } }
+                )
+
+            } catch (err) {
+                console.error("Errore durante l'eliminazione della reazione:", err)
+            }
+            this.fetchMessages()
+        },
         async getMessageReaction(messageId) {
             try {
                 const res = await this.$axios.get(`/message/${messageId}/reaction`, {
                     headers: { Authorization: `Bearer ${this.token}` }
                 });
-                return res.data;
+
+                const reactions = res.data;
+
+                const grouped = Object.values(reactions.reduce((acc, { content, user_id, reaction_id }) => {
+                    if (!acc[content]) {
+                        acc[content] = { content, users: [] };
+                    }
+                    acc[content].users.push({ user_id, reaction_id });
+                    return acc;
+                }, {}));
+
+                return grouped;
 
             } catch (err) {
-                console.error("Errore nel recupero delle reazioni:", err)
+                console.error("Errore nel recupero delle reazioni:", err);
             }
         },
         async changeGroupName() {
@@ -837,14 +871,22 @@ export default {
     gap: 10px;
 }
 
-.message-reactions{
+.message-reactions {
     display: flex;
     justify-content: left;
     margin-top: 5px;
     gap: 1px;
 }
 
-.reaction{
+.reaction-delete-button .feather{
+    height: 10px;
+    width: 10px;
+    padding: 0px;
+    margin: 0px;
+    border: ;
+}
+
+.reaction {
     border: #888 1px solid;
     padding: 2px 8px;
     border-radius: 10px;

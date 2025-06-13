@@ -225,7 +225,7 @@ func (rt *_router) getGroupPhoto(w http.ResponseWriter, r *http.Request, ps http
 
 func (rt *_router) setGroupPhoto(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	// Auth
-	id, err := checkAuth(rt, r)
+	_, err := checkAuth(rt, r)
 	if err != nil {
 		http.Error(w, "Token non valido", http.StatusUnauthorized)
 		return
@@ -268,7 +268,7 @@ func (rt *_router) setGroupPhoto(w http.ResponseWriter, r *http.Request, ps http
 	}
 
 	// Aggiorna il path nel DB
-	err = rt.db.SetGroupPhoto(id, path)
+	err = rt.db.SetGroupPhoto(group.ID, path)
 	if err != nil {
 		http.Error(w, "Errore nella modifica della foto", http.StatusInternalServerError)
 		return

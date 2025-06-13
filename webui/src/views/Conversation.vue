@@ -4,91 +4,123 @@
 
         <!-- header pagina -->
         <div class="header">
-            <img :src="conversationImage" alt="Foto profilo" style="width: 40px; height:40px; border-radius: 10px;" />
-            <button v-if="conversation.is_group" @click="groupPhotoPopup = true">
-                <svg class="feather">
-                    <use href="/feather-sprite-v4.29.0.svg#edit" />
-                </svg>
-            </button>
+            <div class="header-left">
+                <img :src="conversationImage" alt="Foto profilo"
+                    style="width: 40px; height:40px; border-radius: 10px;" />
+                <button v-if="conversation.is_group" @click="groupPhotoPopup = true">
+                    <svg class="feather">
+                        <use href="/feather-sprite-v4.29.0.svg#edit" />
+                    </svg>
+                </button>
 
-            <h1 id="convName">{{ conversation.name }}</h1>
-            <button class="leave" v-if="conversation.is_group" @click="leaveGroup">
-                <svg class="feather">
-                    <use href="/feather-sprite-v4.29.0.svg#x" />
-                </svg>
-                Esci dal gruppo
-            </button>
+
+
+            </div>
+
+            <div class="header-center">
+                <h1 id="convName">{{ conversation.name }}</h1>
+
+                <button v-if="!boolGroupName && this.conversation.is_group" @click="boolGroupName = true">
+                    <svg class="feather">
+                        <use href="/feather-sprite-v4.29.0.svg#edit-3" />
+                    </svg>
+                </button>
+
+                <div v-if="boolGroupName">
+                    <input v-model="newGroupName" type="text" placeholder="nuovo nome..."
+                        @keyup.enter="changeGroupName" />
+                    <button @click="changeGroupName">invia</button>
+                </div>
+
+            </div>
+
+            <div class="header-right">
+                <button class="leave" v-if="conversation.is_group" @click="leaveGroup">
+                    <svg class="feather">
+                        <use href="/feather-sprite-v4.29.0.svg#x" />
+                    </svg>
+                    Esci dal gruppo
+                </button>
+            </div>
+
         </div>
 
         <!-- conversazione -->
-        <div class="messages" id="messagesContainer">
-            <div v-if="!forwardPopup && !photoPopup && !groupPhotoPopup && !reactionPopup"
-                v-for="(message, index) in messages" :key="index"
-                :class="['message', message.sender === name ? 'user' : 'receiver']">
-                <div v-if="message.replied_message_id">
-                    <p class="replied-message">
-                        {{ getMessageById(message.replied_message_id).sender }}:
-                        {{ (getMessageById(message.replied_message_id).photo ==
-                            false) ? getMessageById(message.replied_message_id).content : "photo" }}
-                    </p>
-                </div>
+        <div class="container">
+            <div v-if="!forwardPopup && !photoPopup && !groupPhotoPopup && !reactionPopup" class="messages" id="messagesContainer">
+                <div v-for="(message, index) in messages" :key="index"
+                    :class="['message', message.sender === name ? 'user' : 'receiver']">
+                    <div v-if="message.replied_message_id">
+                        <p class="replied-message">
+                            {{ getMessageById(message.replied_message_id).sender }},
+                            {{ (getMessageById(message.replied_message_id).photo == false) ?
+                                getMessageById(message.replied_message_id).content : "photo" }}
+                        </p>
+                    </div>
 
-                <!-- contenuto del messaggio in caso di testo -->
-                <div v-if="!message.photo" class="normal-message">
+                    <!-- contenuto del messaggio in caso di testo -->
+                    <div v-if="!message.photo" class="normal-message">
 
-                    <p class="sender">{{ message.sender }}</p>
-                    <p class="content">{{ message.content }}</p>
-                    <p class="timestamp">{{ new Date(message.timestamp).toLocaleString() }}</p>
+                        <p class="sender">{{ message.sender }}</p>
+                        <p class="content">{{ message.content }}</p>
+                        <p class="timestamp">{{ new Date(message.timestamp).toLocaleString() }}</p>
 
-
-                </div>
-
-                <!-- contenuto del messaggio in caso di immagine -->
-                <div v-else class="photo-message">
-
-                    <p class="sender">{{ message.sender }}</p>
-                    <img :src="message.photoUrl" alt="Foto del messaggio"
-                        style="max-width: 100%; border-radius: 10px;" />
-                    <p class="timestamp">{{ new Date(message.timestamp).toLocaleString() }}</p>
-
-                </div>
-
-                <!-- footer del messaggio  -->
-                <div class="message-footer">
-                    <div v-if="message.sender === name" class="view">
-                        <svg v-if="message.status === 0" class="feather">
-                            <use href="/feather-sprite-v4.29.0.svg#check" />
-                        </svg>
-                        <svg v-if="message.status === 1" class="feather">
-                            <use href="/feather-sprite-v4.29.0.svg#check-circle" />
-                        </svg>
-                        <svg v-if="message.status === 2" class="feather">
-                            <use href="/feather-sprite-v4.29.0.svg#check-square" />
-                        </svg>
 
                     </div>
 
-                    <button class="reply-btn" @click="replyMessage(message)">
-                        <svg class="feather">
-                            <use href="/feather-sprite-v4.29.0.svg#repeat" />
-                        </svg>
-                    </button>
-                    <button v-if="message.sender === name" class="delete-btn"
-                        @click="deleteMessage(message.message_id)">
-                        <svg class="feather">
-                            <use href="/feather-sprite-v4.29.0.svg#trash" />
-                        </svg>
-                    </button>
-                    <button class="forward-btn" @click="forwardMessage(message.message_id)">
-                        <svg class="feather">
-                            <use href="/feather-sprite-v4.29.0.svg#corner-down-right" />
-                        </svg>
-                    </button>
-                    <button>
-                        <svg class="feather" @click="reactMessage(message.message_id)">
-                            <use href="/feather-sprite-v4.29.0.svg#plus-circle" />
-                        </svg>
-                    </button>
+                    <!-- contenuto del messaggio in caso di immagine -->
+                    <div v-else class="photo-message">
+
+                        <p class="sender">{{ message.sender }}</p>
+                        <img :src="message.photoUrl" alt="Foto del messaggio"
+                            style="max-width: 100%; border-radius: 10px;" />
+                        <p class="timestamp">{{ new Date(message.timestamp).toLocaleString() }}</p>
+
+                    </div>
+
+                    <!-- footer del messaggio  -->
+                    <div class="message-footer">
+                        <div v-if="message.sender === name" class="view">
+                            <svg v-if="message.status === 0" class="feather">
+                                <use href="/feather-sprite-v4.29.0.svg#check" />
+                            </svg>
+                            <svg v-if="message.status === 1" class="feather">
+                                <use href="/feather-sprite-v4.29.0.svg#check-circle" />
+                            </svg>
+                            <svg v-if="message.status === 2" class="feather">
+                                <use href="/feather-sprite-v4.29.0.svg#check-square" />
+                            </svg>
+
+                        </div>
+
+                        <button class="reply-btn" @click="replyMessage(message)">
+                            <svg class="feather">
+                                <use href="/feather-sprite-v4.29.0.svg#repeat" />
+                            </svg>
+                        </button>
+                        <button v-if="message.sender === name" class="delete-btn"
+                            @click="deleteMessage(message.message_id)">
+                            <svg class="feather">
+                                <use href="/feather-sprite-v4.29.0.svg#trash" />
+                            </svg>
+                        </button>
+                        <button class="forward-btn" @click="forwardMessage(message.message_id)">
+                            <svg class="feather">
+                                <use href="/feather-sprite-v4.29.0.svg#corner-down-right" />
+                            </svg>
+                        </button>
+                        <button>
+                            <svg class="feather" @click="reactMessage(message.message_id)">
+                                <use href="/feather-sprite-v4.29.0.svg#plus-circle" />
+                            </svg>
+                        </button>
+                    </div>
+                    <div class = "message-reactions" v-if="message.reactions">
+                        <div v-for="reaction in message.reactions" v-bind:key="reaction.reaction_id">
+                            <p>{{ reaction.content }}</p>
+                        </div>
+
+                    </div>
                 </div>
             </div>
 
@@ -108,7 +140,7 @@
                         <div v-if="groups.length != 0" class="popup-content-conversations">
                             <h4>Gruppi</h4>
                             <ul>
-                                <li v-for="group in groups" class="users">
+                                <li v-for="group in groups" :key="group.conversation_id" class="users">
                                     <label>
                                         <input type="checkbox" :value="conv" v-model="forwardGroupsList" />
                                         {{ group.name }}
@@ -119,7 +151,7 @@
                         <div class="popup-content-users">
                             <h4>Utenti</h4>
                             <ul>
-                                <li v-for="user in users" class="users">
+                                <li v-for="user in users" :key="user.user_id" class="users">
                                     <label>
                                         <input type="checkbox" :value="user" v-model="forwardUsersList" />
                                         {{ user.name }}
@@ -135,8 +167,6 @@
                             invia
                         </button>
                     </div>
-
-
                 </div>
             </div>
 
@@ -174,10 +204,10 @@
                         </button>
                     </div>
                     <div class="popup-content">
-                        <input type="file" @change="" accept="image/*" />
+                        <input type="file" @change="uploadImage" accept="image/*" />
                     </div>
                     <div class="popup-footer">
-                        <button @click="">
+                        <button @click="changeGroupPhoto">
                             imposta immagine del gruppo
                         </button>
                     </div>
@@ -261,12 +291,14 @@ export default {
             messages: [],
 
             newMessage: '',
+            newGroupName: '',
             replyedMessage: {},
 
             forwardPopup: false,
             photoPopup: false,
             groupPhotoPopup: false,
             reactionPopup: false,
+            boolGroupName: false,
 
             photoUrl: '',
             selectedFile: null,
@@ -361,12 +393,14 @@ export default {
                         console.error('Errore nel caricamento della foto del messaggio:', err)
                     }
                 }
+                message.reactions = this.getMessageReaction(message.message_id)
                 this.$nextTick(() => {
                     this.scrollToBottom()
                 })
 
 
             }
+            console.log(this.messages)
         },
         uploadImage(e) {
             const file = e.target.files[0];
@@ -404,7 +438,7 @@ export default {
                             "Content-Type": "multipart/form-data",
                         },
                     });
-                this.message = 'Foto profilo caricata con successo!';
+                this.message = 'Foto caricata con successo!';
             } catch (err) {
                 this.error = 'Errore durante il caricamento della foto profilo.';
             }
@@ -570,21 +604,72 @@ export default {
             }
             else {
                 try {
-                    await this.$axios.post(`/message/${messageId}/reaction`, 
-                    {
-                        user_id: this.user_id,
-                        content: this.reactionContent,
-                        message_id: messageId,
-                    },
-                    { headers: { Authorization: `Bearer ${this.token}` } }
+                    await this.$axios.post(`/message/${messageId}/reaction`,
+                        {
+                            content: this.reactionContent,
+                        },
+                        { headers: { Authorization: `Bearer ${this.token}` } }
                     )
                     this.reactionContent = ''
                 } catch (err) {
                     console.error("Errore durante l'invio della reazione:", err)
                 }
             }
+            this.reactionPopup = false
 
+        },
+        async getMessageReaction(messageId) {
+            try {
+                const res = await this.$axios.get(`/message/${messageId}/reaction`, {
+                    headers: { Authorization: `Bearer ${this.token}` }
+                });
+                return res.data;
 
+            } catch (err) {
+                console.error("Errore nel recupero delle reazioni:", err)
+            }
+        },
+        async changeGroupName() {
+            try {
+                await this.$axios.put(`/group/${this.conversationID}/name`, {
+                    name: this.newGroupName
+                }, {
+                    headers: { Authorization: `Bearer ${this.token}` }
+                })
+            } catch (err) {
+                console.error("Errore durante l'aggiornamento del nome del gruppo:", err)
+            }
+            this.getConversation()
+            this.boolGroupName = false;
+            this.newGroupName = '';
+        },
+        async changeGroupPhoto() {
+            this.message = '';
+            this.error = '';
+
+            if (!this.selectedFile) {
+                this.error = 'Seleziona un file prima di caricare.';
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('photo', this.selectedFile);  // metti il file originale qui
+
+            try {
+                const response = await this.$axios.post(`/group/${this.conversationID}/photo`, formData,
+                    {
+                        headers: {
+                            Authorization: `Bearer ${this.token}`,
+                            "Content-Type": "multipart/form-data",
+                        },
+                    });
+                this.message = 'Foto caricata con successo!';
+            } catch (err) {
+                this.error = 'Errore durante il caricamento della foto profilo.';
+            }
+            this.groupPhotoPopup = false;
+            this.selectedFile = null;  // resetta il file selezionato
+            this.fetchPhoto()
         },
         closeForwardMessage() {
             this.forwardGroupsList = []
@@ -652,19 +737,34 @@ export default {
 #convName {
     font-size: 2em;
     text-align: left;
-    margin: 15px 0px;
+
 }
 
 .conversation {
     width: 100%;
-    margin: 0 auto;
+    margin: 0;
     font-family: Arial, sans-serif;
 }
 
 .header {
     display: flex;
+    justify-content: space-between;
     align-items: center;
-    gap: 20px;
+    margin-top: 10px
+}
+
+.header-left {
+    display: flex;
+    justify-content: left;
+    gap: 10px;
+}
+
+.header-center {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    height: 40px;
 }
 
 .reply-info {
@@ -699,17 +799,25 @@ export default {
     border-radius: 50px;
 }
 
-
-.messages {
+.container {
     border: 1px solid #888;
-
     height: 400px;
-    margin-bottom: 10px;
+    margin: 10px 0px;
+    padding: 0px;
     background-color: #f4f6f8;
-    display: flex;
-    flex-direction: column;
     overflow-y: auto;
     border-radius: 23px;
+
+}
+
+.messages {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 10px;
+    overflow-y: auto;
+    height: 100%;
+
 }
 
 

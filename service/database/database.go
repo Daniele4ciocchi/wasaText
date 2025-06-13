@@ -163,6 +163,7 @@ func New(db *sql.DB) (AppDatabase, error) {
 					    content TEXT NOT NULL,
 					    FOREIGN KEY (message_id) REFERENCES messages(id),
 					    FOREIGN KEY (user_id) REFERENCES users(id)
+						UNIQUE (message_id, user_id, content)
 					);
 
 					CREATE TABLE views (

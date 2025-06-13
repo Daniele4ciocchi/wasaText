@@ -31,7 +31,11 @@ func (rt *_router) commentMessage(w http.ResponseWriter, r *http.Request, ps htt
 		return
 	}
 
-	var reaction utils.Reaction
+	type newReaction struct {
+		Content string `json:"content"`
+	}
+
+	var reaction newReaction
 
 	messageID, err := strconv.Atoi(ps.ByName("messageID"))
 	if err != nil {

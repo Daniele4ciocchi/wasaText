@@ -7,6 +7,18 @@ servers:
   - url: http://127.0.0.1:3000
     description: Server di sviluppo in locale
 
+tags:
+  - name: login
+    description: Operazioni di autenticazione utente
+  - name: utente
+    description: Operazioni relative agli utenti
+  - name: conversazione
+    description: Operazioni relative alle conversazioni
+  - name: messaggio
+    description: Operazioni relative ai messaggi
+  - name: gruppo
+    description: Operazioni relative ai gruppi
+
   # This YAML file defines a set of API operations for a messaging application.
   # Below is a brief description of each operation:
   #
@@ -789,7 +801,7 @@ paths:
     parameters:
       - $ref: "#/components/parameters/groupID"
 
-    post:
+    put:
       tags:
         - gruppo
       operationId: setGroupName
@@ -986,10 +998,10 @@ components:
           description: La data e l'ora in cui il messaggio è stato inviato
           type: string
           format: date-time
-          pattern: ^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])\s(0\d|1\d|2[0-3]):([0-5]\d):([0-5]\d)$
+          pattern: ^[0-9]+-[0-9]+-[0-9]+[A-Za-z][0-9]+:[0-9]+:[A-Za-z0-9]+$ 
           example: "2023-10-01T12:00:00Z"
-          minLength: 19
-          maxLength: 19
+          minLength: 20
+          maxLength: 20
     Reaction:
       description: Rappresenta una reazione a un messaggio
       type: object
@@ -1005,7 +1017,7 @@ components:
         content:
           description: Il contenuto della reazione (emoji)
           type: string
-          pattern: ^(?:\p{Extended_Pictographic}|\p{Emoji_Presentation})+$  
+          pattern: ^.+$  
           example: "👍"
           minLength: 1
           maxLength: 1

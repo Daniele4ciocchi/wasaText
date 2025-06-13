@@ -1,51 +1,50 @@
 <template>
-    <div class="users-list" v-if="addUser">
-        <div class="users-list-header">
-            <h2>Utenti nella conversazione</h2>
-            <button @click="addUser = !addUser">
-                <svg class="feather">
-                    <use href="/feather-sprite-v4.29.0.svg#x" />
-                </svg>
-            </button>
+    <div>
+        <div class="users-list" v-if="addUser">
+            <div class="users-list-header">
+                <h2>Utenti nella conversazione</h2>
+                <button @click="addUser = !addUser">
+                    <svg class="feather">
+                        <use href="/feather-sprite-v4.29.0.svg#x" />
+                    </svg>
+                </button>
+            </div>
+            <div class="users-list-content">
+                <h2>{{ this.users.length != 0? "seleziona gli utenti da aggiungere" : "nessun utente disponibile"  }}</h2>
+
+                <ul>
+                    <li v-for="user in users" :key="user.name">
+
+                        <label>
+                            <input type="checkbox" :value="user" v-model="selectedUsers" />
+                            {{ user.name }}
+                        </label>
+                    </li>
+                </ul>
+                
+
+                <button v-if="this.users.length != 0" @click="addUser = !addUser, addMembers()">
+                    aggiungi
+                </button>
+
+            </div>
         </div>
-        <div class="users-list-content">
-            <h2>{{ this.users.length != 0? "seleziona gli utenti da aggiungere" : "nessun utente disponibile"  }}</h2>
-
-            <ul>
-                <li v-for="user in users" :key="user.name">
-
-                    <label>
-                        <input type="checkbox" :value="user" v-model="selectedUsers" />
-                        {{ user.name }}
-                    </label>
-                </li>
-            </ul>
-            
-
-            <button v-if="this.users.length != 0" @click="addUser = !addUser, addMembers()">
-                aggiungi
-            </button>
-
-        </div>
-
-
-
-    </div>
-    <div class="users-list" v-if="!addUser">
-        <div class="users-list-header">
-            <h2>Utenti nella conversazione</h2>
-            <button @click="addUser = !addUser; getUsers()">
-                <svg class="feather">
-                    <use href="/feather-sprite-v4.29.0.svg#user-plus" />
-                </svg>
-            </button>
-        </div>
-        <div class="users-list-content">
-            <ul>
-                <li v-for="member in members" :key="member.name">
-                    {{ member.name }}
-                </li>
-            </ul>
+        <div class="users-list" v-if="!addUser">
+            <div class="users-list-header">
+                <h2>Utenti nella conversazione</h2>
+                <button @click="addUser = !addUser; getUsers()">
+                    <svg class="feather">
+                        <use href="/feather-sprite-v4.29.0.svg#user-plus" />
+                    </svg>
+                </button>
+            </div>
+            <div class="users-list-content">
+                <ul>
+                    <li v-for="member in members" :key="member.name">
+                        {{ member.name }}
+                    </li>
+                </ul>
+            </div>
         </div>
     </div>
 </template>

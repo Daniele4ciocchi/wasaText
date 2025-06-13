@@ -116,10 +116,9 @@
                         </button>
                     </div>
                     <div class = "message-reactions" v-if="message.reactions">
-                        <div v-for="reaction in message.reactions" v-bind:key="reaction.reaction_id">
-                            <p>{{ reaction.content }}</p>
-                        </div>
-
+                        <span v-for="reaction in message.reactions" :key="reaction.reaction_id" class="reaction">
+                            {{ reaction.content }}
+                        </span>
                     </div>
                 </div>
             </div>
@@ -393,7 +392,7 @@ export default {
                         console.error('Errore nel caricamento della foto del messaggio:', err)
                     }
                 }
-                message.reactions = this.getMessageReaction(message.message_id)
+                message.reactions = await this.getMessageReaction(message.message_id)
                 this.$nextTick(() => {
                     this.scrollToBottom()
                 })
@@ -616,7 +615,7 @@ export default {
                 }
             }
             this.reactionPopup = false
-
+            this.fetchMessages()
         },
         async getMessageReaction(messageId) {
             try {
@@ -836,6 +835,20 @@ export default {
     flex-direction: row;
     justify-content: space-between;
     gap: 10px;
+}
+
+.message-reactions{
+    display: flex;
+    justify-content: left;
+    margin-top: 5px;
+    gap: 1px;
+}
+
+.reaction{
+    border: #888 1px solid;
+    padding: 2px 8px;
+    border-radius: 10px;
+    background: #fff;
 }
 
 .view {

@@ -1,4 +1,3 @@
-
 <template>
 	<div class="home">
 
@@ -13,50 +12,47 @@
 		</form>
 
 		<!-- Info utente -->
-		<form v-if="isLoggedIn">
-			<h2>
-				{{ username }}
-				<button v-if="changeUsername == false" class="btn btn-link" @click="changeUsername = true">
-					<svg class="feather">
-						<use href="/feather-sprite-v4.29.0.svg#edit-3" />
-					</svg>
-				</button>
-			</h2>
-			<div>
-				<img :src="photoUrl" alt="Foto profilo" style="width: 150px; height: 150px; border-radius: 50%;" />
-				<p>nome :  <strong>{{ name }}</strong></p>
+		<div v-if="isLoggedIn">
+			<h2>Profilo</h2>
+			<div class="user-profile">
+				<img :src="photoUrl" alt="Foto profilo" style="width: 150px; height: 150px; border-radius: 15px;" />
+				<div class="user-info">
+					<p>nome : <strong>{{ name }}</strong></p>
+					<p>username : <strong>{{ username }}</strong></p>
+					<button v-if="isLoggedIn" @click="logout" class="logout-button">
+						Logout
+					</button>
+				</div>
 			</div>
 
+			<div class="change">
+				<div class="change-username">
+					<div v-if="!changeUsername">
+						<h4 class="username">Cambia username</h4>
+						<button class="username-button" @click="changeUsername = true">Cambia</button>
+					</div>
+					<div>
+						<form v-if="changeUsername" @submit.prevent="submitUsernameChange">
+							<label for="newusername">Nuovo username:</label>
+							<input class="form-control" type="text" v-model="newusername" id="newusername" required />
+							<button class="btn btn-outline-success btn-lg" type="submit">Invia</button>
+						</form>
+						<button v-if="changeUsername" class="username-button" @click="changeUsername = false">Annulla</button>
+					</div>
 
-		</form>
-
-		<form v-if="isLoggedIn" @submit.prevent="uploadProfilePicture">
-			<div>
-				<label for="profilePicture">Carica una foto profilo:</label>
-				<input type="file" accept="image/jpeg" @change=uploadImage>
-
-			</div>
-			<button class="btn btn-primary btn-lg" type="submit">Carica</button>
-		</form>
-
-		<form v-if="isLoggedIn && changeUsername">
-
-			<div class="username">
-				<div>
-					<label for="username">username:</label>
-					<input class="form-control" id="username" v-model="newusername" required />
 
 				</div>
-				<button class="btn btn-secondary btn-lg username-button" @click.prevent="submitUsernameChange">
-					cambia il tuo username
-				</button>
+				<div class="change-photo">
+					<h4 class="username">Cambia foto profilo</h4>
+					<input type="file" @change="uploadImage" accept="image/*" />
+					<button @click="uploadProfilePicture">Carica Foto</button>
 
+				</div>
 			</div>
-		</form>
+		</div>
 
-		<button v-if="isLoggedIn" @click="logout" class="btn btn-outline-danger btn-lg ">
-			Logout
-		</button>
+
+
 
 		<!-- Messaggi -->
 		<div v-if="message" class="message">{{ message }}</div>
@@ -259,6 +255,49 @@ button {
 	padding: 8px;
 	font-size: 16px;
 	cursor: pointer;
+}
+
+.change {
+	display: flex;
+	gap: 20px;
+	margin-top: 20px;
+	border: #888 1px solid;
+	border-radius: 17px;
+	padding: 10px;
+	width: auto;
+	display: flex;
+
+}
+
+.change-username,
+.change-photo {
+	padding: 10px;
+	border: #888 1px solid;
+	border-radius: 15px;
+	background-color: #f4f6f8;
+	width: 100%;
+}
+
+.logout-button {
+	background-color: #f44336;
+	color: white;
+	border: none;
+	padding: 10px 20px;
+	cursor: pointer;
+	width: 100%;
+}
+
+.user-profile {
+	margin-top: 20px;
+	display: flex;
+	gap: 20px;
+}
+
+.user-info {
+	padding: 10px;
+	width: 400px;
+	border: #888 1px solid;
+	border-radius: 15px;
 }
 
 .message {

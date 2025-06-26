@@ -128,7 +128,6 @@
                                 </svg>
                             </button>
 
-
                         </span>
                     </div>
 
@@ -878,17 +877,24 @@ export default {
     gap: 1px;
 }
 
+.reaction-delete-button {
+    width: 20px;
+    cursor: pointer;
+    padding: 0px;
+    margin: 0px;
+}
+
 .reaction-delete-button .feather{
     height: 10px;
     width: 10px;
     padding: 0px;
     margin: 0px;
-    border: ;
+    
 }
 
 .reaction {
     border: #888 1px solid;
-    padding: 2px 8px;
+    padding: 2px 6px;
     border-radius: 10px;
     background: #fff;
 }

@@ -67,7 +67,7 @@ tags:
 paths:
   /session:
     post:
-      tags: 
+      tags:
         - login
       summary: Logs in the user
       description: |-
@@ -129,10 +129,17 @@ paths:
                   $ref: "#/components/schemas/User"
                 minItems: 0
                 maxItems: 200
+                example:
+                  - id: 1
+                    name: "Mario Rossi"
+                    email: "mario.rossi@example.com"
+                  - id: 2
+                    name: "Luca Bianchi"
+                    email: "luca.bianchi@example.com"
 
-        "401" : { $ref: "#/components/responses/Unauthorized" }
-        "500" : { $ref: "#/components/responses/InternalServerError" }
-    
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "500": { $ref: "#/components/responses/InternalServerError" }
+
   /user/{userID}:
     parameters:
       - $ref: "#/components/parameters/userID"
@@ -150,13 +157,18 @@ paths:
           description: Informazioni sull'utente
           content:
             application/json:
+              example:
+                user_id: 1
+                name: "Mario Rossi"
+                username: "RedMario"
+
               schema:
                 $ref: "#/components/schemas/User"
 
         "400": { $ref: "#/components/responses/BadRequest" }
-        "401" : { $ref: "#/components/responses/Unauthorized" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
         "404": { $ref: "#/components/responses/NotFound" }
-        "500" : { $ref: "#/components/responses/InternalServerError" }
+        "500": { $ref: "#/components/responses/InternalServerError" }
 
   /user/{userID}/photo:
     parameters:
@@ -185,7 +197,6 @@ paths:
         "500": { $ref: "#/components/responses/InternalServerError" }
 
   /me:
-
     get:
       tags:
         - utente
@@ -199,6 +210,17 @@ paths:
           description: Informazioni sull'utente loggato
           content:
             application/json:
+              example:
+                message_id: 4
+                sender_id: 3
+                sender: "Giovanni"
+                replied_message_id: 2
+                conversation_id: 3
+                content: "ciao"
+                photo: false
+                status: 2
+                timestamp: "2023-10-01T12:00:00Z"
+
               schema:
                 $ref: "#/components/schemas/Message"
 
@@ -207,7 +229,6 @@ paths:
         "500": { $ref: "#/components/responses/InternalServerError" }
 
   /me/username:
-    
     put:
       tags:
         - utente
@@ -236,14 +257,12 @@ paths:
       responses:
         "204":
           description: Nome utente impostato correttamente
-          
 
         "401": { $ref: "#/components/responses/Unauthorized" }
         "400": { $ref: "#/components/responses/BadRequest" }
         "500": { $ref: "#/components/responses/InternalServerError" }
 
   /me/photo:
-
     put:
       tags:
         - utente
@@ -262,7 +281,7 @@ paths:
       responses:
         "204":
           description: Foto del profilo impostata correttamente
-          
+
         "401": { $ref: "#/components/responses/Unauthorized" }
         "400": { $ref: "#/components/responses/BadRequest" }
         "500": { $ref: "#/components/responses/InternalServerError" }
@@ -282,6 +301,14 @@ paths:
           description: Elenco delle conversazioni
           content:
             application/json:
+              example:
+                - conversation_id: 2
+                  name: "scuola"
+                  is_group: true
+
+                - conversation_id: 3
+                  name: "Giovanni"
+                  is_group: false
               schema:
                 type: array
                 items:
@@ -302,6 +329,7 @@ paths:
         Crea una nuova conversazione tra gli utenti specificati.
         Restituisce la conversazione creata.
       requestBody:
+        description: il nome della conversazione
         required: true
         content:
           application/json:
@@ -315,7 +343,7 @@ paths:
                   example: "conversazione di lavoro"
                   minLength: 1
                   maxLength: 50
-                  
+
               required:
                 - name
       responses:
@@ -323,9 +351,13 @@ paths:
           description: Conversazione creata correttamente
           content:
             application/json:
+              example:
+                conversation_id: 3
+                name: "Giovanni"
+                is_group: false
               schema:
                 $ref: "#/components/schemas/Conversation"
-                  
+
         "400": { $ref: "#/components/responses/BadRequest" }
         "401": { $ref: "#/components/responses/Unauthorized" }
         "404": { $ref: "#/components/responses/NotFound" }
@@ -346,6 +378,11 @@ paths:
           description: Dettagli della conversazione
           content:
             application/json:
+              example:
+                conversation_id: 3
+                name: "Giovanni"
+                is_group: false
+
               schema:
                 $ref: "#/components/schemas/Conversation"
 
@@ -362,10 +399,11 @@ paths:
       tags:
         - conversazione
       operationId: sendPhoto
-      summary: invia una foto 
+      summary: invia una foto
       description: >
         Invia una foto alla conversazione specificata.
       requestBody:
+        description: si richiede la foto da inviare
         required: true
         content:
           application/json:
@@ -375,12 +413,13 @@ paths:
                 photo:
                   type: string
                   format: binary
+                  example: "https://example.com/images/avatar.png"
               required:
                 - photo
       responses:
         "204":
           description: Foto inviata correttamente
-          
+
         "400": { $ref: "#/components/responses/BadRequest" }
         "401": { $ref: "#/components/responses/Unauthorized" }
         "404": { $ref: "#/components/responses/NotFound" }
@@ -430,6 +469,26 @@ paths:
           description: Elenco dei messaggi
           content:
             application/json:
+              example:
+                - message_id: 4
+                  sender_id: 3
+                  sender: "Giovanni"
+                  replied_message_id: 2
+                  conversation_id: 3
+                  content: "ciao"
+                  photo: false
+                  status: 2
+                  timestamp: "2023-10-01T12:00:00Z"
+                - message_id: 5
+                  sender_id: 2
+                  sender: "Giovanni"
+                  replied_message_id: 2
+                  conversation_id: 3
+                  content: "ciao a te"
+                  photo: false
+                  status: 1
+                  timestamp: "2023-10-01T13:00:00Z"
+
               schema:
                 type: array
                 items:
@@ -451,9 +510,20 @@ paths:
         Invia un messaggio a una conversazione specifica.
         Restituisce l'ID del messaggio inviato.
       requestBody:
+        description: il messaggio da inviare
         required: true
         content:
           application/json:
+            example:
+              message_id: 4
+              sender_id: 3
+              sender: "Giovanni"
+              replied_message_id: 2
+              conversation_id: 3
+              content: "ciao"
+              photo: false
+              status: 2
+              timestamp: "2023-10-01T12:00:00Z"
             schema:
               $ref: "#/components/schemas/Message"
       responses:
@@ -461,6 +531,16 @@ paths:
           description: Messaggio inviato correttamente
           content:
             application/json:
+              example:
+                message_id: 4
+                sender_id: 3
+                sender: "Giovanni"
+                replied_message_id: 2
+                conversation_id: 3
+                content: "ciao"
+                photo: false
+                status: 2
+                timestamp: "2023-10-01T12:00:00Z"
               schema:
                 $ref: "#/components/schemas/Message"
 
@@ -486,6 +566,16 @@ paths:
           description: Dettagli dell'ultimo messaggio
           content:
             application/json:
+              example:
+                message_id: 4
+                sender_id: 3
+                sender: "Giovanni"
+                replied_message_id: 2
+                conversation_id: 3
+                content: "ciao"
+                photo: false
+                status: 2
+                timestamp: "2023-10-01T12:00:00Z"
               schema:
                 $ref: "#/components/schemas/Message"
 
@@ -507,6 +597,7 @@ paths:
         Inoltra un messaggio a una conversazione specifica.
         Restituisce l'ID del messaggio inoltrato.
       requestBody:
+        description: json contente l'id della conversazione di destinazione
         required: true
         content:
           application/json:
@@ -520,12 +611,12 @@ paths:
       responses:
         "204":
           description: Messaggio inoltrato correttamente
-          
+
         "400": { $ref: "#/components/responses/BadRequest" }
         "401": { $ref: "#/components/responses/Unauthorized" }
         "404": { $ref: "#/components/responses/NotFound" }
         "500": { $ref: "#/components/responses/InternalServerError" }
-    
+
   /me/newmessage:
     get:
       tags:
@@ -540,6 +631,25 @@ paths:
           description: Elenco dei nuovi messaggi
           content:
             application/json:
+              example:
+                - message_id: 4
+                  sender_id: 3
+                  sender: "Giovanni"
+                  replied_message_id: 2
+                  conversation_id: 3
+                  content: "ciao"
+                  photo: false
+                  status: 2
+                  timestamp: "2023-10-01T12:00:00Z"
+                - message_id: 5
+                  sender_id: 2
+                  sender: "Giovanni"
+                  replied_message_id: 2
+                  conversation_id: 3
+                  content: "ciao a te"
+                  photo: false
+                  status: 1
+                  timestamp: "2023-10-01T13:00:00Z"
               schema:
                 type: array
                 items:
@@ -598,13 +708,22 @@ paths:
           description: Elenco delle reazioni al messaggio
           content:
             application/json:
+              example:
+                - reaction_id: 1
+                  user_id: 3
+                  content: 👍
+                  message_id: 4
+                - reaction_id: 3
+                  user_id: 2
+                  content: 👍
+                  message_id: 5
+
               schema:
                 type: array
                 items:
                   $ref: "#/components/schemas/Reaction"
-                minItems: 0 
+                minItems: 0
                 maxItems: 500
-                
 
         "400": { $ref: "#/components/responses/BadRequest" }
         "401": { $ref: "#/components/responses/Unauthorized" }
@@ -618,15 +737,21 @@ paths:
       description: >
         Aggiunge un commento(reazione) a un messaggio specifico.
       requestBody:
+        description: json contenente le informazioni della reazione da inviare
         required: true
         content:
           application/json:
+            example:
+              reaction_id: 1
+              user_id: 3
+              content: 👍
+              message_id: 4
             schema:
               $ref: "#/components/schemas/Reaction"
       responses:
         "204":
           description: Commento aggiunto correttamente
-          
+
         "400": { $ref: "#/components/responses/BadRequest" }
         "401": { $ref: "#/components/responses/Unauthorized" }
         "404": { $ref: "#/components/responses/NotFound" }
@@ -647,7 +772,7 @@ paths:
       responses:
         "204":
           description: Commento rimosso correttamente
-          
+
         "400": { $ref: "#/components/responses/BadRequest" }
         "401": { $ref: "#/components/responses/Unauthorized" }
         "404": { $ref: "#/components/responses/NotFound" }
@@ -667,6 +792,10 @@ paths:
         description: nome e mebri del gruppo da creare
         content:
           application/json:
+            example:
+              name: "i più belli"
+              members: [1, 2, 5, 42]
+
             schema:
               type: object
               properties:
@@ -724,7 +853,7 @@ paths:
         "404": { $ref: "#/components/responses/NotFound" }
         "401": { $ref: "#/components/responses/Unauthorized" }
         "500": { $ref: "#/components/responses/InternalServerError" }
-    
+
     delete:
       tags:
         - gruppo
@@ -789,7 +918,6 @@ paths:
       responses:
         "204":
           description: Membro aggiunto correttamente
-          
 
         "400": { $ref: "#/components/responses/BadRequest" }
         "404": { $ref: "#/components/responses/NotFound" }
@@ -826,7 +954,7 @@ paths:
       responses:
         "204":
           description: Nome del gruppo impostato correttamente
-          
+
         "404": { $ref: "#/components/responses/NotFound" }
         "401": { $ref: "#/components/responses/Unauthorized" }
         "500": { $ref: "#/components/responses/InternalServerError" }
@@ -858,7 +986,7 @@ paths:
       responses:
         "204":
           description: Foto del gruppo impostata correttamente
-          
+
         "400": { $ref: "#/components/responses/BadRequest" }
         "404": { $ref: "#/components/responses/NotFound" }
         "401": { $ref: "#/components/responses/Unauthorized" }
@@ -879,7 +1007,6 @@ paths:
               schema:
                 type: string
                 format: binary
-          
 
         "400": { $ref: "#/components/responses/BadRequest" }
         "404": { $ref: "#/components/responses/NotFound" }
@@ -889,10 +1016,10 @@ paths:
 components:
   #schemi per definire oggetti
   securitySchemes:
-    bearerAuth: 
+    bearerAuth:
       type: http
       scheme: bearer
-      bearerFormat: JWT 
+      bearerFormat: JWT
 
   schemas:
     User:
@@ -900,7 +1027,7 @@ components:
       description: Rappresenta un utente del sistema
       properties:
         user_id:
-          description: L'identificatore univoco dell'utente 
+          description: L'identificatore univoco dell'utente
           type: integer
           example: 1
         name:
@@ -997,7 +1124,7 @@ components:
           description: La data e l'ora in cui il messaggio è stato inviato
           type: string
           format: date-time
-          pattern: ^[0-9]+-[0-9]+-[0-9]+[A-Za-z][0-9]+:[0-9]+:[A-Za-z0-9]+$ 
+          pattern: ^[0-9]+-[0-9]+-[0-9]+[A-Za-z][0-9]+:[0-9]+:[A-Za-z0-9]+$
           example: "2023-10-01T12:00:00Z"
           minLength: 20
           maxLength: 20
@@ -1016,7 +1143,7 @@ components:
         content:
           description: Il contenuto della reazione (emoji)
           type: string
-          pattern: ^.+$  
+          pattern: ^.+$
           example: "👍"
           minLength: 1
           maxLength: 1
@@ -1024,7 +1151,6 @@ components:
           description: L'identificatore del messaggio a cui è stata aggiunta la reazione
           type: integer
           example: 1
-        
 
   #parametri utilizzati come richieste dell'utente
   parameters:
@@ -1140,7 +1266,6 @@ components:
               error:
                 type: string
                 example: "Conflitto"
-
 
 security:
   - bearerAuth: [] # use the same name as above

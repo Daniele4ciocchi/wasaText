@@ -59,7 +59,7 @@ export default {
                 for (const conv of this.conversations) {
                     try {
                         const res = await this.$axios.get(
-                            `/conversation/${conv.conversation_id}/lastmessage`,
+                            `/conversation/${conv.conversation_id}/lastMessage`,
                             {
                                 headers: { Authorization: `Bearer ${this.token}` },
                             }

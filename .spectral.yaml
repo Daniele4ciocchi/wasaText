@@ -1,0 +1,8 @@
+extends: spectral:oas
+
+rules:
+  schema-description: warn
+  property-description: warn
+  string-maxLength: warn
+  string-minLength: warn
+  inconsistent-property-type: warn

@@ -19,7 +19,6 @@ func applyCORSHandler(h http.Handler) http.Handler {
 		// Do not modify the CORS origin and max age, they are used in the evaluation.
 		handlers.AllowedOrigins([]string{
 			"*",
-			"http://localhost:3000",
 		}),
 
 		handlers.MaxAge(1),

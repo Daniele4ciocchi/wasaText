@@ -32,7 +32,7 @@ func (rt *_router) Handler() http.Handler {
 	rt.router.POST("/conversation/:conversationID/message", rt.sendMessage)                  // sendMessage OK
 	rt.router.POST("/conversation/:conversationID/photo", rt.sendPhoto)                      // sendPhoto OK
 	rt.router.GET("/conversation/:conversationID/photo/:messageID", rt.getConversationPhoto) // getConversationPhoto OK
-	rt.router.GET("/conversation/:conversationID/lastmessage", rt.getLastMessage)            // getLastMessage OK
+	rt.router.GET("/conversation/:conversationID/lastMessage", rt.getLastMessage)            // getLastMessage OK
 	rt.router.POST("/message/:messageID/forwarded", rt.forwardMessage)                       // forwardMessage OK
 	rt.router.GET("/me/newmessage", rt.getNewMessages)                                       // getNewMessage OK
 	rt.router.DELETE("/message/:messageID", rt.deleteMessage)                                // deleteMessage OK

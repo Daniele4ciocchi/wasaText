@@ -76,9 +76,9 @@ type AppDatabase interface {
 	SetGroupPhoto(id int, path string) error
 
 	// message
-	AddMessage(senderID int, convID int, content string, repliedMessageID int) (int, error)
+	AddMessage(senderID int, convID int, content string, repliedMessageID int, forwarded bool) (int, error)
 	RemoveMessage(messageID int) error
-	AddPhoto(senderID int, convID int, content string, repliedMessageID int) (int, error)
+	AddPhoto(senderID int, convID int, content string, repliedMessageID int, forwarded bool) (int, error)
 	GetMessage(id int) (utils.Message, error)
 	GetMessages(convID int) ([]utils.Message, error)
 	GetLastMessage(convID int) (utils.Message, error)
@@ -132,6 +132,7 @@ func New(db *sql.DB) (AppDatabase, error) {
 					    conversation_id INTEGER NOT NULL,
 					    sender_id INTEGER NOT NULL,
 						replied_message_id INTEGER,
+						forwarded BOOLEAN DEFAULT FALSE,
 					    content TEXT NOT NULL,
 						photo BOOLEAN DEFAULT FALSE,
 					    timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,

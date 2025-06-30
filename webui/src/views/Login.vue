@@ -15,7 +15,8 @@
 		<div v-if="isLoggedIn">
 			<h2>Profilo</h2>
 			<div class="user-profile">
-				<img :src="photoUrl" alt="Foto profilo" style="width: 150px; height: 150px; border-radius: 15px;" />
+				<img :src="photoUrl" alt="Foto profilo"
+					style="width: 150px; height: 150px; border-radius: 15px; border: #888 1px solid;" />
 				<div class="user-info">
 					<p>nome : <strong>{{ name }}</strong></p>
 					<p>username : <strong>{{ username }}</strong></p>
@@ -37,7 +38,8 @@
 							<input class="form-control" type="text" v-model="newusername" id="newusername" required />
 							<button class="btn btn-outline-success btn-lg" type="submit">Invia</button>
 						</form>
-						<button v-if="changeUsername" class="username-button" @click="changeUsername = false">Annulla</button>
+						<button v-if="changeUsername" class="username-button"
+							@click="changeUsername = false">Annulla</button>
 					</div>
 
 
@@ -101,7 +103,7 @@ export default {
 			this.name = localStorage.getItem('name');
 			this.username = localStorage.getItem('username');
 			this.user_id = localStorage.getItem('user_id');
-			this.photoUrl = this.loadPhoto();
+			if (this.token) this.photoUrl = this.loadPhoto();
 		},
 		async login() {
 			this.message = '';
@@ -193,11 +195,13 @@ export default {
 					this.message = 'Username cambiato con successo!';
 					this.changeUsername = false;
 					this.newusername = '';
-				} else {
-					this.error = 'Errore durante il cambio username.';
 				}
 			} catch (err) {
-				this.error = 'Errore durante il cambio username.';
+				if (err.response && err.response.status === 409) {
+					this.error = 'Username già in uso.';
+				} else {
+					this.error = 'Errore durante il cambio dell\'username.';
+				}
 			}
 		},
 		async loadPhoto() {

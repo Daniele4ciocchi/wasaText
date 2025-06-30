@@ -73,7 +73,7 @@ func (rt *_router) sendMessage(w http.ResponseWriter, r *http.Request, ps httpro
 
 	message.SenderID = sender.ID
 
-	messageID, err := rt.db.AddMessage(message.SenderID, message.ConversationID, message.Content, message.RepliedMessageID)
+	messageID, err := rt.db.AddMessage(message.SenderID, message.ConversationID, message.Content, message.RepliedMessageID, message.Forwarded)
 	if err != nil {
 		http.Error(w, "Errore durante l'invio del messaggio", http.StatusInternalServerError)
 		return
@@ -152,7 +152,7 @@ func (rt *_router) sendPhoto(w http.ResponseWriter, r *http.Request, ps httprout
 	}
 
 	// Aggiorna il path nel DB
-	_, err = rt.db.AddPhoto(user.ID, convID, path, 0)
+	_, err = rt.db.AddPhoto(user.ID, convID, path, 0, false)
 	if err != nil {
 		http.Error(w, "Errore nella modifica della foto", http.StatusInternalServerError)
 		return
@@ -403,7 +403,7 @@ func (rt *_router) forwardMessage(w http.ResponseWriter, r *http.Request, ps htt
 		return
 	}
 
-	_, err = rt.db.AddMessage(id, reciver.ID, message.Content, message.RepliedMessageID)
+	_, err = rt.db.AddMessage(id, reciver.ID, message.Content, message.RepliedMessageID, true)
 	if err != nil {
 		http.Error(w, "Errore durante l'invio del messaggio", http.StatusInternalServerError)
 		return

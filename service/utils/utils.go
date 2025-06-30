@@ -37,6 +37,7 @@ type Message struct {
 	Sender           string `json:"sender"`
 	RepliedMessageID int    `json:"replied_message_id"`
 	ConversationID   int    `json:"conversation_id"`
+	Forwarded        bool   `json:"forwarded"`
 	Content          string `json:"content"`
 	Photo            bool   `json:"photo"`
 	Status           int    `json:"status"`

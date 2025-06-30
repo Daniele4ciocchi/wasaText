@@ -1,38 +1,46 @@
 
-
 <script>
 import { RouterLink, RouterView, useRoute } from 'vue-router'
-import { ref, onMounted, onUnmounted, watch } from 'vue'
-import axios from 'axios'
-const route = useRoute();
+import { ref, onMounted, watch } from 'vue'
+
 export default {
 	name: 'App',
-	data() {
+	setup() {
+		const token = ref(localStorage.getItem("token"))
+		const name = ref(localStorage.getItem("name"))
+		const username = ref(localStorage.getItem("username"))
+		const user_id = ref(localStorage.getItem("user_id"))
+
+		// Quando cambia localStorage manualmente da qualche pagina, puoi forzare un aggiornamento:
+		const updateSession = () => {
+			token.value = localStorage.getItem("token")
+			name.value = localStorage.getItem("name")
+			username.value = localStorage.getItem("username")
+			user_id.value = localStorage.getItem("user_id")
+		}
+
+		// Aggiorna all'avvio
+		onMounted(() => {
+			updateSession()
+
+			// osserva cambiamenti a localStorage anche da altre tab
+			window.addEventListener('storage', updateSession)
+		})
+
 		return {
-			token: localStorage.getItem("token"),
-			name: localStorage.getItem("name"),
-			username: localStorage.getItem("username"),
-			user_id: localStorage.getItem("user_id"),
-		};
-	},
-	computed: {
-		isLoggedIn() {
-			return this.token;
+			token,
+			name,
+			username,
+			user_id,
+			isLoggedIn: token,
+			updateSession
 		}
+		
 	},
-	mounted() {
-		this.loadSession();
-	},
-	methods: {
-		loadSession() {
-			this.token = localStorage.getItem('token');
-			this.name = localStorage.getItem('name');
-			this.username = localStorage.getItem('username');
-			this.user_id = localStorage.getItem('user_id');
-		}
-	}
-};
+
+}
 </script>
+
 
 
 <template>
@@ -60,7 +68,7 @@ export default {
 									<svg class="feather" id="Login">
 										<use href="/feather-sprite-v4.29.0.svg#user" />
 									</svg>
-									{{ this.username || "Login" }}
+									Profilo
 								</RouterLink>
 							</li>
 							<li class="nav-item">

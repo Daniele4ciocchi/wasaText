@@ -58,6 +58,14 @@
                                 getMessageById(message.replied_message_id).content : "photo" }}
                         </p>
                     </div>
+                    <!-- tag forwarded -->
+                    <div v-if="message.forwarded" class="forwarded-tag">
+                        <svg class="feather">
+                            <use href="/feather-sprite-v4.29.0.svg#repeat" />
+                        </svg>
+                        <span>Forwarded</span>
+
+                    </div>
 
                     <!-- contenuto del messaggio in caso di testo -->
                     <div v-if="!message.photo" class="normal-message">
@@ -335,11 +343,19 @@ export default {
             try {
                 const res = await this.$axios.get(`/conversation/${this.conversationID}`, {
                     headers: { Authorization: `Bearer ${this.token}` }
-                })
-                this.conversation = res.data
-                await this.fetchPhoto()
+                });
+                this.conversation = res.data;
+
+                // If it is not a group, we must first load the users to find the photo
+                if (!this.conversation.is_group) {
+                    await this.fetchUsers();
+                }
+
+                // Now we can safely load the photo
+                await this.fetchPhoto();
+
             } catch (err) {
-                console.error('Errore nel caricamento della conversazione:', err)
+                console.error('Errore nel caricamento della conversazione:', err);
             }
         },
         async fetchPhoto() {
@@ -355,7 +371,7 @@ export default {
                 }
             } else {
                 try {
-                    const user = this.members.find(user => user.name === this.conversation.name);
+                    const user = this.users.find(user => user.name === this.conversation.name);
                     const res = await this.$axios.get(`/user/${user.user_id}/photo`, {
                         headers: { Authorization: `Bearer ${this.token}` },
                         responseType: 'blob'
@@ -463,6 +479,7 @@ export default {
                 replied_message_id: this.replyedMessage.replied_message_id,
                 content: this.newMessage,
                 sender: this.name,
+                forwarded: false,
                 timestamp: new Date().toISOString()
             }
 
@@ -516,95 +533,76 @@ export default {
         },
         async forwardMessage(messageId) {
             if (this.forwardPopup === false) {
-                this.forwardPopup = true
-                this.forwardMessageId = messageId
-                await this.fetchMyConversations()
-                await this.fetchUsers()
-                return
-            } else {
-                for (const conv of this.forwardGroupsList) {
-                    try {
-                        await this.$axios.post(
-                            `/message/${this.forwardMessageId}/forwarded`,
-                            {
-                                receiver_id: conv.conversation_id,
-                            },
-                            { headers: { Authorization: `Bearer ${this.token}` } }
-                        )
+                this.forwardPopup = true;
+                this.forwardMessageId = messageId;
+                await this.fetchMyConversations();
+                await this.fetchUsers();
+                return;
+            }
 
-                        this.newMessage = ''
-                        this.$nextTick(() => {
-                            this.scrollToBottom()
-                            this.fetchMessages()
-                        })
-                    } catch (err) {
-                        console.error("Errore durante l'invio del messaggio:", err)
-                    }
-                }
+            const forwardPromises = [];
 
-                for (const user of this.forwardUsersList) {
+            // Create promises for forwarding to groups
+            for (const conv of this.forwardGroupsList) {
+                const promise = this.$axios.post(
+                    `/message/${this.forwardMessageId}/forwarded`,
+                    { receiver_id: conv.conversation_id },
+                    { headers: { Authorization: `Bearer ${this.token}` } }
+                );
+                forwardPromises.push(promise);
+            }
+
+            // Create promises for forwarding to users
+            for (const user of this.forwardUsersList) {
+                const promise = (async () => {
+                    let conversationId;
                     try {
                         const response = await this.$axios.post("/conversation",
                             { name: user.name },
-                            {
-                                headers: {
-                                    Authorization: `Bearer ${this.token}`,
-                                },
-                            }
+                            { headers: { Authorization: `Bearer ${this.token}` } }
                         );
-
-                        const conversation = response.data;
-                        try {
-                            await this.$axios.post(
-                                `/message/${this.forwardMessageId}/forwarded`,
-                                {
-                                    receiver_id: conversation.conversation_id,
-                                },
-                                { headers: { Authorization: `Bearer ${this.token}` } }
-                            )
-
-                            this.newMessage = ''
-                            this.$nextTick(() => {
-                                this.scrollToBottom()
-                                this.fetchMessages()
-                            })
-                        } catch (err) {
-                            console.error("Errore durante l'invio del messaggio:", err)
-                        }
+                        conversationId = response.data.conversation_id;
                     } catch (err) {
                         if (err.response?.status === 409 && err.response?.data?.conversation_id) {
-                            try {
-                                await this.$axios.post(
-                                    `/message/${this.forwardMessageId}/forwarded`,
-                                    {
-                                        receiver_id: err.response.data.conversation_id,
-                                    },
-                                    { headers: { Authorization: `Bearer ${this.token}` } }
-                                )
-
-                                this.newMessage = ''
-                                this.$nextTick(() => {
-                                    this.scrollToBottom()
-                                    this.fetchMessages()
-                                })
-
-                            } catch (err) {
-                                console.error("Errore durante l'invio del messaggio:", err)
-                            }
+                            conversationId = err.response.data.conversation_id;
                         } else {
-                            console.error("Errore nella creazione della conversazione", err);
-                            this.error = "Impossibile avviare la conversazione.";
+                            console.error("Errore nella creazione della conversazione per l'inoltro", err);
+                            throw err; // Re-throw to be caught by Promise.all
                         }
                     }
 
-                }
-                this.forwardGroupsList = []
-                this.forwardUsersList = []
-                this.forwardMessageId = null
-                this.forwardPopup = false
-
+                    if (conversationId) {
+                        return this.$axios.post(
+                            `/message/${this.forwardMessageId}/forwarded`,
+                            { receiver_id: conversationId },
+                            { headers: { Authorization: `Bearer ${this.token}` } }
+                        );
+                    }
+                })();
+                forwardPromises.push(promise);
             }
 
+            try {
+                // Wait for all forwarding operations to complete
+                await Promise.all(forwardPromises);
+            } catch (error) {
+                console.error("Uno o più inoltri sono falliti:", error);
+                this.error = "Errore durante l'inoltro del messaggio.";
+            } finally {
+                // This block will run regardless of success or failure
+                this.forwardPopup = false;
+                this.forwardGroupsList = [];
+                this.forwardUsersList = [];
+                this.forwardMessageId = null;
+
+                // Fetch messages to get the updated "forwarded" status on the original message
+                await this.fetchMessages();
+
+                // Use $nextTick to ensure the DOM has updated before scrolling
+                this.$nextTick(() => {
+                    this.scrollToBottom();
+                });
+            }
         },
         async reactMessage(messageId) {
             if (this.reactionPopup === false) {
@@ -884,12 +882,12 @@ export default {
     margin: 0px;
 }
 
-.reaction-delete-button .feather{
+.reaction-delete-button .feather {
     height: 10px;
     width: 10px;
     padding: 0px;
     margin: 0px;
-    
+
 }
 
 .reaction {

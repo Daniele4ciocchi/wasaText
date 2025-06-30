@@ -2,6 +2,7 @@ package api
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -11,6 +12,7 @@ import (
 
 	"github.com/Daniele4ciocchi/wasaText/service/utils"
 	"github.com/julienschmidt/httprouter"
+	"github.com/mattn/go-sqlite3"
 )
 
 // controlla se il token è valido e se si trova all'interno del db
@@ -109,7 +111,13 @@ func (rt *_router) setMyUserName(w http.ResponseWriter, r *http.Request, _ httpr
 
 	err = rt.db.SetUsername(id, username.Username)
 	if err != nil {
-		http.Error(w, "Errore nella modifica dell'username", http.StatusInternalServerError)
+		var sqliteErr sqlite3.Error
+		if errors.As(err, &sqliteErr) && sqliteErr.ExtendedCode == sqlite3.ErrConstraintUnique {
+			http.Error(w, "Username già in uso", http.StatusConflict)
+		} else {
+			http.Error(w, "Errore nella modifica dell'username", http.StatusInternalServerError)
+		}
+
 		return
 	}
 

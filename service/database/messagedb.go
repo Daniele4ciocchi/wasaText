@@ -7,7 +7,7 @@ import (
 	"github.com/Daniele4ciocchi/wasaText/service/utils"
 )
 
-func (db *appdbimpl) AddMessage(senderID int, convID int, content string, repliedMessageID int) (int, error) {
+func (db *appdbimpl) AddMessage(senderID int, convID int, content string, repliedMessageID int, forwarded bool) (int, error) {
 	var messageID int
 
 	var replied interface{}
@@ -17,7 +17,7 @@ func (db *appdbimpl) AddMessage(senderID int, convID int, content string, replie
 		replied = sql.NullInt64{}
 	}
 
-	err := db.c.QueryRow("INSERT INTO messages (sender_id, conversation_id, content, replied_message_id ) VALUES (?, ?, ?, ?) RETURNING id", senderID, convID, content, replied).Scan(&messageID)
+	err := db.c.QueryRow("INSERT INTO messages (sender_id, conversation_id, content, replied_message_id, forwarded) VALUES (?, ?, ?, ?, ?) RETURNING id", senderID, convID, content, replied, forwarded).Scan(&messageID)
 	if err != nil {
 		return 0, err
 	}
@@ -48,7 +48,7 @@ func (db *appdbimpl) RemoveMessage(messageID int) error {
 	return nil
 }
 
-func (db *appdbimpl) AddPhoto(senderID int, convID int, content string, repliedMessageID int) (int, error) {
+func (db *appdbimpl) AddPhoto(senderID int, convID int, content string, repliedMessageID int, forwarded bool) (int, error) {
 	var messageID int
 
 	var replied interface{}
@@ -58,7 +58,7 @@ func (db *appdbimpl) AddPhoto(senderID int, convID int, content string, repliedM
 		replied = sql.NullInt64{}
 	}
 
-	err := db.c.QueryRow("INSERT INTO messages (sender_id, conversation_id, content, replied_message_id, photo ) VALUES (?, ?, ?, ?, true) RETURNING id", senderID, convID, content, replied).Scan(&messageID)
+	err := db.c.QueryRow("INSERT INTO messages (sender_id, conversation_id, content, replied_message_id, photo, forwarded ) VALUES (?, ?, ?, ?, true, ?) RETURNING id", senderID, convID, content, replied, forwarded).Scan(&messageID)
 	if err != nil {
 		return 0, err
 	}
@@ -73,7 +73,7 @@ func (db *appdbimpl) AddPhoto(senderID int, convID int, content string, repliedM
 
 func (db *appdbimpl) GetMessage(id int) (utils.Message, error) {
 	var message utils.Message
-	err := db.c.QueryRow("SELECT id, sender_id, conversation_id, content, timestamp FROM messages WHERE id = ?", id).Scan(&message.ID, &message.SenderID, &message.ConversationID, &message.Content, &message.Timestamp)
+	err := db.c.QueryRow("SELECT id, sender_id, conversation_id, content, forwarded, timestamp FROM messages WHERE id = ?", id).Scan(&message.ID, &message.SenderID, &message.ConversationID, &message.Content, &message.Forwarded, &message.Timestamp)
 	if err != nil {
 		return utils.Message{}, err
 	}
@@ -81,7 +81,7 @@ func (db *appdbimpl) GetMessage(id int) (utils.Message, error) {
 }
 
 func (db *appdbimpl) GetMessages(convID int) ([]utils.Message, error) {
-	rows, err := db.c.Query("SELECT messages.id, messages.sender_id, users.name, messages.conversation_id, messages.replied_message_id, messages.content, messages.timestamp, messages.photo FROM messages JOIN users ON messages.sender_id = users.id WHERE conversation_id = ?", convID)
+	rows, err := db.c.Query("SELECT messages.id, messages.sender_id, users.name, messages.conversation_id, messages.replied_message_id, messages.content, messages.timestamp, messages.photo, messages.forwarded FROM messages JOIN users ON messages.sender_id = users.id WHERE conversation_id = ?", convID)
 	if err != nil {
 		return nil, err
 	}
@@ -92,7 +92,7 @@ func (db *appdbimpl) GetMessages(convID int) ([]utils.Message, error) {
 		var message utils.Message
 		var replied sql.NullInt64 // Utilizza NullInt64 per gestire il valore NULL
 
-		if err := rows.Scan(&message.ID, &message.SenderID, &message.Sender, &message.ConversationID, &replied, &message.Content, &message.Timestamp, &message.Photo); err != nil {
+		if err := rows.Scan(&message.ID, &message.SenderID, &message.Sender, &message.ConversationID, &replied, &message.Content, &message.Timestamp, &message.Photo, &message.Forwarded); err != nil {
 			return nil, err
 		}
 
@@ -206,7 +206,7 @@ func (db *appdbimpl) SetViewedMessage(userID int, messageID int) error {
 
 func (db *appdbimpl) GetLastMessage(convID int) (utils.Message, error) {
 	var message utils.Message
-	err := db.c.QueryRow("SELECT id, sender_id, conversation_id, content, timestamp FROM messages WHERE conversation_id = ? ORDER BY timestamp DESC LIMIT 1", convID).Scan(&message.ID, &message.SenderID, &message.ConversationID, &message.Content, &message.Timestamp)
+	err := db.c.QueryRow("SELECT id, sender_id, conversation_id, content, forwarded, timestamp FROM messages WHERE conversation_id = ? ORDER BY timestamp DESC LIMIT 1", convID).Scan(&message.ID, &message.SenderID, &message.ConversationID, &message.Content, &message.Forwarded, &message.Timestamp)
 	if err != nil {
 		return utils.Message{}, err
 	}
@@ -216,8 +216,10 @@ func (db *appdbimpl) GetLastMessage(convID int) (utils.Message, error) {
 
 // ritorna una lista di messaggi non arrivati e li segna come arrivati
 func (db *appdbimpl) GetNewMessages(userID int) ([]utils.Message, error) {
-	rows, err := db.c.Query("SELECT m.id, m.sender_id, m.conversation_id, m.content, m.timestamp FROM messages m JOIN views v ON m.id = v.message_id WHERE v.user_id = ? AND v.status = 0 ", userID)
+	rows, err := db.c.Query("SELECT m.id, m.sender_id, m.conversation_id, m.content, m.forwarded, m.timestamp FROM messages m JOIN views v ON m.id = v.message_id WHERE v.user_id = ? AND v.status = 0 ", userID)
 	if err != nil {
+		// print error
+		log.Println("Error getting new messages:", err)
 		return nil, err
 	}
 	defer rows.Close()
@@ -225,7 +227,7 @@ func (db *appdbimpl) GetNewMessages(userID int) ([]utils.Message, error) {
 	var messages []utils.Message
 	for rows.Next() {
 		var message utils.Message
-		if err := rows.Scan(&message.ID, &message.SenderID, &message.ConversationID, &message.Content, &message.Timestamp); err != nil {
+		if err := rows.Scan(&message.ID, &message.SenderID, &message.ConversationID, &message.Content, &message.Forwarded, &message.Timestamp); err != nil {
 			return nil, err
 		}
 		message.Status, err = db.GetMessageStatus(message.ID)

@@ -7,7 +7,7 @@
 
         <!-- Tag Forwarded -->
         <div v-if="message.forwarded" class="forwarded-tag">
-            <svg class="feather"><use href="/feather-sprite-v4.29.0.svg#repeat" /></svg>
+            <svg class="feather"><use href="/feather-sprite-v4.29.0.svg#corner-down-right" /></svg>
             <span>Inoltrato</span>
         </div>
 
@@ -97,8 +97,21 @@ defineEmits(['reply', 'delete', 'forward', 'react', 'delete-reaction']);
 }
 .forwarded-tag .feather { width: 12px; height: 12px; }
 
-.photo-message { width: 200px; height: auto; display: flex; flex-direction: column; border-radius: 10px; }
-.photo-message img { max-width: 100%; border-radius: 10px; }
+.photo-message { 
+    max-width: 250px; /* Limita la larghezza massima del box */
+    max-height: 250px; /* Imposta un'altezza massima anche per il contenitore */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    border-radius: 10px;
+    overflow: hidden; /* Nasconde eventuali overflow */
+}
+.photo-message img { 
+    width: 100%; /* Fa in modo che l'immagine riempia la larghezza del contenitore */
+    height: 100%; /* Fa in modo che l'immagine riempia l'altezza del contenitore */
+    object-fit: contain; /* Assicura che l'intera immagine sia visibile e mantenga le proporzioni */
+    border-radius: 10px; 
+}
 
 .message-footer { display: flex; flex-direction: row; justify-content: flex-end; gap: 10px; margin-top: 5px; }
 .message-footer button { 

@@ -62,7 +62,7 @@
         <MessageInput 
             :replyed-message="replyedMessage"
             @send-message="sendMessage"
-            @cancel-reply="replyedMessage = {}"
+            @cancel-reply="replyedMessage = { replied_message_id: null, content: '' }"
             @open-photo-popup="photoPopup = true"
         />
 
@@ -215,7 +215,13 @@ export default {
                 const res = await this.$axios.get(`/message/${messageId}/reaction`, {
                     headers: { Authorization: `Bearer ${this.token}` }
                 });
-                const reactions = res.data;
+                const reactions = res.data; // res.data dovrebbe essere un array
+
+                if (!Array.isArray(reactions)) {
+                    console.warn(`API /message/${messageId}/reaction non ha restituito un array:`, reactions);
+                    return []; // Restituisce un array vuoto per evitare errori
+                }
+
                 return Object.values(reactions.reduce((acc, { content, user_id, reaction_id }) => {
                     if (!acc[content]) {
                         acc[content] = { content, users: [] };
@@ -244,7 +250,7 @@ export default {
             } catch (err) {
                 console.error("Errore durante l'invio del messaggio:", err);
             }
-            this.replyedMessage = {};
+            this.replyedMessage = { replied_message_id: null, content: '' };
         },
         async sendImage(file) {
             const formData = new FormData();
@@ -362,7 +368,12 @@ export default {
                 });
                 this.getConversation();
             } catch (err) {
-                console.error("Errore durante l'aggiornamento del nome del gruppo:", err);
+                if (err.response && err.response.status === 409) {
+                    this.error = "Nome utente già in uso. Scegli un altro nome.";
+                } else {
+                    console.error("Errore durante l'aggiornamento del nome del gruppo:", err);
+                    this.error = "Errore durante il cambio nome. Riprova.";
+                }
             }
         },
         async changeGroupPhoto(file) {

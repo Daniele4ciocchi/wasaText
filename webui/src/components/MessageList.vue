@@ -7,6 +7,7 @@
             :current-user-name="currentUserName"
             :current-user-id="currentUserId"
             :replied-message-text="getRepliedMessageText(message)"
+            :users="users"
             @reply="$emit('reply', $event)"
             @delete="$emit('delete', $event)"
             @forward="$emit('forward', $event)"
@@ -24,6 +25,7 @@ const props = defineProps({
     messages: { type: Array, required: true },
     currentUserName: { type: String, required: true },
     currentUserId: { type: [String, Number], required: true },
+    users: { type: Array, default: () => [] },
 });
 
 defineEmits(['reply', 'delete', 'forward', 'react', 'delete-reaction']);

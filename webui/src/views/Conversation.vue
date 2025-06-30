@@ -16,6 +16,7 @@
                 :messages="messages"
                 :current-user-name="name"
                 :current-user-id="user_id"
+                :users="users"
                 @reply="replyMessage"
                 @delete="deleteMessage"
                 @forward="openForwardModal"
@@ -133,9 +134,7 @@ export default {
                 });
                 this.conversation = res.data;
 
-                if (!this.conversation.is_group) {
-                    await this.fetchUsers();
-                }
+                await this.fetchUsers();
                 await this.fetchPhoto();
             } catch (err) {
                 console.error('Errore nel caricamento della conversazione:', err);
@@ -184,7 +183,11 @@ export default {
                 });
                 const messages = res.data;
 
-                // Fetch photos and reactions in parallel for performance
+                // Ensure users are available before processing reactions
+                if (this.users.length === 0) {
+                    await this.fetchUsers();
+                }
+
                 await Promise.all(messages.map(async (message) => {
                     if (message.photo) {
                         try {
@@ -226,7 +229,12 @@ export default {
                     if (!acc[content]) {
                         acc[content] = { content, users: [] };
                     }
-                    acc[content].users.push({ user_id, reaction_id });
+                    const user = this.users.find(u => u.user_id === user_id);
+                    if (user) {
+                        acc[content].users.push({ user_id, reaction_id, username: user.username });
+                    } else {
+                        acc[content].users.push({ user_id, reaction_id, username: 'Unknown User' });
+                    }
                     return acc;
                 }, {}));
             } catch (err) {

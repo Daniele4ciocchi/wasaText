@@ -48,6 +48,7 @@
         <div class="message-reactions" v-if="message.reactions && message.reactions.length > 0">
             <span v-for="reaction in message.reactions" :key="reaction.reaction_id" class="reaction">
                 {{ reaction.content }} {{ reaction.users.length }}
+                <span class="reaction-users-tooltip">{{ reaction.users.map(user => user.username) }}</span>
                 <button v-if="reaction.users.some(user => user.user_id == currentUserId)" 
                         @click="$emit('delete-reaction', { messageId: message.message_id, reactionId: reaction.users.find(user => user.user_id == currentUserId).reaction_id })"
                         class="reaction-delete-button">
@@ -65,7 +66,8 @@ defineProps({
     message: { type: Object, required: true },
     currentUserName: { type: String, required: true },
     currentUserId: { type: [String, Number], required: true },
-    repliedMessageText: { type: String, default: '' }
+    repliedMessageText: { type: String, default: '' },
+    users: { type: Array, default: () => [] },
 });
 
 defineEmits(['reply', 'delete', 'forward', 'react', 'delete-reaction']);
@@ -130,7 +132,29 @@ defineEmits(['reply', 'delete', 'forward', 'react', 'delete-reaction']);
 .view { width: 15px; height: 15px; color: #6b6b6b; align-self: center; margin-right: auto; }
 
 .message-reactions { display: flex; justify-content: flex-start; margin-top: 5px; gap: 5px; flex-wrap: wrap; }
-.reaction { border: #888 1px solid; padding: 4px 8px; border-radius: 12px; background: #fff; font-size: 1em; display: flex; align-items: center; gap: 4px; }
+.reaction { border: #888 1px solid; padding: 4px 8px; border-radius: 12px; background: #fff; font-size: 1em; display: flex; align-items: center; gap: 4px; position: relative; display: inline-block; }
+
+.reaction .reaction-users-tooltip {
+    visibility: hidden;
+    width: 120px;
+    background-color: black;
+    color: #fff;
+    text-align: center;
+    border-radius: 6px;
+    padding: 5px 0;
+    position: absolute;
+    z-index: 1;
+    bottom: 125%; /* Position the tooltip above the reaction */
+    left: 50%;
+    margin-left: -60px; /* Center the tooltip */
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+.reaction:hover .reaction-users-tooltip {
+    visibility: visible;
+    opacity: 1;
+}
 .reaction-delete-button { width: 20px; cursor: pointer; padding: 0; margin: 0; background: none; border: none; }
 .reaction-delete-button .feather { height: 10px; width: 10px; padding: 0; margin: 0; }
 </style>

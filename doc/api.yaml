@@ -618,7 +618,8 @@ paths:
                           description: L'ID della conversazione del messaggio aggiornato
                         new_status:
                           type: integer
-                          description: Il nuovo stato del messaggio (0: inviato, 1: ricevuto, 2: letto)
+                          description: |
+                            Il nuovo stato del messaggio (0: inviato, 1: ricevuto, 2: letto)
                           enum: [0, 1, 2]
                     minItems: 0
                 required:
@@ -957,7 +958,7 @@ paths:
         "400": { $ref: "#/components/responses/BadRequest" }
         "404": { $ref: "#/components/responses/NotFound" }
         "401": { $ref: "#/components/responses/Unauthorized" }
-        "500": { $ref: "/components/responses/InternalServerError" }
+        "500": { $ref: "#/components/responses/InternalServerError" }
 
     get:
       tags:
@@ -980,7 +981,7 @@ paths:
         "400": { $ref: "#/components/responses/BadRequest" }
         "404": { $ref: "#/components/responses/NotFound" }
         "401": { $ref: "#/components/responses/Unauthorized" }
-        "500": { $ref: "/components/responses/InternalServerError" }
+        "500": { $ref: "#/components/responses/InternalServerError" }
 
 components:
   securitySchemes:

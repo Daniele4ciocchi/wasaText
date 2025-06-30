@@ -51,7 +51,7 @@ export default {
         this.getConversations();
         // Avvia il polling ogni 3 secondi, assicurando il contesto corretto
         this.pollingInterval = setInterval(() => {
-            this.getConversations();
+            this.checkNewMessagesAndUpdates();
         }, 3000);
     },
     beforeUnmount() {
@@ -150,25 +150,10 @@ export default {
                 const res = await this.$axios.get('/me/newmessage', {
                     headers: { Authorization: `Bearer ${this.token}` }
                 });
-                const { new_messages, status_updates } = res.data;
-
-                if (new_messages && new_messages.length > 0) {
-                    // Se ci sono nuovi messaggi, ricarica tutte le conversazioni
-                    // per aggiornare gli ultimi messaggi e l'ordinamento.
+                if (res.data && res.data.length > 0) {
+                    // Se ci sono nuovi messaggi, ricarica le conversazioni
                     await this.getConversations();
-                }
-
-                if (status_updates && status_updates.length > 0) {
-                    status_updates.forEach(update => {
-                        // Trova la conversazione a cui appartiene il messaggio
-                        const conv = this.conversations.find(c => c.conversation_id === update.conversation_id);
-                        if (conv && conv.message && conv.message.message_id === update.message_id) {
-                            // Se l'aggiornamento riguarda l'ultimo messaggio della conversazione,
-                            // aggiorna il suo stato.
-                            conv.message.status = update.new_status;
-                        }
-                    });
-                }
+                } 
             } catch (err) {
                 // Non loggare errori per il polling per evitare spam nella console
                 // a meno che non sia un errore grave (es. 401 Unauthorized)

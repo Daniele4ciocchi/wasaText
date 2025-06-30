@@ -27,13 +27,21 @@ export default {
 			window.addEventListener('storage', updateSession)
 		})
 
+		const logout = () => {
+			localStorage.clear();
+			updateSession(); // Aggiorna lo stato interno
+			// Reindirizza al login, potresti dover importare useRouter se non già fatto
+			window.location.hash = '#/'; 
+		}
+
 		return {
 			token,
 			name,
 			username,
 			user_id,
 			isLoggedIn: token,
-			updateSession
+			updateSession,
+			logout
 		}
 		
 	},

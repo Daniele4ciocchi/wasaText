@@ -73,7 +73,7 @@ func (db *appdbimpl) AddPhoto(senderID int, convID int, content string, repliedM
 
 func (db *appdbimpl) GetMessage(id int) (utils.Message, error) {
 	var message utils.Message
-	err := db.c.QueryRow("SELECT id, sender_id, conversation_id, content, forwarded, timestamp FROM messages WHERE id = ?", id).Scan(&message.ID, &message.SenderID, &message.ConversationID, &message.Content, &message.Forwarded, &message.Timestamp)
+	err := db.c.QueryRow("SELECT id, sender_id, conversation_id, content, photo, forwarded, timestamp FROM messages WHERE id = ?", id).Scan(&message.ID, &message.SenderID, &message.ConversationID, &message.Content, &message.Photo, &message.Forwarded, &message.Timestamp)
 	if err != nil {
 		return utils.Message{}, err
 	}
@@ -88,6 +88,8 @@ func (db *appdbimpl) GetMessages(convID int) ([]utils.Message, error) {
 	defer rows.Close()
 
 	var messages []utils.Message
+	var messageIDsToUpdate []int // Slice to store IDs of messages that need status update
+
 	for rows.Next() {
 		var message utils.Message
 		var replied sql.NullInt64 // Utilizza NullInt64 per gestire il valore NULL
@@ -107,12 +109,27 @@ func (db *appdbimpl) GetMessages(convID int) ([]utils.Message, error) {
 		if err != nil {
 			log.Println(err)
 		}
-		messages = append(messages, message)
 
+		messages = append(messages, message)
+		messageIDsToUpdate = append(messageIDsToUpdate, message.ID) // Collect message ID for later update
 	}
+
+	// Check for any errors that occurred during rows.Next()
 	if err := rows.Err(); err != nil {
 		return nil, err
 	}
+
+	// Now, after all messages have been read and rows are closed,
+	// update the changed_status for each collected message ID.
+	for _, messageID := range messageIDsToUpdate {
+		_, err := db.c.Exec("UPDATE messages SET changed_status = FALSE WHERE id = ?", messageID)
+		if err != nil {
+			// Log the error. You might not want to return an error here
+			// as the messages themselves have already been successfully retrieved.
+			log.Printf("Error setting changed_status to FALSE for message %d: %v\n", messageID, err)
+		}
+	}
+
 	return messages, nil
 }
 
@@ -193,6 +210,12 @@ func (db *appdbimpl) SetArrivedMessage(userID int, messageID int) error {
 	if err != nil {
 		return err
 	}
+
+	_, err = db.c.Exec("UPDATE messages SET changed_status = ? WHERE id = ?", true, messageID)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -201,12 +224,17 @@ func (db *appdbimpl) SetViewedMessage(userID int, messageID int) error {
 	if err != nil {
 		return err
 	}
+
+	_, err = db.c.Exec("UPDATE messages SET changed_status = ? WHERE id = ?", true, messageID)
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
 func (db *appdbimpl) GetLastMessage(convID int) (utils.Message, error) {
 	var message utils.Message
-	err := db.c.QueryRow("SELECT id, sender_id, conversation_id, content, forwarded, timestamp FROM messages WHERE conversation_id = ? ORDER BY timestamp DESC LIMIT 1", convID).Scan(&message.ID, &message.SenderID, &message.ConversationID, &message.Content, &message.Forwarded, &message.Timestamp)
+	err := db.c.QueryRow("SELECT id, sender_id, conversation_id, content, photo, forwarded, timestamp FROM messages WHERE conversation_id = ? ORDER BY timestamp DESC LIMIT 1", convID).Scan(&message.ID, &message.SenderID, &message.ConversationID, &message.Content, &message.Photo, &message.Forwarded, &message.Timestamp)
 	if err != nil {
 		return utils.Message{}, err
 	}
@@ -214,9 +242,8 @@ func (db *appdbimpl) GetLastMessage(convID int) (utils.Message, error) {
 	return message, nil
 }
 
-// ritorna una lista di messaggi non arrivati e li segna come arrivati
 func (db *appdbimpl) GetNewMessages(userID int) ([]utils.Message, error) {
-	rows, err := db.c.Query("SELECT m.id, m.sender_id, m.conversation_id, m.content, m.forwarded, m.timestamp FROM messages m JOIN views v ON m.id = v.message_id WHERE v.user_id = ? AND v.status = 0 ", userID)
+	rows, err := db.c.Query("SELECT m.id, m.sender_id, m.conversation_id, m.content, m.forwarded, m.timestamp FROM messages m JOIN views v ON m.id = v.message_id WHERE v.user_id = ? AND (v.status = 0 OR m.changed_status = 1) ", userID)
 	if err != nil {
 		// print error
 		log.Println("Error getting new messages:", err)

@@ -136,6 +136,7 @@ func New(db *sql.DB) (AppDatabase, error) {
 					    content TEXT NOT NULL,
 						photo BOOLEAN DEFAULT FALSE,
 					    timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
+						changed_status BOOLEAN DEFAULT FALSE,
 					    FOREIGN KEY (conversation_id) REFERENCES conversations(id),
 					    FOREIGN KEY (sender_id) REFERENCES users(id)
 						FOREIGN KEY (replied_message_id) REFERENCES messages(id)

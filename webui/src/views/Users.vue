@@ -2,11 +2,15 @@
   <div class="container mt-4">
     <h1>Lista Utenti</h1>
 
+    <div class="search-bar">
+      <input type="text" v-model="searchQuery" placeholder="Cerca utenti..." />
+    </div>
+
     <div v-if="loading">Caricamento utenti...</div>
     <div v-if="error" class="alert alert-danger">{{ error }}</div>
 
-    <div v-if="users.length">
-      <div v-for="user in users" :key="user.id" class="mb-2">
+    <div v-if="filteredUsers.length">
+      <div v-for="user in filteredUsers" :key="user.id" class="mb-2">
         <button
           class="user"
           @click="startConversation(user.name)"
@@ -27,7 +31,8 @@ export default {
   name: "Users",
   data() {
     return {
-      users: [],
+      allUsers: [], // Store all fetched users here
+      searchQuery: '', // New data property for search input
       loading: false,
       error: null,
       token: localStorage.getItem("token"),
@@ -35,6 +40,15 @@ export default {
       username: localStorage.getItem("username"),
       user_id: localStorage.getItem("user_id"),
     };
+  },
+  computed: {
+    filteredUsers() {
+      if (!this.searchQuery) {
+        return this.allUsers;
+      }
+      const query = this.searchQuery.toLowerCase();
+      return this.allUsers.filter(user => user.username.toLowerCase().includes(query));
+    }
   },
   methods: {
     async fetchUsers() {
@@ -45,16 +59,11 @@ export default {
             Authorization: `Bearer ${this.token}`,
           },
         });
-        this.users = response.data;
+        this.allUsers = response.data.filter(user => user.name !== this.name); // Store and filter out current user
       } catch (err) {
         this.error = "Errore nel recupero degli utenti";
       } finally {
         this.loading = false;
-      }
-      for (const user of this.users) {
-        if (user.name === this.name) {
-          this.users.splice(this.users.indexOf(user), 1);
-        }
       }
     },
 
@@ -102,5 +111,16 @@ export default {
 .user:hover {
     background-color: #c3e6cb;
     cursor: pointer;
+}
+
+.search-bar {
+  margin-bottom: 15px;
+}
+
+.search-bar input {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
 }
 </style>

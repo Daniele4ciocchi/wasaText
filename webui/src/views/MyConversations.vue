@@ -1,7 +1,12 @@
 <template>
     <ul class="nav flex-column">
         <h2>Conversazioni</h2>
-        <li class="nav-item" v-for="conv in conversations" :key="conv.conversation_id">
+
+        <div class="search-bar">
+            <input type="text" v-model="searchQuery" placeholder="Cerca conversazioni..." />
+        </div>
+
+        <li class="nav-item" v-for="conv in filteredConversations" :key="conv.conversation_id">
             <RouterLink :to="'/conversation/' + conv.conversation_id" class="nav-link">
                 <div class="conversation-list">
                     <div id="conversation-photo">
@@ -16,8 +21,8 @@
                             <svg class="feather">
                                 <use href="/feather-sprite-v4.29.0.svg#message-square" />
                             </svg>
-                            {{ conv.message.content.length > 20 ? conv.message.content.slice(0, 20) + '...' :
-                            conv.message.content }}
+                            <span v-if="conv.message.photo">photo</span>
+                            <span v-else>{{ conv.message.content.length > 20 ? conv.message.content.slice(0, 20) + '...' : conv.message.content }}</span>
                             <span id="timestamp">
                                 <svg v-if="conv.message.status === 0" class="feather status-icon"><use href="/feather-sprite-v4.29.0.svg#check" /></svg>
                                 <svg v-if="conv.message.status === 1" class="feather status-icon"><use href="/feather-sprite-v4.29.0.svg#check-circle" /></svg>
@@ -42,9 +47,19 @@ export default {
             name: localStorage.getItem('name'),
             username: localStorage.getItem('username'),
             user_id: localStorage.getItem('user_id'),
-            conversations: [],
+            allConversations: [], // Store all fetched conversations here
+            searchQuery: '', // New data property for search input
             error: null,
             pollingInterval: null, // Per memorizzare l'ID dell'intervallo
+        }
+    },
+    computed: {
+        filteredConversations() {
+            if (!this.searchQuery) {
+                return this.allConversations;
+            }
+            const query = this.searchQuery.toLowerCase();
+            return this.allConversations.filter(conv => conv.name.toLowerCase().includes(query));
         }
     },
     mounted() {
@@ -67,11 +82,11 @@ export default {
                 const newData = res.data;
                 
                 // Evita aggiornamenti inutili se i dati non sono cambiati
-                if (JSON.stringify(newData) === JSON.stringify(this.conversations)) return;
+                if (JSON.stringify(newData) === JSON.stringify(this.allConversations)) return;
 
-                this.conversations = newData;
+                this.allConversations = newData; // Store in allConversations
 
-                for (const conv of this.conversations) {
+                for (const conv of this.allConversations) {
                     try {
                         const res = await this.$axios.get(
                             `/conversation/${conv.conversation_id}/lastMessage`,
@@ -95,7 +110,7 @@ export default {
             await this.sortConversations();
         },
         async sortConversations() {
-            this.conversations.sort((a, b) => {
+            this.allConversations.sort((a, b) => {
                 // Assicurati che message e timestamp esistano prima di accedere
                 const timestampA = a.message ? new Date(a.message.timestamp).getTime() : 0;
                 const timestampB = b.message ? new Date(b.message.timestamp).getTime() : 0;
@@ -201,5 +216,16 @@ export default {
     width: 40px;
     height: 40px; 
     border-radius: 10px;
+}
+
+.search-bar {
+  margin-bottom: 15px;
+}
+
+.search-bar input {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
 }
 </style>

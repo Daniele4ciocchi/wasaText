@@ -403,10 +403,20 @@ func (rt *_router) forwardMessage(w http.ResponseWriter, r *http.Request, ps htt
 		return
 	}
 
-	_, err = rt.db.AddMessage(id, reciver.ID, message.Content, message.RepliedMessageID, true)
-	if err != nil {
-		http.Error(w, "Errore durante l'invio del messaggio", http.StatusInternalServerError)
-		return
+	if message.Photo {
+		// Se il messaggio è una foto, aggiungo la foto alla conversazione del ricevente
+		_, err = rt.db.AddPhoto(id, reciver.ID, message.Content, message.RepliedMessageID, true)
+		if err != nil {
+			http.Error(w, "Errore durante l'invio della foto", http.StatusInternalServerError)
+			return
+		}
+		log.Println("Foto inoltrata con successo")
+	} else {
+		_, err = rt.db.AddMessage(id, reciver.ID, message.Content, message.RepliedMessageID, true)
+		if err != nil {
+			http.Error(w, "Errore durante l'invio del messaggio", http.StatusInternalServerError)
+			return
+		}
 	}
 
 	if err := json.NewEncoder(w).Encode(message); err != nil {

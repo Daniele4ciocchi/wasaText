@@ -37,6 +37,7 @@ func (db *appdbimpl) GetUsers() ([]utils.User, error) {
 	return users, nil
 }
 
+// funzione per trovare un utente dal suo id
 func (db *appdbimpl) GetUserById(id int) (utils.User, error) {
 	var user utils.User
 	err := db.c.QueryRow("SELECT id, name, username FROM users WHERE id = ?", id).Scan(&user.ID, &user.Name, &user.Username)
@@ -71,6 +72,7 @@ func (db *appdbimpl) GetUser(name string) (utils.User, error) {
 	return user, nil
 }
 
+// funzione per impostare lo username di un utente
 func (db *appdbimpl) SetUsername(id int, username string) error {
 	_, err := db.c.Exec("UPDATE users SET username = ? WHERE id = ?", username, id)
 	if err != nil {
@@ -79,6 +81,7 @@ func (db *appdbimpl) SetUsername(id int, username string) error {
 	return nil
 }
 
+// funzione per impostare la foto di un utente
 func (db *appdbimpl) SetUserPhoto(id int, path string) error {
 
 	_, err := db.c.Exec("UPDATE users SET photoPath = ? WHERE id = ?", path, id)
@@ -88,6 +91,7 @@ func (db *appdbimpl) SetUserPhoto(id int, path string) error {
 	return nil
 }
 
+// funzione per ottenere il path della foto di un utente
 func (db *appdbimpl) GetUserPhoto(id int) (string, error) {
 	var path string
 	err := db.c.QueryRow("SELECT photoPath FROM users WHERE id = ?", id).Scan(&path)

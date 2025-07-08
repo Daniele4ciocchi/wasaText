@@ -4,7 +4,7 @@ import (
 	"github.com/Daniele4ciocchi/wasaText/service/utils"
 )
 
-// AddConversation adds a new conversation to the database.
+// AddConversation aggiunge una conversazione al database.
 func (db *appdbimpl) AddConversation(name string, isGroup bool) (int, error) {
 
 	var convID int
@@ -29,7 +29,7 @@ func (db *appdbimpl) CheckExistingConversation(id1 int, id2 int) (int, error) {
 
 }
 
-// AddUserConversation adds a user to a conversation.
+// AddUserConversation aggiunge un'associazione utente-conversazione all'interno del db
 func (db *appdbimpl) AddUserConversation(userID int, convID int) error {
 	_, err := db.c.Exec("INSERT INTO user_conversations (user_id, conversation_id) VALUES (?, ?)", userID, convID)
 	if err != nil {
@@ -38,6 +38,7 @@ func (db *appdbimpl) AddUserConversation(userID int, convID int) error {
 	return nil
 }
 
+// cerca una conversazione specifica all'interno del db
 func (db *appdbimpl) GetConversation(id int) (utils.Conversation, error) {
 	var conv utils.Conversation
 	err := db.c.QueryRow("SELECT id, name, is_group FROM conversations WHERE id = ?", id).Scan(&conv.ID, &conv.Name, &conv.IsGroup)
@@ -49,6 +50,7 @@ func (db *appdbimpl) GetConversation(id int) (utils.Conversation, error) {
 
 }
 
+// cerca tutte le convetsazioni di un utente
 func (db *appdbimpl) GetConversations(id int) ([]utils.Conversation, error) {
 	rows, err := db.c.Query("SELECT conversation_id FROM user_conversations WHERE user_id = ?", id)
 	if err != nil {
@@ -74,6 +76,7 @@ func (db *appdbimpl) GetConversations(id int) ([]utils.Conversation, error) {
 	return convs, nil
 }
 
+// cerca una coversazione dal nome
 func (db *appdbimpl) GetConversationByName(sender string, reciver string) (utils.Conversation, error) {
 	var conv utils.Conversation
 	err := db.c.QueryRow("SELECT id, name, is_group FROM conversations WHERE (name = ? OR name = ?) AND is_group = false", sender+reciver, reciver+sender).Scan(&conv.ID, &conv.Name, &conv.IsGroup)
@@ -83,6 +86,7 @@ func (db *appdbimpl) GetConversationByName(sender string, reciver string) (utils
 	return conv, nil
 }
 
+// cerca tutti i membri di una conversazione all'interno del db
 func (db *appdbimpl) GetConversationMembers(groupID int) ([]utils.User, error) {
 	rows, err := db.c.Query("SELECT u.id, u.name, u.username FROM user_conversations uc JOIN users u ON uc.user_id = u.id WHERE uc.conversation_id = ?", groupID)
 	if err != nil {

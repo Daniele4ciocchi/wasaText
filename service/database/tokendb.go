@@ -8,6 +8,7 @@ import (
 	"github.com/Daniele4ciocchi/wasaText/service/utils"
 )
 
+// funzione per impostare il token di un nuovo utente
 func (db *appdbimpl) SetToken(id int, name string) error {
 
 	token := name + strconv.Itoa(id)
@@ -16,6 +17,7 @@ func (db *appdbimpl) SetToken(id int, name string) error {
 	return err
 }
 
+// funzione per ottenere  il token di un utente
 func (db *appdbimpl) GetToken(id int) (string, error) {
 	var token string
 	err := db.c.QueryRow("SELECT tokens.token FROM tokens WHERE user_id = ?", id).Scan(&token)
@@ -28,6 +30,7 @@ func (db *appdbimpl) GetToken(id int) (string, error) {
 	return token, nil
 }
 
+// funzione per ottenere l'utente da un token
 func (db *appdbimpl) GetUserFromToken(token string) (utils.User, error) {
 	var id int
 	var user utils.User
@@ -45,6 +48,7 @@ func (db *appdbimpl) GetUserFromToken(token string) (utils.User, error) {
 
 }
 
+// funzione per controllare se un determinato token esiste nel db
 func (db *appdbimpl) CheckToken(token string) (int, error) {
 	var id int
 	err := db.c.QueryRow("SELECT user_id FROM tokens WHERE token = ?", token).Scan(&id)

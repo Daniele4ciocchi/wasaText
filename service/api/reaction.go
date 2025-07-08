@@ -10,6 +10,7 @@ import (
 	"github.com/julienschmidt/httprouter"
 )
 
+// la funzione serve ad inserire una reazione ad un messaggio
 func (rt *_router) commentMessage(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	w.Header().Set("Content-Type", "application/json")
 
@@ -57,6 +58,7 @@ func (rt *_router) commentMessage(w http.ResponseWriter, r *http.Request, ps htt
 	w.WriteHeader(http.StatusOK)
 }
 
+// la funzione serve a togliere una reazione ad un messaggio
 func (rt *_router) uncommentMessage(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	w.Header().Set("Content-Type", "application/json")
 
@@ -82,6 +84,7 @@ func (rt *_router) uncommentMessage(w http.ResponseWriter, r *http.Request, ps h
 	w.WriteHeader(http.StatusOK)
 }
 
+// la funzione ritorna tutte le reazioni di un messaggio
 func (rt *_router) getComments(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	w.Header().Set("Content-Type", "application/json")
 

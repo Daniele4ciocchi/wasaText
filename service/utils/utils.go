@@ -6,31 +6,37 @@ import (
 	"os"
 )
 
+// struct per contenere il token
 type Token struct {
 	Token string `json:"Authorization"`
 }
 
+// nome
 type Name struct {
 	Name string `json:"name"`
 }
 
+// informazioni di un Utente
 type User struct {
 	ID       int    `json:"user_id"`
 	Name     string `json:"name"`
 	Username string `json:"username"`
 }
 
+// informazioni di un gruppo
 type Group struct {
 	ID   int    `json:"group_id"`
 	Name string `json:"name"`
 }
 
+// informazioni di una conversazione
 type Conversation struct {
 	ID      int    `json:"conversation_id"`
 	Name    string `json:"name"`
 	IsGroup bool   `json:"is_group"`
 }
 
+// informazioni di un messaggio
 type Message struct {
 	ID               int    `json:"message_id"`
 	SenderID         int    `json:"sender_id"`
@@ -44,6 +50,7 @@ type Message struct {
 	Timestamp        string `json:"timestamp"`
 }
 
+// informazioni di una reazione
 type Reaction struct {
 	ID        int    `json:"reaction_id"`
 	UserID    int    `json:"user_id"`
@@ -51,6 +58,7 @@ type Reaction struct {
 	MessageID int    `json:"message_id"`
 }
 
+// funzione utilizzata per salvare i file all'interno della cartella photos
 func SaveFile(name string, fileContent multipart.File) (string, error) {
 	// Define the file path
 	basePath := "service/photos/"

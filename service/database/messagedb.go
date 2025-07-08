@@ -7,6 +7,7 @@ import (
 	"github.com/Daniele4ciocchi/wasaText/service/utils"
 )
 
+// funzione per aggiungere un messaggio al db
 func (db *appdbimpl) AddMessage(senderID int, convID int, content string, repliedMessageID int, forwarded bool) (int, error) {
 	var messageID int
 
@@ -35,6 +36,7 @@ func (db *appdbimpl) AddMessage(senderID int, convID int, content string, replie
 	return messageID, nil
 }
 
+// funzione per rimuovere un messaggio la db
 func (db *appdbimpl) RemoveMessage(messageID int) error {
 	// Rimuove il messaggio dalla tabella views
 	_, err := db.c.Exec("DELETE FROM views WHERE message_id = ?", messageID)
@@ -48,6 +50,7 @@ func (db *appdbimpl) RemoveMessage(messageID int) error {
 	return nil
 }
 
+// funzione per aggiungere il path di una foto al db come messaggio
 func (db *appdbimpl) AddPhoto(senderID int, convID int, content string, repliedMessageID int, forwarded bool) (int, error) {
 	var messageID int
 
@@ -71,6 +74,7 @@ func (db *appdbimpl) AddPhoto(senderID int, convID int, content string, repliedM
 	return messageID, nil
 }
 
+// funzione per ottenere un determinato messaggio contenuto nel db
 func (db *appdbimpl) GetMessage(id int) (utils.Message, error) {
 	var message utils.Message
 	err := db.c.QueryRow("SELECT id, sender_id, conversation_id, content, photo, forwarded, timestamp FROM messages WHERE id = ?", id).Scan(&message.ID, &message.SenderID, &message.ConversationID, &message.Content, &message.Photo, &message.Forwarded, &message.Timestamp)
@@ -80,6 +84,7 @@ func (db *appdbimpl) GetMessage(id int) (utils.Message, error) {
 	return message, nil
 }
 
+// funzione per ottenere tutti i messaggi di una conversazione
 func (db *appdbimpl) GetMessages(convID int) ([]utils.Message, error) {
 	rows, err := db.c.Query("SELECT messages.id, messages.sender_id, users.name, messages.conversation_id, messages.replied_message_id, messages.content, messages.timestamp, messages.photo, messages.forwarded FROM messages JOIN users ON messages.sender_id = users.id WHERE conversation_id = ?", convID)
 	if err != nil {
@@ -133,6 +138,7 @@ func (db *appdbimpl) GetMessages(convID int) ([]utils.Message, error) {
 	return messages, nil
 }
 
+// funzione per ottenere lo stato di un messaggio (letto, consegnato, inviato)
 func (db *appdbimpl) GetMessageStatus(messageID int) (int, error) {
 	var status int
 
@@ -181,6 +187,7 @@ func (db *appdbimpl) GetMessageStatus(messageID int) (int, error) {
 	return 0, nil
 }
 
+// funzione per assegnare lo stato di invio ad un messaggio
 func (db *appdbimpl) SetSendedMessage(messageID int) error {
 
 	var mess utils.Message
@@ -205,6 +212,7 @@ func (db *appdbimpl) SetSendedMessage(messageID int) error {
 	return nil
 }
 
+// funzione per impostare che un messaggio è arrivato
 func (db *appdbimpl) SetArrivedMessage(userID int, messageID int) error {
 	_, err := db.c.Exec("UPDATE views SET status = ? WHERE user_id = ? AND message_id = ?", 1, userID, messageID)
 	if err != nil {
@@ -219,6 +227,7 @@ func (db *appdbimpl) SetArrivedMessage(userID int, messageID int) error {
 	return nil
 }
 
+// funzione per impostare la lettura di un messaggio
 func (db *appdbimpl) SetViewedMessage(userID int, messageID int) error {
 	_, err := db.c.Exec("UPDATE views SET status = ? WHERE user_id = ? AND message_id = ?", 2, userID, messageID)
 	if err != nil {
@@ -232,6 +241,7 @@ func (db *appdbimpl) SetViewedMessage(userID int, messageID int) error {
 	return nil
 }
 
+// funzione per ottenere l'ultimo messaggio di una conversaione
 func (db *appdbimpl) GetLastMessage(convID int) (utils.Message, error) {
 	var message utils.Message
 	err := db.c.QueryRow("SELECT id, sender_id, conversation_id, content, photo, forwarded, timestamp FROM messages WHERE conversation_id = ? ORDER BY timestamp DESC LIMIT 1", convID).Scan(&message.ID, &message.SenderID, &message.ConversationID, &message.Content, &message.Photo, &message.Forwarded, &message.Timestamp)
@@ -242,6 +252,7 @@ func (db *appdbimpl) GetLastMessage(convID int) (utils.Message, error) {
 	return message, nil
 }
 
+// funzione per ottenere nuovi messaggi di una conversazione (non letti)
 func (db *appdbimpl) GetNewMessages(userID int) ([]utils.Message, error) {
 	rows, err := db.c.Query("SELECT m.id, m.sender_id, m.conversation_id, m.content, m.forwarded, m.timestamp FROM messages m JOIN views v ON m.id = v.message_id WHERE v.user_id = ? AND (v.status = 0 OR m.changed_status = 1) ", userID)
 	if err != nil {

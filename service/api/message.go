@@ -15,6 +15,8 @@ import (
 	"github.com/julienschmidt/httprouter"
 )
 
+// tramite la seguente funzione possiamo inviare un messaggio specificandone le informazioni
+// all'interno di un json, e l'id della conversazione nel path
 func (rt *_router) sendMessage(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	w.Header().Set("Content-Type", "application/json")
 
@@ -92,6 +94,8 @@ func (rt *_router) sendMessage(w http.ResponseWriter, r *http.Request, ps httpro
 	w.WriteHeader(http.StatusCreated)
 }
 
+// la funzione serve ad inviare le foto, vengono salvate come messaggi nomrali con un path
+// della cartella del backend in cui si trovano
 func (rt *_router) sendPhoto(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	// Auth
 	id, err := checkAuth(rt, r)
@@ -160,6 +164,8 @@ func (rt *_router) sendPhoto(w http.ResponseWriter, r *http.Request, ps httprout
 
 	w.WriteHeader(http.StatusOK)
 }
+
+// la funzione ritorna la foto profilo di una conversazione specifica in base a chi è loggato
 func (rt *_router) getConversationPhoto(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	w.Header().Set("Content-Type", "application/json")
 
@@ -215,6 +221,7 @@ func (rt *_router) getConversationPhoto(w http.ResponseWriter, r *http.Request, 
 	}
 }
 
+// tramite questa funzione siamo in grado di eliminare un messaggio
 func (rt *_router) deleteMessage(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	w.Header().Set("Content-Type", "application/json")
 
@@ -264,6 +271,7 @@ func (rt *_router) deleteMessage(w http.ResponseWriter, r *http.Request, ps http
 	w.WriteHeader(http.StatusOK)
 }
 
+// questa funzione ritorna tutti i messaggi di una conversazione
 func (rt *_router) getMessages(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	w.Header().Set("Content-Type", "application/json")
 
@@ -319,6 +327,7 @@ func (rt *_router) getMessages(w http.ResponseWriter, r *http.Request, ps httpro
 	w.WriteHeader(http.StatusOK)
 }
 
+// questa funzione ritorna l'ultimo messaggio di una conversazione
 func (rt *_router) getLastMessage(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	w.Header().Set("Content-Type", "application/json")
 
@@ -350,6 +359,7 @@ func (rt *_router) getLastMessage(w http.ResponseWriter, r *http.Request, ps htt
 
 }
 
+// la funzione serve a inoltrare un messaggio
 func (rt *_router) forwardMessage(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	w.Header().Set("Content-Type", "application/json")
 
@@ -428,6 +438,7 @@ func (rt *_router) forwardMessage(w http.ResponseWriter, r *http.Request, ps htt
 
 }
 
+// tramite questa funzione possiamo ottenere nuovi messaggi
 func (rt *_router) getNewMessages(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	w.Header().Set("Content-Type", "application/json")
 

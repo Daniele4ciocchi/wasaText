@@ -13,6 +13,8 @@ import (
 	"github.com/julienschmidt/httprouter"
 )
 
+// la funzione crea una nuova conversazione tra due utenti assegnando un id
+// se la conversazione esisre già ritorna le informazioni su di essa
 func (rt *_router) addConversation(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 
 	w.Header().Set("Content-Type", "application/json")
@@ -115,6 +117,7 @@ func (rt *_router) addConversation(w http.ResponseWriter, r *http.Request, _ htt
 
 }
 
+// la seguente funzione ritorna una lista di tutte le conversazioni appartenenti all'utente loggato
 func (rt *_router) getMyConversations(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	w.Header().Set("Content-Type", "application/json")
 
@@ -156,6 +159,7 @@ func (rt *_router) getMyConversations(w http.ResponseWriter, r *http.Request, _ 
 
 }
 
+// funzione che ritorna una singola conversazione dal suo id
 func (rt *_router) getConversation(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	w.Header().Set("Content-Type", "application/json")
 
@@ -202,6 +206,8 @@ func (rt *_router) getConversation(w http.ResponseWriter, r *http.Request, ps ht
 
 }
 
+// la seguente funzione ritorna le informazioni su tutti gli utenti di una conversazione,
+// che sia un gruppo oppure una semplice conversazione tra due utenti
 func (rt *_router) getConversationMembers(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	w.Header().Set("Content-Type", "application/json")
 

@@ -27,7 +27,7 @@ func (rt *_router) Handler() http.Handler {
 	rt.router.POST("/conversation", rt.addConversation)                                      // addConversation OK
 	rt.router.GET("/conversation/:conversationID", rt.getConversation)                       // getConversation OK
 	rt.router.GET("/conversation/:conversationID/member", rt.getConversationMembers)         // getGroupMembers OK
-	rt.router.POST("/conversation/:conversationID/member", rt.addToGroup)                    // addToGroup OK VA RIVISTO IN QUANTO SOTTO UN'ALTRO PATH
+	rt.router.POST("/conversation/:conversationID/member", rt.addToGroup)                    // addToGroup OK
 	rt.router.GET("/conversation/:conversationID/message", rt.getMessages)                   // getMessages OK
 	rt.router.POST("/conversation/:conversationID/message", rt.sendMessage)                  // sendMessage OK
 	rt.router.POST("/conversation/:conversationID/photo", rt.sendPhoto)                      // sendPhoto OK

@@ -39,6 +39,7 @@ func checkAuth(r *_router, req *http.Request) (int, error) {
 	return id, nil
 }
 
+// la funzione ritorna tutti gli utenti con cui è possibile inziare una conversazione
 func (rt *_router) getUsers(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	w.Header().Set("Content-Type", "application/json")
 
@@ -64,6 +65,7 @@ func (rt *_router) getUsers(w http.ResponseWriter, r *http.Request, _ httprouter
 
 }
 
+// la funzione serve a ritornare un particolare utente
 func (rt *_router) getUser(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	w.Header().Set("Content-Type", "application/json")
 
@@ -89,6 +91,7 @@ func (rt *_router) getUser(w http.ResponseWriter, r *http.Request, ps httprouter
 	}
 }
 
+// con questa funzione possiamo impostare il nostro nome utente
 func (rt *_router) setMyUserName(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	w.Header().Set("Content-Type", "application/json")
 
@@ -124,6 +127,7 @@ func (rt *_router) setMyUserName(w http.ResponseWriter, r *http.Request, _ httpr
 	w.WriteHeader(http.StatusOK)
 }
 
+// questa funzione ritorna le informazioni sull'utente loggato
 func (rt *_router) getMe(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	w.Header().Set("Content-Type", "application/json")
 
@@ -146,6 +150,7 @@ func (rt *_router) getMe(w http.ResponseWriter, r *http.Request, _ httprouter.Pa
 	}
 }
 
+// con questa funzione possiamo impostare la nostra foto profilo
 func (rt *_router) setMyPhoto(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	// Auth
 	id, err := checkAuth(rt, r)
@@ -192,6 +197,7 @@ func (rt *_router) setMyPhoto(w http.ResponseWriter, r *http.Request, _ httprout
 	w.WriteHeader(http.StatusOK)
 }
 
+// la seguente funzione ritorna la foto di un determinato utente
 func (rt *_router) getUserPhoto(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	w.Header().Set("Content-Type", "image/jpeg")
 	// auth control

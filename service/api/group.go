@@ -12,6 +12,7 @@ import (
 	"github.com/julienschmidt/httprouter"
 )
 
+// la seguente funzione ritorna le informazioni su un singolo gruppo tramite il suo id
 func (rt *_router) getGroup(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	w.Header().Set("Content-Type", "application/json")
 
@@ -42,6 +43,8 @@ func (rt *_router) getGroup(w http.ResponseWriter, r *http.Request, ps httproute
 
 }
 
+// createGroup permette di creare un gruppo tramite un json contenente le informazioni
+// principali (nome, membri )
 func (rt *_router) createGroup(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	w.Header().Set("Content-Type", "application/json")
 
@@ -112,6 +115,8 @@ func (rt *_router) createGroup(w http.ResponseWriter, r *http.Request, _ httprou
 
 }
 
+// la seguente funzione permette all'utente loggato di abbandonare un gruppo
+// specificato nel path
 func (rt *_router) leaveGroup(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	w.Header().Set("Content-Type", "application/json")
 
@@ -148,6 +153,8 @@ func (rt *_router) leaveGroup(w http.ResponseWriter, r *http.Request, ps httprou
 
 }
 
+// tramite la funzione è possibile impostare il nome di un gruppo specificando il nome del
+// gruppo nel path
 func (rt *_router) setGroupName(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	w.Header().Set("Content-Type", "application/json")
 
@@ -184,6 +191,7 @@ func (rt *_router) setGroupName(w http.ResponseWriter, r *http.Request, ps httpr
 
 }
 
+// tramite la seguente funzione possiamo ottenere la foto di un gruppo specificando l'ID del gruppo nell path
 func (rt *_router) getGroupPhoto(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	w.Header().Set("Content-Type", "image/jpeg")
 
@@ -223,6 +231,7 @@ func (rt *_router) getGroupPhoto(w http.ResponseWriter, r *http.Request, ps http
 
 }
 
+// questa funzione serve per impostare la foto di un gruppo
 func (rt *_router) setGroupPhoto(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	// Auth
 	_, err := checkAuth(rt, r)
@@ -277,6 +286,7 @@ func (rt *_router) setGroupPhoto(w http.ResponseWriter, r *http.Request, ps http
 	w.WriteHeader(http.StatusOK)
 }
 
+// la seguente funzione serve ad inserire un nuovo membro all'interno di un gruppo
 func (rt *_router) addToGroup(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	w.Header().Set("Content-Type", "application/json")
 
